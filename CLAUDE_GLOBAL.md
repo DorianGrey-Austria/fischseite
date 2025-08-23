@@ -43,16 +43,20 @@ Dieses Dokument enthält übergreifende Best Practices, Regeln und Erkenntnisse 
 - User Authentication & Gallery
 - Cloud-Speicherung der Kunstwerke
 
-### 3. Tierarzt-Spiel (Educational Game)
-**URL**: In Entwicklung  
-**Status**: Prototyp-Phase  
-**Tech Stack**: Unity WebGL / HTML5 Canvas  
+### 3. VetScan Pro 3000 (Educational Veterinary Game)
+**URL**: 🌐 https://vibecoding.company/  
+**Status**: V7.0.2 - Beta mit 3D-Features  
+**Tech Stack**: Vanilla JS, Three.js r128, React 18 (Vite), GitHub Actions  
 **Features**:
-- Lernspiel für Kinder (6-12 Jahre)
-- Interaktive Tier-Behandlungen
-- Mini-Games und Quizzes
-- Termin-Management System
-- Fortschritts-Tracking
+- 10+ Standalone HTML Versionen (keine Build-Tools nötig)
+- **3D Medical Scanner**: X-Ray, Ultrasound, Thermal, MRI Modi
+- **Educational Focus**: Dr. Eule Mentor-System mit Lerneffekt
+- **Progressive Loading**: Multi-Quality GLB (High/Medium/Low)
+- **Auto-Deploy**: GitHub Actions → Hostinger FTP
+- **Versionen**: Detective (⭐ EMPFOHLEN), Story Mode, Professional, Missions
+- **200+ Tiere**: Medizinische Enzyklopädie mit realistischen Werten
+
+**Aktueller Fokus**: Blender MCP Integration für echte 3D-Modelle
 
 ### 4. Claude Mobile (Claude-to-Mobile Bridge)
 **URL**: Local Development  
@@ -201,14 +205,31 @@ docker run -v ./assets:/work imagemagick-mcp \
 }
 ```
 
-#### Tierarzt-Spiel für Kinder
-**Zweck**: Educational Game mit interaktiven Lernmodulen
+#### VetScan Pro 3000 (Tierarzt-Spiel)
+**Zweck**: Educational Veterinary Simulator mit 3D Medical Visualization
 
 **Empfohlene MCP-Server**:
-- **Dialogflow/Rasa Docker**: Interaktive Chatbots
-- **Unity WebGL Server**: Game Hosting
-- **PostgreSQL**: Termin- und Tierdaten
-- **NGINX**: Static Asset Serving
+- **Blender MCP**: 3D-Asset-Pipeline für Tiermodelle (Bello)
+- **Filesystem MCP**: Verwaltung von 10+ HTML-Versionen
+- **GitHub MCP**: Auto-Deploy zu vibecoding.company
+- **ImageMagick Docker**: Medical Texture Generation
+- **Context7 MCP**: Three.js r128 Dokumentation
+- **Memory MCP**: Game-State und Achievement Tracking
+
+**Spezial-Konfiguration für 3D Pipeline**:
+```json
+{
+  "blender-mcp": {
+    "command": "uvx",
+    "args": ["blender-mcp"],
+    "env": {
+      "BLENDER_PATH": "/Applications/Blender.app",
+      "AUTO_EXPORT_GLB": "true",
+      "QUALITY_LEVELS": "high,medium,low"
+    }
+  }
+}
+```
 
 ### 🔥 MCP Power-Features für EndlessRunner
 
@@ -307,6 +328,60 @@ docker run -v ./assets:/work imagemagick-mcp \
 
 ## Docker Integration
 
+### VetScan Pro 3D Asset Pipeline Docker Setup
+```yaml
+# docker-compose.yml für Blender MCP Pipeline
+version: '3.8'
+
+services:
+  blender-mcp:
+    image: blender-mcp:latest
+    container_name: vetscan-blender-pipeline
+    volumes:
+      - ./models:/workspace/models
+      - ./exports:/workspace/exports
+      - ./textures:/workspace/textures
+    environment:
+      - BLENDER_VERSION=3.6
+      - AUTO_EXPORT=true
+      - QUALITY_LEVELS=ultra,high,medium,low
+    command: |
+      blender --background --python /scripts/export_pipeline.py
+    networks:
+      - vetscan-network
+
+  model-optimizer:
+    image: gltf-pipeline:latest
+    depends_on:
+      - blender-mcp
+    volumes:
+      - ./exports:/input
+      - ./optimized:/output
+    environment:
+      - DRACO_COMPRESSION=true
+      - TEXTURE_COMPRESSION=webp
+      - MAX_TEXTURE_SIZE=1024
+    networks:
+      - vetscan-network
+
+  medical-shader-generator:
+    build: ./shader-generator
+    depends_on:
+      - model-optimizer
+    volumes:
+      - ./optimized:/models
+      - ./shaders:/output
+    environment:
+      - SHADER_TYPES=xray,ultrasound,thermal,mri
+      - THREE_VERSION=r128
+    networks:
+      - vetscan-network
+
+networks:
+  vetscan-network:
+    driver: bridge
+```
+
 ### Standard Docker-Compose Template
 ```yaml
 version: '3.8'
@@ -367,6 +442,22 @@ services:
 
 ## Frontend Development
 
+### Educational Game Design Principles (VetScan Pro Learnings)
+1. **Progressive Difficulty**
+   - Start mit einfachen Fällen (gesunde Tiere)
+   - Graduell komplexere Diagnosen einführen
+   - Mentor-Charakter (Dr. Eule) für Guidance
+
+2. **Learning Reinforcement**
+   - Immer Normal- vs. Gemessene Werte zeigen
+   - Farbcodierung (Grün = Normal, Rot = Kritisch)
+   - Achievements für Lernfortschritt
+
+3. **Multi-Version Strategy**
+   - Verschiedene HTML-Versionen für verschiedene Zielgruppen
+   - Detective Version für maximalen Lerneffekt
+   - Professional Version für fortgeschrittene User
+
 ### Performance Guidelines
 1. **Code Splitting**
    - Lazy Loading für große Components
@@ -410,6 +501,23 @@ npm run test:e2e:ui  # Mit UI für Debugging
 npm run test:visual
 ```
 
+### VetScan Pro Testing Strategy
+```bash
+# Automated 3D Model Testing
+npm run test:model -- --model=bello --checks=all
+
+# Medical Shader Validation
+npm run validate:shaders -- --modes=xray,ultrasound,thermal,mri
+
+# Educational Content Testing
+npm run test:learning -- --difficulty=progressive --mentor=true
+
+# Multi-Version Compatibility
+for file in vetscan-*.html; do
+  python3 test-console-errors.py "$file"
+done
+```
+
 ### Manuelle Test-Checkliste
 Nach JEDER Code-Änderung:
 1. [ ] Core Features funktionieren
@@ -417,6 +525,11 @@ Nach JEDER Code-Änderung:
 3. [ ] Mobile Responsiveness
 4. [ ] Cross-Browser Testing (Chrome, Safari, Firefox)
 5. [ ] Performance Metrics akzeptabel
+6. [ ] **VetScan**: Alle 10+ HTML-Versionen getestet
+7. [ ] **VetScan**: 3D-Modelle laden korrekt (alle Qualitätsstufen)
+8. [ ] **VetScan**: Medical Shaders funktionieren
+9. [ ] **VetScan**: Dr. Eule Mentor-System aktiv
+10. [ ] **VetScan**: Normalwerte-Vergleich korrekt
 
 ### Test-Pyramide
 ```
@@ -531,6 +644,136 @@ console.log('Debug:', data);  // NIEMALS in Production!
      }
    }
    ```
+
+---
+
+## 🎓 Educational Game Development Patterns (VetScan Pro Learnings)
+
+### Core Educational Principles
+
+#### 1. **Scaffolded Learning Approach**
+```javascript
+// VetScan Pro Pattern: Progressive Difficulty
+const learningStages = {
+  1: "Gesunde Tiere erkennen (Baseline etablieren)",
+  2: "Einfache Krankheiten (1 klares Symptom)",
+  3: "Mittlere Krankheiten (2-3 Symptome)",
+  4: "Komplexe Diagnosen (Multiple Symptome)",
+  5: "Differentialdiagnosen (Ähnliche Krankheiten unterscheiden)"
+};
+
+// Implementation: Dr. Eule Mentor System
+if (playerLevel < 3) {
+  showMentorHint("Dr. Eule: 'Schau dir zuerst die Herzfrequenz an!'");
+}
+```
+
+#### 2. **Comparison-Based Learning**
+```javascript
+// IMMER Normal- vs. Gemessene Werte zeigen
+const displayDiagnosis = (animal, measurement) => {
+  return {
+    normal: animalNormalValues[animal][measurement],
+    measured: currentMeasurement,
+    status: getStatus(currentMeasurement, normalRange),
+    color: currentMeasurement < normalMin ? 'blue' : 
+           currentMeasurement > normalMax ? 'red' : 'green'
+  };
+};
+```
+
+#### 3. **Immediate Feedback with Explanation**
+```javascript
+// VetScan Pattern: Erkläre WARUM
+const provideFeedback = (diagnosis, correct) => {
+  if (correct) {
+    return `✅ Richtig! ${diagnosis} zeigt sich durch erhöhte Herzfrequenz (${measured} statt normal ${normal})`;
+  } else {
+    return `❌ Nicht ganz. Bei ${diagnosis} wäre die Temperatur erhöht. Schau nochmal genau!`;
+  }
+};
+```
+
+### Medical Accuracy als Lernwerkzeug
+
+#### Realistische Wertebereiche (200+ Tiere recherchiert)
+```javascript
+const animalNormalValues = {
+  hund: {
+    heartRate: [60, 140],      // Beats per minute
+    temperature: [37.5, 39.2], // Celsius
+    respiration: [10, 30],     // Breaths per minute
+    bloodPressure: [110, 160], // Systolic
+    weight: {
+      klein: [2, 10],          // kg
+      mittel: [10, 25],
+      gross: [25, 45],
+      riesig: [45, 90]
+    }
+  },
+  katze: {
+    heartRate: [140, 220],
+    temperature: [38.0, 39.2],
+    respiration: [20, 30],
+    bloodPressure: [120, 180]
+  },
+  pferd: {
+    heartRate: [28, 44],
+    temperature: [37.2, 38.3],
+    respiration: [8, 16],
+    bloodPressure: [110, 140]
+  },
+  kaninchen: {
+    heartRate: [180, 300],
+    temperature: [38.5, 40.0],
+    respiration: [30, 60],
+    bloodPressure: [90, 130]
+  }
+};
+```
+
+### Gamification mit Lernzielen
+
+#### Achievement System mit medizinischem Fokus
+```javascript
+const achievements = {
+  "Erste Hilfe": "Erste korrekte Diagnose",
+  "Tierfreund": "10 verschiedene Tiere untersucht",
+  "Diagnostiker": "5 schwere Krankheiten erkannt",
+  "Lebensretter": "Kritischen Fall rechtzeitig erkannt",
+  "Experte": "100% Genauigkeit bei 10 Fällen",
+  "Dr. Dolittle": "Alle Tierarten gemeistert"
+};
+```
+
+### 3D Visualization als Lehrmittel
+
+#### Medical Shader System (Educational Purpose)
+```javascript
+// VetScan Pro 3D Medical Modes
+const medicalVisualizationModes = {
+  xray: {
+    purpose: "Knochen und Frakturen erkennen",
+    shader: "Fresnel-based transparency",
+    educationalValue: "Verständnis für Skelettstruktur"
+  },
+  ultrasound: {
+    purpose: "Weichteile und Organe untersuchen",
+    shader: "Noise-based echo simulation",
+    educationalValue: "Organpositionierung verstehen"
+  },
+  thermal: {
+    purpose: "Entzündungen lokalisieren",
+    shader: "Temperature gradient mapping",
+    educationalValue: "Wärmeverteilung bei Krankheiten"
+  },
+  mri: {
+    purpose: "Detaillierte Gewebeanalyse",
+    shader: "Grayscale tissue differentiation",
+    educationalValue: "Gewebetypen unterscheiden"
+  }
+};
+```
 
 ---
 
@@ -746,11 +989,256 @@ git add . && git commit -m "msg" && git push
 
 ### 🔴 Kritische Lessons Learned
 
+#### 🔥 DAS DEBUG-MONITOR-DESASTER (Zeichenapp - 20+ Lösungsversuche!)
+
+**Das schlimmste Debug-Problem aller Zeiten: 8. August 2025**
+
+##### Timeline der Verzweiflung
+
+**Version 1-3**: Erste Versuche (gescheitert)
+- MutationObserver implementiert
+- CSS mit `display: none !important`
+- Window.alert/confirm/prompt überschrieben
+- **PROBLEM BLIEB**: Debug-Monitor erschien weiterhin bei Tool-Clicks
+
+**Version 4**: Nuclear Solution (teilweise erfolgreich)
+```javascript
+// Was wir gemacht haben:
+// 1. ALLE Popup-Mechanismen überschrieben
+window.alert = () => {};
+window.confirm = () => true;
+window.prompt = () => null;
+
+// 2. Ultra-aggressiver MutationObserver
+const observer = new MutationObserver((mutations) => {
+    // Löscht ALLES mit "debug" im id/class/text
+});
+
+// 3. createElement gehijacked
+const originalCreateElement = document.createElement;
+document.createElement = function(tagName) {
+    const element = originalCreateElement.call(document, tagName);
+    Promise.resolve().then(() => {
+        if (element.id?.includes('debug')) element.remove();
+    });
+    return element;
+};
+
+// 4. Nuclear CSS - 12-fache Sicherheit
+#debug-*, .debug-*, [id*="debug"], [class*="debug"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -99999px !important;
+    // ... 6 weitere Properties
+}
+```
+
+##### Die WAHRE Ursache (nach 20+ Versuchen gefunden!)
+
+**339+ console.log Statements im Production Code!**
+```javascript
+// ❌ DAS WAR DAS PROBLEM:
+console.log('🔧 [JoeFlowApp] Selecting tool...');  // Bei JEDEM Tool-Click!
+console.log('State changed:', state);               // Bei JEDER State-Änderung!
+console.error('Debug:', data);                      // Überall verstreut!
+
+// Browser-Extension oder Dev-Tool zeigte diese als Popups!
+```
+
+**Weitere versteckte Probleme:**
+1. **Auskommentierter Code wurde trotzdem verarbeitet**
+   - 319 Zeilen auskommentierter Debug-Code
+   - Mit problematischen onclick Handlers
+   - Browser-Parser war verwirrt bei 10.000+ Zeilen
+
+2. **Inline onclick Handler im HTML**
+   ```html
+   <!-- Diese existierten noch im auskommentierten Bereich! -->
+   onclick="window.debugMonitor.triggerTestError()"
+   onclick="window.debugMonitor.clearErrors()"
+   ```
+
+3. **showNotification() war nicht disabled**
+   - Erstellte echte DOM-Popups
+   - War in keiner der Nuclear Solutions enthalten
+
+##### Warum es SO LANGE dauerte
+
+1. **Falsche Annahme**: Dachten es sind Debug-Panels → waren console.log Popups!
+2. **Komplexität**: 10.000+ Zeilen in einer Datei = Parser-Verwirrung
+3. **Cache-Hölle**: Service Workers cachten alte Versionen
+4. **Browser-Extensions**: Zeigten console.log als visuelle Popups
+
+##### Die finale funktionierende Lösung
+
+```javascript
+// 1. ALLE console.* komplett überschreiben
+window.console = {
+    log: () => {},
+    error: () => {},
+    warn: () => {},
+    info: () => {},
+    debug: () => {},
+    trace: () => {},
+    table: () => {},
+    // ALLE Methoden disabled!
+};
+
+// 2. Service Worker Nuclear Option
+navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+});
+caches.keys().then(names => {
+    names.forEach(name => caches.delete(name));
+});
+
+// 3. Auskommentierten Code KOMPLETT GELÖSCHT
+// Nicht nur auskommentiert - ENTFERNT!
+// 319 Zeilen problematischer Code eliminiert
+
+// 4. Alle Debug-Funktionen neutralisiert
+debugState() { return; }
+logCurrentState() { return; }
+showNotification() { return; }
+```
+
+### 🚨 CODE-HYGIENE REGELN (NIEMALS WIEDER 20+ DEBUG-VERSUCHE!)
+
+#### Die 10 Gebote der Debug-Sauberkeit
+
+1. **KEIN console.log in Production - NIEMALS!**
+   ```javascript
+   // ❌ TÖDLICH - Kann als Popup erscheinen!
+   console.log('Tool selected');
+   
+   // ✅ IMMER mit Feature Flag
+   if (FEATURE_FLAGS.DEBUG_MODE) {
+       console.log('Tool selected');
+   }
+   ```
+
+2. **Auskommentierten Code LÖSCHEN, nicht behalten**
+   ```javascript
+   // ❌ GEFÄHRLICH - Browser parst trotzdem!
+   /* 
+   onclick="window.debugMonitor.show()"
+   console.log('debug');
+   */
+   
+   // ✅ RICHTIG - Code komplett entfernen!
+   // Gelöscht, nicht auskommentiert
+   ```
+
+3. **Keine Inline onclick Handler mit Debug-Calls**
+   ```html
+   <!-- ❌ NIEMALS -->
+   <button onclick="debugState()">Test</button>
+   
+   <!-- ✅ IMMER Event Listeners -->
+   <button id="test-btn">Test</button>
+   ```
+
+4. **showNotification() und ähnliche Popups isolieren**
+   ```javascript
+   // ✅ Debug-Notifications hinter Flag
+   function showNotification(msg) {
+       if (!FEATURE_FLAGS.SHOW_NOTIFICATIONS) return;
+       // Implementation
+   }
+   ```
+
+5. **Service Worker Cache regelmäßig clearen**
+   ```javascript
+   // In Development immer ausführen
+   if (location.hostname === 'localhost') {
+       navigator.serviceWorker.getRegistrations().then(regs => {
+           regs.forEach(reg => reg.unregister());
+       });
+   }
+   ```
+
+#### Quick Debug Detection Checklist
+
+```bash
+# 1. Finde ALLE console.* Statements
+grep -r "console\." --include="*.html" --include="*.js" . | wc -l
+# Sollte 0 sein in Production!
+
+# 2. Finde Debug-Funktionen
+grep -r "debugState\|logCurrentState\|showDebug" .
+
+# 3. Finde Inline onclick Handler
+grep -r "onclick=\".*debug" .
+
+# 4. Zähle auskommentierten Code
+grep -r "/\*" . | grep -c "console\|debug"
+
+# 5. Check für Debug-IDs/Classes
+grep -r "id=\"debug\|class=\"debug" .
+```
+
+#### Emergency Debug Cleanup Script
+
+```javascript
+// Nuclear Option - Nur im Notfall!
+function EMERGENCY_DEBUG_CLEANUP() {
+    // 1. Override ALL console methods
+    Object.keys(console).forEach(key => {
+        console[key] = () => {};
+    });
+    
+    // 2. Remove ALL debug elements
+    document.querySelectorAll('[id*="debug"], [class*="debug"]').forEach(el => {
+        el.remove();
+    });
+    
+    // 3. Clear all caches
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+        });
+    }
+    
+    // 4. Unregister service workers
+    navigator.serviceWorker?.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+    });
+    
+    // 5. Clear localStorage
+    localStorage.clear();
+    sessionStorage.clear();
+}
+```
+
 #### Ultimate Disaster - Falsche App geladen (Zeichenapp)
 **Problem**: VetScan Pro statt JOE FLOW APP wurde angezeigt
 **Ursache**: Extreme Cache-Kontamination + BMAD Method
 **Lösung**: Complete Rollback, Nuclear Cache Clear
 **Details**: `zeichenapp/TROUBLESHOOTING.md` Section "ULTIMATE DISASTER"
+
+#### Three.js CDN Loading Issues (VetScan Pro & EndlessRunner)
+**Problem**: OrbitControls/GLTFLoader nicht gefunden oder falsche Namespace
+**Ursache**: cdnjs hat keine Three.js example files, unpkg globale Variablen
+**Lösung**: unpkg CDN verwenden, window.load Event für Timing
+**Details**: `tierarztspiel/Troubleshooting.md` Section "CDN OrbitControls Error"
+
+#### Three.js Version Migration Issues (EndlessRunner)
+**Problem**: "Scripts build/three.js deprecated with r150+"
+**Ursache**: Three.js änderte CDN-Struktur ab r150
+**Lösung**: 
+```javascript
+// ❌ FALSCH - Deprecated seit r150
+<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+
+// ✅ RICHTIG - Neue Struktur
+<script src="https://unpkg.com/three@0.150.0/build/three.module.js" type="module"></script>
+// ODER bei älteren Versionen bleiben:
+<script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script>
+```
+**Details**: `EndlessRunner/TROUBLESHOOTING_WEBGL_2025.md`
 
 #### Deployment Disaster - GitHub Actions Failure
 **Problem**: Commits erfolgen, aber keine Deployment
@@ -856,7 +1344,9 @@ Chrome DevTools → Performance Tab
 - `zeichenapp/CLAUDE.md` - Projekt-spezifische Regeln
 - `zeichenapp/MCP-TIPPS.md` - MCP Server Best Practices
 - `EndlessRunner/TROUBLESHOOTING.md` - Game-spezifische Issues
-- `TierarztSpiel/TROUBLESHOOTING.md` - Unity WebGL Problems
+- `tierarztspiel/Troubleshooting.md` - Three.js CDN & Version Management
+- `tierarztspiel/3dworkflowBlender.md` - Blender MCP Pipeline Documentation
+- `tierarztspiel/CLAUDE.md` - VetScan Pro Development Guide
 
 ### Quick Links zu kritischen Sections
 1. **Cache-Probleme**: → HOSTINGER_TIPPS.md Section 7 & 11
@@ -866,6 +1356,272 @@ Chrome DevTools → Performance Tab
 5. **MCP Setup**: → MCP-SETUP.md für Konfiguration
 
 ---
+
+## 🎯 Version Management Best Practices (VetScan Pro Pattern)
+
+### Landing Page Strategy für Multi-Version Projects
+1. **Neue Features (BETA)**
+   - Orange/gelber Rahmen als Warnung
+   - Klickbar aber klar als "BETA - Experimentell" markiert
+   - Disclaimer: "Feedback willkommen"
+
+2. **Empfohlene Version**
+   - Golden Badge "⭐ EMPFOHLEN"
+   - Für neue User als Default
+   - Stabilste Experience
+
+3. **Version Number Management**
+   - **KRITISCH**: Bei JEDEM Deployment updaten!
+   - Format: `Major.Minor.Patch` (z.B. 7.0.2)
+   - Build: `YYYY.MM.DD.XXX` (z.B. 2025.08.23.002)
+   - Update Locations:
+     - HTML `<title>` Tag
+     - Header im Body
+     - JavaScript `const VERSION`
+     - Status Badge im UI
+
+### Three.js CDN Strategy (Lessons Learned)
+```javascript
+// ❌ FALSCH - cdnjs hat keine example files
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+
+// ✅ RICHTIG - unpkg hat alles
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+// ✅ TIMING FIX - Warte auf Scripts
+window.addEventListener('load', function() {
+    init(); // Jetzt sicher zu starten
+});
+
+// ✅ NAMESPACE FIX für r128 CDN
+if (typeof OrbitControls !== 'undefined' && !THREE.OrbitControls) {
+    THREE.OrbitControls = OrbitControls;  // Global → THREE namespace
+    THREE.GLTFLoader = GLTFLoader;
+    THREE.DRACOLoader = DRACOLoader;
+}
+```
+
+### Blender to Web 3D Pipeline (VetScan Pro Method)
+```javascript
+// Multi-Quality Export Strategy
+const qualityLevels = {
+  ultra: { polygons: 50000, texture: 2048, fileSize: "~5MB" },
+  high:  { polygons: 25000, texture: 1024, fileSize: "~2MB" },
+  medium:{ polygons: 10000, texture: 512,  fileSize: "~1MB" },
+  low:   { polygons: 5000,  texture: 256,  fileSize: "~500KB" }
+};
+
+// Progressive Loading Implementation
+async function loadModelProgressive(modelName) {
+  const quality = detectDeviceCapability(); // Mobile = low, Desktop = high
+  const modelPath = `models/${modelName}_${quality}.glb`;
+  
+  // Fallback chain
+  try {
+    return await loader.loadAsync(modelPath);
+  } catch {
+    console.warn(`Falling back to lower quality`);
+    return await loader.loadAsync(`models/${modelName}_low.glb`);
+  }
+}
+```
+
+### Version Management für Educational Games
+```javascript
+// VetScan Pro Landing Page Pattern
+const versionStrategy = {
+  beta: {
+    display: "⚡ BETA - Neue Features",
+    style: "orange-border warning-style",
+    access: "clickable but warned",
+    message: "Experimentell - Feedback willkommen!"
+  },
+  recommended: {
+    display: "⭐ EMPFOHLEN",
+    style: "golden-badge highlight",
+    access: "default for new users",
+    message: "Stabilste Version für Lernerfolg"
+  },
+  experimental: {
+    display: "🔬 EXPERIMENTAL",
+    style: "grayscale disabled-look",
+    access: "direct URL only",
+    message: "Nur für Entwickler"
+  }
+};
+```
+
+## 🎮 EndlessRunner Spezifische Erkenntnisse
+
+### Critical Game Initialization Patterns
+
+#### Race Conditions beim Game Start
+```javascript
+// ❌ PROBLEM: Kritische Funktionen zu spät definiert
+// Button onclick ruft startGame() auf Zeile 763
+<button onclick="startGame()">Start</button>
+
+// Aber Funktion wird erst Zeile 3405 definiert!
+window.startGame = function() { ... }
+
+// ✅ LÖSUNG: Fallback Pattern
+// SOFORT am Script-Anfang:
+window.startGame = function() {
+    console.log('Fallback version');
+    if (typeof startGameInternal === 'function') {
+        startGameInternal();
+    } else {
+        setTimeout(() => window.startGame(), 2000);
+    }
+};
+
+// Später überschreiben mit echter Implementation
+window.startGame = async function() {
+    // Echte Implementation
+};
+```
+
+#### WebGL Context Failures
+```javascript
+// ❌ PROBLEM: Multiple Initialization Attempts
+window.gameCore = { init() {...} }  // Zeile 1275
+function init() {...}               // Zeile 4649
+startGameInternal() {...}           // Zeile 3405
+
+// ✅ LÖSUNG: Single Source of Truth
+let initialized = false;
+function init() {
+    if (initialized) return;
+    initialized = true;
+    // Initialization code
+}
+```
+
+#### Shader Compilation Errors
+```javascript
+// PROBLEM: Uniforms können nicht gesetzt werden
+// "INVALID_OPERATION: uniform3f: location is not from the associated program"
+
+// LÖSUNG: Shader Program Validation
+const material = new THREE.ShaderMaterial({
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    uniforms: uniforms
+});
+
+// Validate before use
+if (!material.program) {
+    console.error('Shader compilation failed');
+    // Fallback to basic material
+    return new THREE.MeshBasicMaterial({ color: 0xff0000 });
+}
+```
+
+### Gesture Control Evolution (MediaPipe Integration)
+
+#### From TensorFlow to MediaPipe Migration
+```javascript
+// V1-V4: TensorFlow.js (schwer, langsam, instabil)
+// V5+: MediaPipe Face Mesh (leicht, schnell, stabil)
+
+// KRITISCHE ERKENNTNISSE:
+1. Smoothing Logic kann alles blockieren
+2. gameState.isPlaying Check verhindert Testing
+3. Mirror-Korrektur für intuitive Steuerung
+4. Boundaries müssen user-tested sein
+5. Debug-Visibility ist essentiell
+```
+
+#### Gesture Boundaries Optimization Journey
+```javascript
+// V5.3.1: Zu restriktiv (25%/75%)
+LEFT_BOUNDARY = 0.25;   // Unmöglich zu erreichen
+RIGHT_BOUNDARY = 0.75;  // Unmöglich zu erreichen
+
+// V5.3.10: Besser aber noch zu eng (35%/65%)
+LEFT_BOUNDARY = 0.35;
+RIGHT_BOUNDARY = 0.65;
+
+// V5.3.22: PERFEKT (45%/55%)
+LEFT_BOUNDARY = 0.45;   // Natural head movement
+RIGHT_BOUNDARY = 0.55;  // Comfortable range
+
+// V5.3.35: Ultra-sensitive für Testing (49%/51%)
+UP_BOUNDARY = 0.49;     // Nur 2% Neutral-Zone
+DOWN_BOUNDARY = 0.51;
+```
+
+### Game Loop & Performance Disasters
+
+#### Console.log Performance Killer
+```javascript
+// ❌ DISASTER V5.3.33: 60 logs/second
+detectGesture(landmarks) {
+    console.log('Y-COORDINATE:', avgEyeY); // JEDEN FRAME!
+    // Browser freeze nach 30 Sekunden
+}
+
+// ✅ FIX: Conditional Logging
+if (!this.lastLoggedY || Math.abs(avgEyeY - this.lastLoggedY) > 0.05) {
+    console.log('Y-Value changed:', avgEyeY);
+    this.lastLoggedY = avgEyeY;
+}
+```
+
+#### Audio System CSP Violations
+```javascript
+// ❌ PROBLEM: Desktop Chrome crashes bei Game Over
+async preloadSounds() {
+    const response = await fetch(dataURL); // CSP VIOLATION!
+}
+
+// ✅ FIX: Audio Preload temporary disabled
+async preloadSounds() {
+    return; // TEMPORARILY DISABLED to fix Desktop crashes
+}
+```
+
+### Version Management Chaos
+
+#### The Great Module System Failure
+```markdown
+**6 WOCHEN VERSCHWENDET** mit Module-System Versuchen:
+- GameCore.js → Failed (Deployment issues)
+- levels/rainbow.js → Failed (Import problems)
+- obstacles/special.js → Failed (GitHub Actions)
+
+**LÖSUNG**: Alles in index.html! 
+- 8800+ Zeilen aber es FUNKTIONIERT
+- Keine Module = Keine Import-Probleme
+- KISS Principle wins again
+```
+
+### Three.js Specific Gotchas
+
+#### Double Declaration Trap
+```javascript
+// ❌ DER KLASSIKER: hemisphereLight doppelt
+const hemisphereLight = new THREE.HemisphereLight(...); // Zeile 824
+// ... 200 Zeilen später ...
+const hemisphereLight = new THREE.HemisphereLight(...); // CRASH!
+
+// ✅ LÖSUNG: Unique Names
+const mainHemisphereLight = new THREE.HemisphereLight(...);
+const skyHemisphereLight = new THREE.HemisphereLight(...);
+```
+
+#### Material Property Mismatches
+```javascript
+// ❌ PROBLEM: MeshBasicMaterial hat kein 'emissive'
+const material = new THREE.MeshBasicMaterial({
+    emissive: 0xff0000  // ERROR!
+});
+
+// ✅ LÖSUNG: Richtiges Material verwenden
+const material = new THREE.MeshLambertMaterial({
+    emissive: 0xff0000  // OK!
+});
+```
 
 ## 🚀 Deployment Checkliste (Global)
 
@@ -888,9 +1644,9 @@ Nach Deployment:
 
 ---
 
-## 📊 EndlessRunner Spezifische Optimierungen
+## 📊 Project-Specific Optimizations
 
-### Gesture Control Workflow mit MCP
+### EndlessRunner - Gesture Control Workflow mit MCP
 1. **Development Phase**
    - Context7 MCP für MediaPipe/Three.js Docs
    - Filesystem MCP für rapid iteration
@@ -905,6 +1661,22 @@ Nach Deployment:
    - GitHub MCP für Auto-Deploy
    - Fetch MCP für CDN Verification
    - Brave Search für Error Research
+
+### VetScan Pro - 3D Medical Visualization Pipeline
+1. **Asset Creation Phase**
+   - Blender MCP für 3D-Modell-Export
+   - ImageMagick für Texture-Optimierung
+   - Filesystem MCP für Multi-Quality GLB Management
+
+2. **Implementation Phase**
+   - Context7 MCP für Three.js r128 Docs
+   - Medical Shader Generation (X-Ray, MRI, Ultrasound, Thermal)
+   - Progressive Loading System (High/Medium/Low Quality)
+
+3. **Educational Content**
+   - Dr. Eule Mentor-System Implementation
+   - Comparison Tables (Normal vs. Measured Values)
+   - Achievement & Progress Tracking mit localStorage
 
 ### Optimale MCP Pipeline für Game Development
 ```bash
@@ -939,11 +1711,112 @@ mcp.github.merge_and_deploy()
 
 ---
 
+## 🏃 EndlessRunner Spezifische Beiträge zu diesem Dokument
+
+### Was EndlessRunner zur globalen Knowledge Base beiträgt:
+
+1. **Game Initialization Best Practices**
+   - Race Condition Prevention mit Fallback Pattern
+   - Single Source of Truth für Init
+   - WebGL Context Management
+   - Shader Compilation Validation
+
+2. **Gesture Control Evolution (MediaPipe)**
+   - TensorFlow → MediaPipe Migration
+   - Smoothing Logic Pitfalls
+   - Mirror-Korrektur für intuitive Steuerung
+   - Boundary Optimization durch User Testing
+   - Debug-Visibility Importance
+
+3. **Performance Disaster Prevention**
+   - Console.log Frame-by-Frame Killer
+   - CSP Violations mit Audio System
+   - Multiple Initialization Chaos
+   - Memory Leaks durch Event Listeners
+
+4. **Three.js Hard-Won Lessons**
+   - CDN Version Migration (r150+ Changes)
+   - Double Declaration Traps
+   - Material Property Mismatches
+   - Frustum Culling ohne BoundingSphere
+   - WebGL Uniform Errors
+
+5. **Version Management Reality Check**
+   - 6 Wochen Module-System Failure
+   - KISS Principle Victory (8800 Zeilen aber funktioniert!)
+   - GitHub Actions Integration Issues
+   - Single File vs. Module Architecture
+
+6. **Critical Bug Patterns**
+   - Missing Comma Syntax Errors (3x in 2 Tagen!)
+   - startGame Function Race Conditions
+   - Game Over/Victory Freeze Issues
+   - Z-Index Overlay Conflicts
+
+---
+
+## 🏥 VetScan Pro Spezifische Beiträge zu diesem Dokument
+
+### Was VetScan Pro zur globalen Knowledge Base beiträgt:
+
+1. **Educational Game Design Patterns**
+   - Scaffolded Learning mit Dr. Eule Mentor
+   - Comparison-Based Learning (Normal vs. Gemessen)
+   - Immediate Feedback mit Erklärungen
+   - Progressive Difficulty System
+
+2. **3D Web Pipeline Best Practices**
+   - Blender MCP Integration Workflow
+   - Multi-Quality GLB Export Strategy
+   - Progressive Model Loading
+   - Medical Visualization Shaders
+
+3. **Version Management für Multi-Version Projects**
+   - Beta/Recommended/Experimental Strategy
+   - Landing Page mit klarem Visual Hierarchy
+   - Direct URL Access für Development
+
+4. **Three.js CDN Troubleshooting**
+   - unpkg vs. cdnjs Unterschiede
+   - Global vs. THREE Namespace Issues
+   - Script Loading Timing Problems
+   - Compatibility Layer Solutions
+
+5. **Medical Accuracy als Feature**
+   - 200+ recherchierte Tierwerte
+   - Realistische Krankheitsbilder
+   - Farbcodierung für Lerneffekt
+   - Achievement System mit Lernzielen
+
+6. **Docker Pipeline für Asset Generation**
+   - Blender → GLB → Optimizer → Shader Pipeline
+   - Automated Quality Variations
+   - Medical Shader Generation
+
+---
+
 **Letzte Aktualisierung**: 23.08.2025  
 **Maintainer**: Claude Code & Team  
-**Version**: 2.0.0 - Mit MCP Integration Guide  
+**Version**: 2.3.0 - Erweitert mit EndlessRunner Game Dev Patterns & MediaPipe Insights  
 
 *Dieses Dokument wird kontinuierlich erweitert basierend auf Erkenntnissen aus allen Projekten.*
+
+### EndlessRunner Quick Links
+- **Projekt Übersicht**: Siehe "🎮 AKTIVE PROJEKTE ÜBERSICHT"
+- **Game Initialization**: Siehe "Critical Game Initialization Patterns"
+- **Gesture Control**: Siehe "Gesture Control Evolution"
+- **Performance Issues**: Siehe "Game Loop & Performance Disasters"
+- **Three.js Gotchas**: Siehe "Three.js Specific Gotchas"
+- **Troubleshooting Docs**: 
+  - `/coding/EndlessRunner/TROUBLESHOOTING_WEBGL_2025.md`
+  - `/coding/EndlessRunner/GESTURE_TROUBLESHOOTING_COMPLETE.md`
+
+### VetScan Pro Quick Links
+- **Projekt Übersicht**: Siehe Abschnitt "🎮 AKTIVE PROJEKTE ÜBERSICHT"
+- **Educational Patterns**: Siehe "🎓 Educational Game Development Patterns"
+- **3D Pipeline**: Siehe "Blender to Web 3D Pipeline"
+- **Troubleshooting**: Siehe "Three.js CDN Strategy"
+- **Docker Setup**: Siehe "VetScan Pro 3D Asset Pipeline Docker Setup"
 
 ### Wichtige Referenzen
 - **EndlessRunner Docs**: `/coding/EndlessRunner/MCP_TIPS.md`
