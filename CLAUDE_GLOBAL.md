@@ -16,9 +16,109 @@ Dieses Dokument enthält übergreifende Best Practices, Regeln und Erkenntnisse 
 
 ---
 
+## 🎮 AKTIVE PROJEKTE ÜBERSICHT
+
+### 1. EndlessRunner (Subway Runner 3D)
+**URL**: 🌐 https://ki-revolution.at/  
+**Status**: V5.3.35 - In aktiver Entwicklung  
+**Tech Stack**: Vanilla JS, Three.js v0.150.0, MediaPipe Face Mesh  
+**Features**:
+- Browser-basiertes 3D Endless Runner Spiel
+- Gesture Control via Webcam (3-Lane System funktional)
+- 10 einzigartige Welten mit verschiedenen Obstacles
+- Power-Ups: Shield, Magnet, 2x Score
+- Leaderboard mit Supabase Backend
+- Auto-Deploy via GitHub Actions
+
+**Aktueller Fokus**: Fixing vertical gestures (Jump/Duck) mit ultra-sensitiven Boundaries
+
+### 2. Zeichenapp (JOE FLOW APP 2025)  
+**URL**: 🌐 https://ai-workflows.at/  
+**Status**: Production mit kontinuierlichen Updates  
+**Tech Stack**: HTML5 Canvas, Supabase, Print-on-Demand APIs  
+**Features**:
+- Web-basierte Drawing/Design App
+- 100+ Tools und Effekte
+- Print-on-Demand Integration (Printful)
+- User Authentication & Gallery
+- Cloud-Speicherung der Kunstwerke
+
+### 3. Tierarzt-Spiel (Educational Game)
+**URL**: In Entwicklung  
+**Status**: Prototyp-Phase  
+**Tech Stack**: Unity WebGL / HTML5 Canvas  
+**Features**:
+- Lernspiel für Kinder (6-12 Jahre)
+- Interaktive Tier-Behandlungen
+- Mini-Games und Quizzes
+- Termin-Management System
+- Fortschritts-Tracking
+
+### 4. Claude Mobile (Claude-to-Mobile Bridge)
+**URL**: Local Development  
+**Status**: Experimental  
+**Tech Stack**: Node.js, WebSocket, React Native  
+**Features**:
+- Mobile Control für Claude Desktop
+- WebSocket-basierte Kommunikation
+- Remote Command Execution
+- File Sync zwischen Desktop und Mobile
+- Voice Input Integration
+
+---
+
 ## MCP (Model Context Protocol)
 
+### 🚀 MCP Quick Setup für neue Projekte
+
+```bash
+# 1. Basis-Konfiguration erstellen
+cat > ~/Library/Application\ Support/Claude/claude_desktop_config.json << EOF
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "$(pwd)"]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"]
+    }
+  }
+}
+EOF
+
+# 2. Claude Desktop neu starten
+# 3. Hammer-Icon ⚒️ im Chat verifiziert Success
+```
+
 ### Projekt-spezifische MCP-Konfigurationen
+
+#### EndlessRunner (Subway Runner 3D)
+**Zweck**: Browser-basiertes 3D Endless Runner mit Gesture Control
+
+**Optimale MCP-Server**:
+- **Filesystem MCP**: Zugriff auf index.html und Assets
+- **Git/GitHub MCP**: Auto-Commits und PR-Management
+- **Playwright MCP**: Automated Gesture-Control Testing
+- **Memory MCP**: Session-übergreifende Game-States
+- **Context7 MCP**: Three.js und MediaPipe Dokumentation
+- **ImageMagick Docker**: Sprite-Sheet Generation
+- **Fetch MCP**: CDN und API Monitoring
+
+**Spezial-Konfiguration**:
+```json
+{
+  "playwright": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-playwright",
+      "--project", "/Users/doriangrey/Desktop/coding/EndlessRunner/SubwayRunner"
+    ]
+  }
+}
+```
 
 #### Zeichenapp (JOE FLOW APP 2025)
 **Zweck**: Web-basierte Drawing App mit Print-on-Demand Integration
@@ -50,30 +150,55 @@ services:
       - "3001:3000"
 ```
 
-#### Endless Runner Spiel
-**Zweck**: Browser-basiertes Endless Runner mit Leaderboard
+#### Claude Mobile
+**Zweck**: Mobile Bridge für Claude Desktop Control
 
 **Empfohlene MCP-Server**:
-- **Redis Docker**: Schnelle Leaderboard-Speicherung
-- **PostgreSQL MCP**: Persistente Spielstände
-- **Godot MCP**: Game Engine Integration
-- **WebSocket Server**: Realtime Multiplayer
+- **WebSocket MCP**: Real-time Communication
+- **Express Server MCP**: REST API für Commands
+- **File Sync MCP**: Desktop-Mobile File Transfer
+- **Voice Recognition Docker**: Speech-to-Text Processing
 
-**Docker-Setup**:
-```yaml
-services:
-  redis:
-    image: redis:alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - ./redis-data:/data
-      
-  game-api:
-    image: node:18-alpine
-    volumes:
-      - ./game-server:/app
-    environment:
-      REDIS_URL: redis://redis:6379
+### 🎯 MCP Best Practices für EndlessRunner
+
+#### Performance-Optimierung
+```javascript
+// MCP-gestützte Test-Automation
+// Playwright MCP kann Gesture-Control automatisch testen
+const testGestures = async () => {
+  // MCP ruft Playwright auf
+  await mcp.playwright.test({
+    file: 'gesture-test.spec.js',
+    headless: false,  // Für Webcam-Tests
+    timeout: 30000
+  });
+};
+```
+
+#### Asset-Pipeline mit MCP
+```bash
+# ImageMagick MCP für Sprite-Generation
+docker run -v ./assets:/work imagemagick-mcp \
+  convert sprite_*.png -append spritesheet.png
+
+# Automatische Optimierung
+docker run -v ./assets:/work imagemagick-mcp \
+  mogrify -quality 85 -resize 1024x1024\> *.png
+```
+
+#### Continuous Deployment
+```json
+{
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxx",
+      "AUTO_MERGE_PR": "true",
+      "DEPLOY_ON_MERGE": "true"
+    }
+  }
+}
 ```
 
 #### Tierarzt-Spiel für Kinder
@@ -85,12 +210,63 @@ services:
 - **PostgreSQL**: Termin- und Tierdaten
 - **NGINX**: Static Asset Serving
 
+### 🔥 MCP Power-Features für EndlessRunner
+
+#### Gesture Control Testing mit MCP
+```javascript
+// Automatisierte Gesture-Tests via Playwright MCP
+{
+  "gesture-test": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-playwright",
+      "--test-file", "gesture-control.test.js",
+      "--video", "on",  // Video-Recording der Tests
+      "--trace", "on"   // Debugging-Traces
+    ]
+  }
+}
+```
+
+#### Three.js Performance Profiling
+```javascript
+// Memory MCP für Performance-Tracking
+{
+  "performance-monitor": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-memory",
+      "--track-metrics", "fps,memory,drawCalls",
+      "--alert-threshold", "fps<30"
+    ]
+  }
+}
+```
+
+#### Leaderboard Management
+```json
+{
+  "supabase-leaderboard": {
+    "command": "npx",
+    "args": ["-y", "supabase-mcp"],
+    "env": {
+      "SUPABASE_URL": "https://cquahsbgcycdmslcmmdz.supabase.co",
+      "SUPABASE_ANON_KEY": "your-key-here",
+      "AUTO_BACKUP": "true"
+    }
+  }
+}
+```
+
 ### Globale MCP Best Practices
 
 1. **Security First**
    - Niemals API Keys hardcoden
    - Environment Variables für Secrets
    - Read-only Mounts wo möglich
+   - Network Isolation für Container
 
 2. **Performance Optimierung**
    ```yaml
@@ -99,12 +275,33 @@ services:
        limits:
          cpus: '0.5'
          memory: 512M
+       reservations:
+         cpus: '0.25'
+         memory: 256M
    ```
 
 3. **Container Isolation**
    - Ein Service pro Container
    - Explizite Network-Policies
    - Volume-Mounts minimieren
+   - Health-Checks mandatory
+
+4. **MCP Server Prioritäten**
+   - **Kritisch**: filesystem, git
+   - **Hoch**: github, playwright, memory
+   - **Mittel**: context7, fetch, brave-search
+   - **Niedrig**: docker-basierte Tools
+
+5. **Troubleshooting MCP Issues**
+   ```bash
+   # MCP Server nicht erreichbar
+   pkill -f "npx.*mcp"  # Kill hanging processes
+   rm -rf ~/.npm/_npx   # Clear npx cache
+   
+   # Docker MCP Probleme
+   docker system prune -a  # Nuclear option
+   docker compose down -v  # Remove volumes
+   ```
 
 ---
 
@@ -691,8 +888,65 @@ Nach Deployment:
 
 ---
 
-**Letzte Aktualisierung**: 23.08.2025
-**Maintainer**: Claude Code & Team
-**Version**: 1.0.0
+## 📊 EndlessRunner Spezifische Optimierungen
+
+### Gesture Control Workflow mit MCP
+1. **Development Phase**
+   - Context7 MCP für MediaPipe/Three.js Docs
+   - Filesystem MCP für rapid iteration
+   - Memory MCP für State-Tracking
+
+2. **Testing Phase**
+   - Playwright MCP für automated Gesture Tests
+   - Performance Monitor MCP für FPS Tracking
+   - Git MCP für Version Control
+
+3. **Deployment Phase**
+   - GitHub MCP für Auto-Deploy
+   - Fetch MCP für CDN Verification
+   - Brave Search für Error Research
+
+### Optimale MCP Pipeline für Game Development
+```bash
+# 1. Research Phase
+mcp.context7("Three.js v0.150 raycasting")
+mcp.brave_search("MediaPipe gesture boundaries")
+
+# 2. Implementation
+mcp.filesystem.edit("index.html")
+mcp.git.commit("Feature: Improved gesture detection")
+
+# 3. Testing
+mcp.playwright.test("gesture-control.spec.js")
+mcp.memory.track("performance_metrics")
+
+# 4. Deployment
+mcp.github.create_pr("Feature complete")
+mcp.github.merge_and_deploy()
+```
+
+### EndlessRunner MCP Cheat Sheet
+| Aufgabe | MCP Server | Command |
+|---------|------------|---------|
+| Code ändern | filesystem | Edit index.html |
+| Testen | playwright | Run gesture tests |
+| Commit | git | Auto-commit changes |
+| Deploy | github | Push to main |
+| Docs | context7 | Get Three.js docs |
+| Debug | memory | Track game state |
+| Assets | imagemagick | Optimize sprites |
+| Search | brave | Find solutions |
+
+---
+
+**Letzte Aktualisierung**: 23.08.2025  
+**Maintainer**: Claude Code & Team  
+**Version**: 2.0.0 - Mit MCP Integration Guide  
 
 *Dieses Dokument wird kontinuierlich erweitert basierend auf Erkenntnissen aus allen Projekten.*
+
+### Wichtige Referenzen
+- **EndlessRunner Docs**: `/coding/EndlessRunner/MCP_TIPS.md`
+- **Zeichenapp Troubleshooting**: `/coding/zeichenapp/TROUBLESHOOTING.md`
+- **Global MCP Config**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Project Configs**: `[project]/CLAUDE.md`
