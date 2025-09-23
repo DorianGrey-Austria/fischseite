@@ -14,10 +14,18 @@
             --light-blue: #E8F4F8;
             --white: #FFFFFF;
             --ocean-gradient: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
-            --seaweed-green: #228B22;
+            --seaweed-green: #4CAF50;
+            --logo-green: #4CAF50;
+            --logo-green-accent: #66BB6A;
             --bubble-blue: rgba(173, 216, 230, 0.8);
             --coral-pink: #FF7F7F;
             --sand-beige: #F4A460;
+
+            /* Logo Size Variables */
+            --logo-header-desktop: 180px;
+            --logo-header-mobile: 120px;
+            --logo-hero-size: 280px;
+            --logo-footer-size: 100px;
         }
 
         * {
@@ -35,7 +43,7 @@
             position: relative;
         }
 
-        /* Underwater Background Effects */
+        /* Underwater Background Effects - Reduced */
         body::before {
             content: '';
             position: fixed;
@@ -44,18 +52,213 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(circle at 20% 80%, var(--bubble-blue) 2px, transparent 2px),
-                radial-gradient(circle at 80% 20%, var(--bubble-blue) 1px, transparent 1px),
-                radial-gradient(circle at 40% 40%, var(--bubble-blue) 1.5px, transparent 1.5px);
-            background-size: 200px 200px, 150px 150px, 100px 100px;
-            animation: bubbles 20s infinite linear;
+                radial-gradient(circle at 25% 75%, var(--bubble-blue) 1px, transparent 1px),
+                radial-gradient(circle at 75% 25%, var(--bubble-blue) 0.8px, transparent 0.8px);
+            background-size: 600px 600px, 500px 500px;
+            animation: bubbles 40s infinite linear;
             pointer-events: none;
             z-index: -1;
+            opacity: 0.5;
         }
 
         @keyframes bubbles {
             0% { transform: translateY(100vh); }
             100% { transform: translateY(-100vh); }
+        }
+
+        /* Advanced 3D Parallax Water Layers */
+        .hero {
+            perspective: 1000px;
+            perspective-origin: center center;
+            transform-style: preserve-3d;
+        }
+
+        .water-layer-1,
+        .water-layer-2,
+        .water-layer-3 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Background Water Layer - Deepest */
+        .water-layer-1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 15% 60%, var(--bubble-blue) 1px, transparent 1px),
+                radial-gradient(circle at 85% 30%, var(--bubble-blue) 0.8px, transparent 0.8px),
+                radial-gradient(circle at 45% 85%, var(--bubble-blue) 1.2px, transparent 1.2px);
+            background-size: 300px 300px, 250px 250px, 180px 180px;
+            animation: bubbles-slow 35s infinite linear;
+            opacity: 0.3;
+            transform: translateZ(-100px) scale(1.1);
+        }
+
+        /* Middle Water Layer */
+        .water-layer-2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 25% 70%, var(--bubble-blue) 1.5px, transparent 1.5px),
+                radial-gradient(circle at 75% 25%, var(--bubble-blue) 1px, transparent 1px),
+                radial-gradient(circle at 55% 75%, var(--bubble-blue) 1.8px, transparent 1.8px);
+            background-size: 220px 220px, 180px 180px, 160px 160px;
+            animation: bubbles-medium 25s infinite linear;
+            opacity: 0.5;
+            transform: translateZ(-50px) scale(1.05);
+        }
+
+        /* Foreground Water Layer - Closest */
+        .water-layer-3::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 30% 80%, var(--bubble-blue) 2px, transparent 2px),
+                radial-gradient(circle at 70% 20%, var(--bubble-blue) 1.5px, transparent 1.5px),
+                radial-gradient(circle at 50% 60%, var(--bubble-blue) 2.5px, transparent 2.5px);
+            background-size: 150px 150px, 120px 120px, 100px 100px;
+            animation: bubbles-fast 15s infinite linear;
+            opacity: 0.7;
+            transform: translateZ(0px);
+        }
+
+        @keyframes bubbles-slow {
+            0% { transform: translateY(100vh) translateZ(-100px) scale(1.1); }
+            100% { transform: translateY(-100vh) translateZ(-100px) scale(1.1); }
+        }
+
+        @keyframes bubbles-medium {
+            0% { transform: translateY(100vh) translateZ(-50px) scale(1.05); }
+            100% { transform: translateY(-100vh) translateZ(-50px) scale(1.05); }
+        }
+
+        @keyframes bubbles-fast {
+            0% { transform: translateY(100vh) translateZ(0px); }
+            100% { transform: translateY(-100vh) translateZ(0px); }
+        }
+
+        /* Caustic Light Effects - Underwater Light Refraction */
+        .caustic-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(173, 216, 230, 0.15) 10px,
+                    rgba(173, 216, 230, 0.15) 20px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 15px,
+                    rgba(135, 206, 235, 0.1) 15px,
+                    rgba(135, 206, 235, 0.1) 30px
+                );
+            animation: caustic-shimmer 8s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+            mix-blend-mode: overlay;
+        }
+
+        @keyframes caustic-shimmer {
+            0% {
+                transform: translateX(-20px) translateY(-10px) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateX(10px) translateY(5px) scale(1.02);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateX(-15px) translateY(-8px) scale(0.98);
+                opacity: 0.7;
+            }
+        }
+
+        /* Enhanced Bubble Particles System */
+        .bubble-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .bubble-particles::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 20%, rgba(173,216,230,0.6) 60%, transparent 80%);
+            border-radius: 50%;
+            box-shadow:
+                20px 50px 0 -2px rgba(255,255,255,0.6),
+                45px 20px 0 -1px rgba(173,216,230,0.5),
+                70px 80px 0 -3px rgba(255,255,255,0.4),
+                120px 30px 0 -1px rgba(173,216,230,0.7),
+                180px 70px 0 -2px rgba(255,255,255,0.5),
+                220px 40px 0 -1px rgba(173,216,230,0.4),
+                280px 90px 0 -3px rgba(255,255,255,0.6),
+                350px 25px 0 -1px rgba(173,216,230,0.5);
+            animation: floating-bubbles 12s infinite linear;
+        }
+
+        .bubble-particles::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 30%, rgba(173,216,230,0.7) 70%, transparent 90%);
+            border-radius: 50%;
+            box-shadow:
+                80px 60px 0 -1px rgba(255,255,255,0.7),
+                140px 90px 0 -2px rgba(173,216,230,0.6),
+                200px 30px 0 -1px rgba(255,255,255,0.5),
+                260px 75px 0 -2px rgba(173,216,230,0.8),
+                320px 45px 0 -1px rgba(255,255,255,0.4),
+                380px 85px 0 -3px rgba(173,216,230,0.6);
+            animation: floating-bubbles 18s infinite linear reverse;
+            animation-delay: -6s;
+        }
+
+        @keyframes floating-bubbles {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         /* Seaweed Animation Sides */
@@ -100,7 +303,7 @@
         header {
             background: rgba(0, 105, 148, 0.95);
             color: var(--white);
-            padding: 1rem 0;
+            padding: 0.8rem 0;
             position: fixed;
             top: 0;
             left: 0;
@@ -108,6 +311,7 @@
             z-index: 1000;
             backdrop-filter: blur(10px);
             border-bottom: 2px solid var(--secondary-teal);
+            height: 80px;
         }
 
         nav {
@@ -115,15 +319,174 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 1002;
+            position: relative;
+            flex-shrink: 0;
+            max-width: 60%;
+        }
+
+        .logo span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 3D Logo Styles */
+        .logo-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3));
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            will-change: transform;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .logo-image:hover {
+            transform: rotateY(15deg) scale(1.05);
+            filter: drop-shadow(0 8px 16px var(--logo-green))
+                    drop-shadow(0 0 20px var(--logo-green-accent));
+        }
+
+        /* Glassmorphism Background für Logo */
+        .logo-image::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg,
+                rgba(76, 175, 80, 0.1) 0%,
+                rgba(102, 187, 106, 0.05) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .logo-image:hover::before {
+            opacity: 1;
+        }
+
+        /* Floating Animation für Hero Logo */
+        .hero-logo {
+            width: var(--logo-hero-size);
+            height: auto;
+            animation: floating 6s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px var(--logo-green))
+                    drop-shadow(0 0 30px var(--logo-green-accent));
+            margin: 2rem 0;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .hero-logo:hover {
+            animation-play-state: paused;
+            transform: scale(1.1);
+        }
+
+        /* Hero Logo Glow Effect */
+        .hero-logo::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle,
+                var(--logo-green-accent) 0%,
+                transparent 60%);
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-10px) rotate(1deg);
+            }
+            66% {
+                transform: translateY(-5px) rotate(-1deg);
+            }
+        }
+
+        /* Water Ripple Effect */
+        .logo-ripple {
+            position: relative;
+            overflow: visible;
+        }
+
+        .logo-ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(78, 205, 196, 0.4) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s ease;
+        }
+
+        .logo-ripple:hover::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
+            animation: rippleWave 1s ease-out;
+        }
+
+        @keyframes rippleWave {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 0.4;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        /* Footer Logo */
+        .footer-logo {
+            width: var(--logo-footer-size);
+            height: auto;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo:hover {
+            opacity: 1;
         }
 
         /* Fish Icon Animation */
@@ -254,23 +617,119 @@
             100% { background-position-x: -200px, -150px; }
         }
 
-        /* Floating Fish Animation */
-        .hero::after {
-            content: '🐠 🐟 🦈';
+        /* Advanced 3D Multi-Layer Fish Animation System */
+        .underwater-life {
             position: absolute;
-            top: 20%;
-            left: -200px;
-            font-size: 2rem;
-            animation: fish-float 25s linear infinite;
-            opacity: 0.6;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        @keyframes fish-float {
-            0% { left: -200px; transform: translateY(0) rotateY(0deg); }
-            25% { transform: translateY(-20px) rotateY(0deg); }
-            50% { left: 50%; transform: translateY(20px) rotateY(180deg); }
-            75% { transform: translateY(-10px) rotateY(180deg); }
-            100% { left: calc(100% + 200px); transform: translateY(0) rotateY(180deg); }
+        /* School Fish - Background Layer */
+        .fish-school-1::before {
+            content: '🐠 🐟 🐠';
+            position: absolute;
+            top: 15%;
+            left: -300px;
+            font-size: 1rem;
+            animation: fish-swim-left-to-right 25s linear infinite;
+            opacity: 0.3;
+            transform: translateZ(-50px);
+            animation-delay: -8s;
+        }
+
+        .fish-school-2::before {
+            content: '🐟 🐠';
+            position: absolute;
+            top: 35%;
+            right: -200px;
+            font-size: 0.9rem;
+            animation: fish-swim-right-to-left 30s linear infinite;
+            opacity: 0.35;
+            transform: translateZ(-30px);
+            animation-delay: -12s;
+        }
+
+        /* Main Fish - Middle Layer */
+        .hero::after {
+            content: '🐠';
+            position: absolute;
+            top: 25%;
+            left: -250px;
+            font-size: 1.5rem;
+            animation: fish-swim-left-to-right 35s linear infinite;
+            opacity: 0.5;
+            transform: translateZ(0px);
+            animation-delay: -15s;
+        }
+
+        /* Large Fish - Foreground Layer */
+        .fish-large::before {
+            content: '🦈';
+            position: absolute;
+            top: 45%;
+            left: -400px;
+            font-size: 2rem;
+            animation: fish-swim-left-to-right 45s linear infinite;
+            opacity: 0.4;
+            transform: translateZ(20px);
+            animation-delay: -20s;
+        }
+
+        /* Bottom Dwellers */
+        .fish-bottom::before {
+            content: '🐡';
+            position: absolute;
+            bottom: 15%;
+            right: -250px;
+            font-size: 1.3rem;
+            animation: fish-swim-right-to-left 38s linear infinite;
+            opacity: 0.4;
+            animation-delay: -18s;
+        }
+
+        /* Biologically Correct Swimming Animations */
+        @keyframes fish-swim-left-to-right {
+            0% {
+                left: -300px;
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
+            }
+            25% {
+                transform: translateY(-20px) scaleX(1) translateZ(var(--fish-depth, 0));
+            }
+            50% {
+                transform: translateY(10px) scaleX(1) translateZ(var(--fish-depth, 0));
+            }
+            75% {
+                transform: translateY(-15px) scaleX(1) translateZ(var(--fish-depth, 0));
+            }
+            100% {
+                left: calc(100% + 300px);
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
+            }
+        }
+
+        @keyframes fish-swim-right-to-left {
+            0% {
+                right: -300px;
+                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
+            }
+            25% {
+                transform: translateY(-15px) scaleX(-1) translateZ(var(--fish-depth, 0));
+            }
+            50% {
+                transform: translateY(20px) scaleX(-1) translateZ(var(--fish-depth, 0));
+            }
+            75% {
+                transform: translateY(-10px) scaleX(-1) translateZ(var(--fish-depth, 0));
+            }
+            100% {
+                right: calc(100% + 300px);
+                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
+            }
         }
 
         .hero-content {
@@ -514,6 +973,29 @@
             text-align: center;
             box-shadow: 0 5px 15px rgba(0, 105, 148, 0.1);
             transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Logo Watermark für Feature Cards */
+        .logo-watermark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0.1;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .watermark-logo {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            filter: grayscale(100%);
+        }
+
+        .feature-card:hover .logo-watermark {
+            opacity: 0.2;
         }
 
         .feature-card:hover {
@@ -561,12 +1043,71 @@
             color: var(--secondary-teal);
         }
 
-        /* Coral Dividers */
-        .coral-divider {
-            height: 40px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><path d="M0,40 Q25,10 50,40 Q75,10 100,40" fill="%23FF7F7F" opacity="0.6"/></svg>') repeat-x;
-            background-size: 100px 40px;
+        /* Underwater Section Dividers */
+        .underwater-divider {
+            height: 80px;
+            position: relative;
+            overflow: hidden;
             margin: 2rem 0;
+            background: linear-gradient(180deg,
+                rgba(78, 205, 196, 0.1) 0%,
+                rgba(0, 105, 148, 0.1) 50%,
+                rgba(78, 205, 196, 0.1) 100%);
+        }
+
+        .underwater-divider::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -200px;
+            width: calc(100% + 400px);
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(173, 216, 230, 0.8) 3px, transparent 3px),
+                radial-gradient(circle at 60% 70%, rgba(173, 216, 230, 0.6) 2px, transparent 2px),
+                radial-gradient(circle at 80% 20%, rgba(173, 216, 230, 0.7) 2.5px, transparent 2.5px),
+                radial-gradient(circle at 40% 80%, rgba(173, 216, 230, 0.5) 1.5px, transparent 1.5px);
+            background-size: 150px 80px, 120px 80px, 100px 80px, 80px 80px;
+            animation: bubbleFlow 25s infinite linear;
+        }
+
+        @keyframes bubbleFlow {
+            from { transform: translateX(0); }
+            to { transform: translateX(200px); }
+        }
+
+        .underwater-divider::after {
+            content: '🐠';
+            position: absolute;
+            top: 50%;
+            left: -50px;
+            font-size: 2rem;
+            animation: fishSwim 30s infinite linear;
+            transform: translateY(-50%);
+            opacity: 0.7;
+        }
+
+        @keyframes fishSwim {
+            0% {
+                left: -50px;
+                transform: translateY(-50%) scaleX(1);
+            }
+            25% {
+                transform: translateY(-60%) scaleX(1);
+            }
+            49% {
+                transform: translateY(-40%) scaleX(1);
+            }
+            50% {
+                transform: translateY(-40%) scaleX(-1);
+            }
+            75% {
+                transform: translateY(-60%) scaleX(-1);
+            }
+            100% {
+                left: calc(100% + 50px);
+                transform: translateY(-50%) scaleX(-1);
+            }
         }
 
         /* Floating Fish Navigation Buttons */
@@ -624,48 +1165,186 @@
             75% { transform: scale(1.1) rotate(-5deg); }
         }
 
-        /* Enhanced Tab Buttons with Fish Theme */
-        .tab-button {
-            background: var(--light-blue);
-            color: var(--primary-blue);
-            border: 2px solid var(--primary-blue);
-            padding: 12px 24px;
+        /* Modern Underwater Tab System */
+        .tab-container {
+            display: flex;
+            gap: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             border-radius: 25px;
+            padding: 8px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 105, 148, 0.1);
+        }
+
+        .modern-tab {
+            background: transparent;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 20px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            min-height: 44px;
-            display: inline-flex;
+            min-height: 60px;
+            display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            flex: 1;
+            color: var(--primary-blue);
+            font-weight: 500;
         }
 
-        .tab-button::after {
-            content: '🐠';
-            position: absolute;
-            right: -30px;
+        .tab-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
             transition: all 0.3s ease;
+        }
+
+        .tab-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+
+        .tab-title {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .tab-count {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .tab-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-teal));
             opacity: 0;
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            z-index: -1;
         }
 
-        .tab-button.active {
-            background: var(--primary-blue);
+        /* Video Tab Special Effects */
+        .video-tab {
+            position: relative;
+        }
+
+        .video-icon {
+            position: relative;
+        }
+
+        .video-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-teal);
+            border-radius: 50%;
+            animation: video-pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7);
+        }
+
+        @keyframes video-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7);
+                opacity: 1;
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(78, 205, 196, 0);
+                opacity: 0.8;
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(78, 205, 196, 0);
+                opacity: 1;
+            }
+        }
+
+        .video-glow {
+            background: linear-gradient(135deg,
+                rgba(78, 205, 196, 0.1),
+                rgba(0, 105, 148, 0.1),
+                rgba(78, 205, 196, 0.15)
+            );
+        }
+
+        /* Hover Effects */
+        .modern-tab:hover {
+            transform: translateY(-2px);
             color: var(--white);
-            transform: scale(1.05);
         }
 
-        .tab-button.active::after {
-            right: 8px;
+        .modern-tab:hover .tab-glow {
+            opacity: 0.3;
+        }
+
+        .modern-tab:hover .tab-icon {
+            transform: scale(1.1);
+        }
+
+        .modern-tab:hover .video-indicator {
+            background: var(--white);
+            animation-duration: 1s;
+        }
+
+        /* Active State */
+        .modern-tab.active {
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+
+        .modern-tab.active .tab-glow {
             opacity: 1;
         }
 
-        .tab-button:hover {
-            background: var(--secondary-teal);
-            color: var(--white);
-            border-color: var(--secondary-teal);
-            transform: translateY(-2px);
+        .modern-tab.active .tab-icon {
+            transform: scale(1.05);
+        }
+
+        .modern-tab.active .video-indicator {
+            background: var(--white);
+        }
+
+        /* Underwater Bubble Effect */
+        .modern-tab::before {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            top: 20%;
+            left: 15%;
+            animation: bubble-float 4s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        .modern-tab:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes bubble-float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-10px) scale(1.2);
+                opacity: 0.6;
+            }
         }
 
         /* Enhanced Cards with Bubble Effects */
@@ -701,6 +1380,91 @@
 
         /* Responsive Design with Mobile-First Approach */
         @media (max-width: 768px) {
+            .logo {
+                font-size: 1rem;
+                gap: 8px;
+                max-width: 70%;
+            }
+
+            /* Mobile Logo Adjustments */
+            .logo-image {
+                width: 45px;
+                height: 45px;
+            }
+
+            .logo span {
+                font-size: 0.9rem;
+            }
+
+            .hero-logo {
+                width: calc(var(--logo-hero-size) * 0.7);
+            }
+
+            .footer-logo {
+                width: calc(var(--logo-footer-size) * 0.8);
+            }
+
+            /* Reduced 3D effects for mobile performance */
+            .logo-image:hover {
+                transform: scale(1.02);
+                filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.4));
+            }
+            /* Mobile Performance Optimizations for 3D Effects */
+            .hero {
+                perspective: 500px; /* Reduced for mobile performance */
+            }
+
+            /* Simplified Water Layers for Mobile */
+            .water-layer-1::before,
+            .water-layer-2::before {
+                display: none; /* Hide background layers on mobile */
+            }
+
+            .water-layer-3::before {
+                background-size: 100px 100px, 80px 80px, 60px 60px;
+                animation-duration: 20s; /* Slower animation for battery */
+                opacity: 0.4;
+            }
+
+            /* Reduced Caustic Effects */
+            .caustic-lights {
+                opacity: 0.3;
+                animation-duration: 12s;
+            }
+
+            /* Optimized Bubble Particles for Mobile */
+            .bubble-particles::before {
+                box-shadow:
+                    20px 50px 0 -2px rgba(255,255,255,0.4),
+                    70px 80px 0 -3px rgba(255,255,255,0.3),
+                    180px 70px 0 -2px rgba(255,255,255,0.3);
+                animation-duration: 15s;
+            }
+
+            .bubble-particles::after {
+                box-shadow:
+                    80px 60px 0 -1px rgba(255,255,255,0.4),
+                    200px 30px 0 -1px rgba(255,255,255,0.3);
+                animation-duration: 20s;
+            }
+
+            /* Mobile Fish Optimizations */
+            .fish-school-1::before,
+            .fish-school-2::before {
+                font-size: 0.8rem;
+                animation-duration: 25s;
+            }
+
+            .fish-large::before {
+                font-size: 2rem;
+                animation-duration: 35s;
+            }
+
+            .fish-bottom::before {
+                font-size: 1.2rem;
+                animation-duration: 22s;
+            }
+
             /* Show Hamburger Menu */
             .hamburger {
                 display: flex;
@@ -800,9 +1564,30 @@
                 gap: 1rem;
             }
 
-            .tab-button {
-                width: 200px;
+            .tab-container {
+                flex-direction: column;
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .modern-tab {
+                width: 100%;
                 justify-content: center;
+                padding: 16px 20px;
+                min-height: 56px;
+            }
+
+            .tab-content {
+                align-items: center;
+                text-align: center;
+            }
+
+            .tab-title {
+                font-size: 1.1rem;
+            }
+
+            .tab-count {
+                font-size: 0.9rem;
             }
 
             .image-gallery,
@@ -831,6 +1616,70 @@
                 font-size: 2rem;
                 margin-bottom: 2rem;
             }
+
+            /* Mobile Member Gallery */
+            .member-gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .member-intro {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .member-intro h3 {
+                font-size: 1.4rem;
+            }
+
+            .portrait-link-btn, .back-to-gallery-btn {
+                padding: 15px 25px;
+                font-size: 1.1rem;
+            }
+
+            /* Mobile Portrait Section */
+            .portrait-hero {
+                padding: 2rem 0;
+            }
+
+            .portrait-hero h2 {
+                font-size: 2rem;
+            }
+
+            .portrait-hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .portrait-content {
+                padding: 2rem 1rem;
+            }
+
+            .portrait-text {
+                font-size: 1rem;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .two-column-list {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .spec-section {
+                padding: 1rem;
+            }
+
+            .spec-section h3 {
+                font-size: 1.1rem;
+            }
+
+            .author-badge {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
         }
 
         /* Ultra-Wide Screen Optimizations */
@@ -849,6 +1698,237 @@
             }
         }
 
+        /* Member Gallery Styles */
+        .member-spotlight {
+            margin-bottom: 3rem;
+        }
+
+        .member-intro {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 15px;
+            border: 2px solid var(--secondary-teal);
+        }
+
+        .member-intro h3 {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .member-intro p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--deep-blue);
+        }
+
+        .portrait-link-btn {
+            background: var(--secondary-teal);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .portrait-link-btn:hover {
+            background: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .member-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .member-image-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 105, 148, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .member-image-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 105, 148, 0.2);
+        }
+
+        .member-image-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .member-image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .author-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 105, 148, 0.9);
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        .portrait-link-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .member-image-card:hover .portrait-link-indicator {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .portrait-link-indicator:hover {
+            background: rgba(255, 107, 107, 1);
+            transform: scale(1.1);
+        }
+
+        .member-image-card .image-info {
+            padding: 1.5rem;
+        }
+
+        .member-image-card .image-info h4 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .member-image-card .image-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Member Portrait Section */
+        .member-portrait {
+            background: var(--white);
+            margin: 3rem 0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 105, 148, 0.1);
+        }
+
+        .portrait-hero {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-teal));
+            color: var(--white);
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .portrait-hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portrait-hero .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .portrait-content {
+            padding: 3rem;
+        }
+
+        .portrait-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: var(--deep-blue);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .spec-section {
+            background: var(--light-blue);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 4px solid var(--secondary-teal);
+        }
+
+        .spec-section h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .spec-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .spec-list li {
+            padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(0, 105, 148, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .spec-list li:last-child {
+            border-bottom: none;
+        }
+
+        .two-column-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .back-to-gallery-btn {
+            background: var(--accent-coral);
+            color: var(--white);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-top: 2rem;
+            min-height: 44px;
+        }
+
+        .back-to-gallery-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
         /* Performance Optimizations */
         * {
             will-change: auto;
@@ -861,6 +1941,56 @@
 
         .cta-button::before {
             will-change: transform, opacity;
+        }
+
+        /* Advanced Performance & Accessibility */
+        .water-layer-1::before,
+        .water-layer-2::before,
+        .water-layer-3::before,
+        .bubble-particles::before,
+        .bubble-particles::after,
+        .caustic-lights,
+        .fish-school-1::before,
+        .fish-school-2::before,
+        .fish-large::before,
+        .fish-bottom::before {
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+
+        /* Reduced Motion Support for Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .water-layer-1::before,
+            .water-layer-2::before,
+            .water-layer-3::before,
+            .bubble-particles::before,
+            .bubble-particles::after,
+            .caustic-lights {
+                animation: none !important;
+            }
+
+            .fish-school-1::before,
+            .fish-school-2::before,
+            .fish-large::before,
+            .fish-bottom::before,
+            .hero::after {
+                animation-duration: 60s !important;
+                animation-timing-function: linear !important;
+            }
+        }
+
+        /* Battery Optimization for Mobile */
+        @media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+            .water-layer-3::before {
+                animation-timing-function: linear;
+            }
+
+            .bubble-particles::before,
+            .bubble-particles::after {
+                animation-timing-function: ease-out;
+            }
         }
 
         /* Lightbox for images */
@@ -916,6 +2046,9 @@
         <button class="fish-nav-button" onclick="scrollToSection('events')" title="Events">
             🎉
         </button>
+        <button class="fish-nav-button" onclick="scrollToSection('mitglieder-portraits')" title="Mitglieder-Portraits">
+            👤
+        </button>
         <button class="fish-nav-button" onclick="scrollToSection('mitgliedschaft')" title="Mitgliedschaft">
             🤝
         </button>
@@ -927,8 +2060,8 @@
     <header>
         <nav class="container">
             <div class="logo">
-                <i class="fas fa-fish"></i>
-                Aquaristikfreunde Steiermark
+                <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple">
+                <span>Aquaristikfreunde Steiermark</span>
             </div>
 
             <!-- Hamburger Menu Button -->
@@ -943,6 +2076,7 @@
                 <li><a href="#galerie" onclick="closeMobileMenu()">Galerie</a></li>
                 <li><a href="#verein" onclick="closeMobileMenu()">Verein</a></li>
                 <li><a href="#events" onclick="closeMobileMenu()">Events</a></li>
+                <li><a href="#mitglieder-portraits" onclick="closeMobileMenu()">Mitglieder-Portraits</a></li>
                 <li><a href="#mitgliedschaft" onclick="closeMobileMenu()">Mitgliedschaft</a></li>
                 <li><a href="#kontakt" onclick="closeMobileMenu()">Kontakt</a></li>
             </ul>
@@ -950,7 +2084,27 @@
     </header>
 
     <section id="home" class="hero">
+        <!-- 3D Parallax Water Layers -->
+        <div class="water-layer-1"></div>
+        <div class="water-layer-2"></div>
+        <div class="water-layer-3"></div>
+
+        <!-- Caustic Light Effects -->
+        <div class="caustic-lights"></div>
+
+        <!-- Enhanced Bubble Particles -->
+        <div class="bubble-particles"></div>
+
+        <!-- Advanced 3D Underwater Life Layers -->
+        <div class="underwater-life">
+            <div class="fish-school-1"></div>
+            <div class="fish-school-2"></div>
+            <div class="fish-large"></div>
+            <div class="fish-bottom"></div>
+        </div>
+
         <div class="hero-content container">
+            <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="hero-logo" onclick="createLogoRipples(event)">
             <h1>Willkommen bei den Aquaristikfreunden Steiermark</h1>
             <p>Seit Jahrzehnten die führende Aquaristik-Community in der Steiermark. Tauchen Sie ein in eine lebendige Gemeinschaft von Aquaristik-Enthusiasten mit umfassendem Fachwissen und regelmäßigen Events.</p>
             <a href="#galerie" class="cta-button" onclick="createBubbleTrail(event)">
@@ -959,69 +2113,123 @@
         </div>
     </section>
 
-    <!-- Coral Divider -->
-    <div class="coral-divider"></div>
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
 
     <section id="galerie" class="media-section">
         <div class="container">
-            <h2 class="section-title">Unsere Aquarium-Galerie</h2>
+            <h2 class="section-title">Mario Lanz - Südamerika Aquaristik</h2>
 
             <div class="gallery-tabs">
-                <button class="tab-button active" onclick="showGallery('images')">
-                    <i class="fas fa-image"></i> Bilder (6)
-                </button>
-                <button class="tab-button" onclick="showGallery('videos')">
-                    <i class="fas fa-video"></i> Videos (7)
-                </button>
+                <div class="tab-container">
+                    <button class="tab-button modern-tab active" onclick="showGallery('images')" data-tab="images">
+                        <div class="tab-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="tab-content">
+                            <span class="tab-title">Bilder</span>
+                            <span class="tab-count">6 Fotos</span>
+                        </div>
+                        <div class="tab-glow"></div>
+                    </button>
+
+                    <button class="tab-button modern-tab video-tab" onclick="showGallery('videos')" data-tab="videos">
+                        <div class="tab-icon video-icon">
+                            <i class="fas fa-video"></i>
+                            <div class="video-indicator"></div>
+                        </div>
+                        <div class="tab-content">
+                            <span class="tab-title">Videos</span>
+                            <span class="tab-count">7 Clips 🎥</span>
+                        </div>
+                        <div class="tab-glow video-glow"></div>
+                    </button>
+                </div>
             </div>
 
-            <!-- Image Gallery -->
+            <!-- Image Gallery - Mario Lanz Südamerika-Spezialist -->
             <div id="images-gallery" class="image-gallery">
-                <div class="image-card" onclick="openLightbox('bilder/IMG_1290.jpeg')">
-                    <img src="bilder/IMG_1290.jpeg" alt="Tropische Fische">
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein1.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein1.jpg" alt="Südamerika Biotop mit Skalaren" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Tropische Meeresbewohner</h3>
-                        <p>Bunte Vielfalt im Salzwasseraquarium</p>
+                        <h3>Manacapuru Skalare im 576L Raumteiler</h3>
+                        <p>8 Jahre alte Zucht-Skalare in 160x60x60cm Aquarium mit direkter Sonneneinstrahlung</p>
                     </div>
                 </div>
 
-                <div class="image-card" onclick="openLightbox('bilder/IMG_0231.jpeg')">
-                    <img src="bilder/IMG_0231.jpeg" alt="Süßwasser Aquarium">
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein2.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein2.jpg" alt="375 Liter Gesellschaftsbecken" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Süßwasser Paradies</h3>
-                        <p>Perfekt eingerichtetes Süßwasseraquarium</p>
+                        <h3>Gut bepflanztes Gesellschaftsaquarium</h3>
+                        <p>Ehemalige 375L Zuchtbecken-Anlage mit niedrigen GH/KH-Werten für Skalarzucht</p>
                     </div>
                 </div>
 
-                <div class="image-card" onclick="openLightbox('bilder/IMG_7911.jpeg')">
-                    <img src="bilder/IMG_7911.jpeg" alt="Aquarium Setup">
+                <div class="image-card" onclick="openLightbox('bilder/mariolanz_verein3.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/mariolanz_verein3.jpg" alt="Pflanzenpracht aus Südamerika" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Modernes Aquarium Design</h3>
-                        <p>Professionelle Aquarium-Einrichtung</p>
+                        <h3>Üppige Pflanzenvielfalt ohne Südamerika-Begrenzung</h3>
+                        <p>Hygrophila, Anubias und Cryptocoryne - Pflanzenauswahl erweitert über Südamerika hinaus</p>
                     </div>
                 </div>
 
-                <div class="image-card" onclick="openLightbox('bilder/IMG_5864.jpeg')">
-                    <img src="bilder/IMG_5864.jpeg" alt="Fisch Portrait">
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein4.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein4.jpg" alt="Roter Neon Schwarm" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Fisch Portrait</h3>
-                        <p>Detailaufnahme eines wunderschönen Fisches</p>
+                        <h3>Paracheirodon axelrodi Schwarm</h3>
+                        <p>Rote Neon-Salmler in perfekter Harmonie mit alten Nicht-Südamerikanern</p>
                     </div>
                 </div>
 
-                <div class="image-card" onclick="openLightbox('bilder/IMG_5865.jpeg')">
-                    <img src="bilder/IMG_5865.jpeg" alt="Aquarium Landschaft">
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein5.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein5.jpg" alt="Corydoras Gruppe" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Unterwasser Landschaft</h3>
-                        <p>Natürlich gestaltete Aquarium-Szene</p>
+                        <h3>Corydoras julii am Quarzsand-Bodengrund</h3>
+                        <p>Panzerwelse auf 0,4-0,8mm Quarzsand beige mit 27°C Wassertemperatur</p>
                     </div>
                 </div>
 
-                <div class="image-card" onclick="openLightbox('bilder/IMG_5868.jpeg')">
-                    <img src="bilder/IMG_5868.jpeg" alt="Aquarium Detail">
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein7.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein7.jpg" alt="Hygrophila Pflanzenwelt" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
                     <div class="image-info">
-                        <h3>Aquarium Details</h3>
-                        <p>Faszinierende Details aus der Unterwasserwelt</p>
+                        <h3>Hygrophila-Bestand im Hintergrund</h3>
+                        <p>Dichter Pflanzenwuchs dank Daytime Matrix 120W mit 21.000 Lumen und CO2-Anlage</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein8.jpg')" data-photographer="Mario Lanz">
+                    <img src="bilder/marioLanz_verein8.jpg" alt="Eheim Professionell Filterung" loading="lazy">
+                    <div class="author-badge">📸 Mario Lanz</div>
+                    <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
+                        👤 Portrait
+                    </div>
+                    <div class="image-info">
+                        <h3>Eheim Professionell 3 Filteranlage</h3>
+                        <p>Kristallklares Wasser trotz direkter Sonneneinstrahlung - Profi-Filtration</p>
                     </div>
                 </div>
             </div>
@@ -1029,9 +2237,9 @@
             <!-- Video Gallery -->
             <div id="videos-gallery" class="video-gallery">
                 <div class="video-card">
-                    <video controls preload="metadata">
-                        <source src="videos/IMG_8481.MOV" type="video/quicktime">
+                    <video controls preload="metadata" poster="">
                         <source src="videos/IMG_8481.MOV" type="video/mp4">
+                        <source src="videos/IMG_8481.MOV" type="video/quicktime">
                         Ihr Browser unterstützt das Video-Element nicht.
                     </video>
                     <div class="video-info">
@@ -1041,9 +2249,9 @@
                 </div>
 
                 <div class="video-card">
-                    <video controls preload="metadata">
-                        <source src="videos/IMG_7427.MOV" type="video/quicktime">
+                    <video controls preload="metadata" poster="">
                         <source src="videos/IMG_7427.MOV" type="video/mp4">
+                        <source src="videos/IMG_7427.MOV" type="video/quicktime">
                         Ihr Browser unterstützt das Video-Element nicht.
                     </video>
                     <div class="video-info">
@@ -1053,9 +2261,9 @@
                 </div>
 
                 <div class="video-card">
-                    <video controls preload="metadata">
-                        <source src="videos/IMG_2479.MOV" type="video/quicktime">
+                    <video controls preload="metadata" poster="">
                         <source src="videos/IMG_2479.MOV" type="video/mp4">
+                        <source src="videos/IMG_2479.MOV" type="video/quicktime">
                         Ihr Browser unterstützt das Video-Element nicht.
                     </video>
                     <div class="video-info">
@@ -1115,14 +2323,34 @@
         </div>
     </section>
 
-    <!-- Coral Divider -->
-    <div class="coral-divider"></div>
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
+
+    <!-- Mario Lanz Intro Section -->
+    <section class="media-section" id="member-gallery">
+        <div class="container">
+            <div class="member-intro" style="text-align: center; margin: 2rem 0; padding: 2rem; background: rgba(76, 175, 80, 0.1); border-radius: 15px; border: 2px solid var(--logo-green);">
+                <h3 style="color: var(--primary-blue); font-size: 1.8rem; margin-bottom: 1rem;">Featured: Mario Lanz - Südamerika-Spezialist</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--deep-blue);">
+                    Seit 8 Jahren züchtet Mario erfolgreich Skalare in seinem 576L Raumteiler. Trotz direkter Sonneneinstrahlung schafft er mit seinem Eheim Professionell 3 kristallklares Wasser.
+                    Seine Erfahrung: "Gleich nach meinem Einstieg beeindruckten mich Skalare" - heute schwimmen seine ältesten Zucht-Skalare seit 8 Jahren in seinem Aquarium.
+                </p>
+                <button class="portrait-link-btn" onclick="navigateToPortrait('mario-lanz-portrait')" style="background: var(--logo-green); color: var(--white); border: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; min-height: 44px;">
+                    👤 Zum ausführlichen Portrait von Mario Lanz
+                </button>
+            </div>
+        </div>
+    </section>
+
 
     <section id="verein" class="features">
         <div class="container">
             <h2 class="section-title">Unser Verein</h2>
             <div class="features-grid">
                 <div class="feature-card">
+                    <div class="logo-watermark">
+                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                    </div>
                     <div class="feature-icon">
                         <i class="fas fa-history"></i>
                     </div>
@@ -1131,6 +2359,9 @@
                 </div>
 
                 <div class="feature-card">
+                    <div class="logo-watermark">
+                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                    </div>
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
                     </div>
@@ -1139,6 +2370,9 @@
                 </div>
 
                 <div class="feature-card">
+                    <div class="logo-watermark">
+                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                    </div>
                     <div class="feature-icon">
                         <i class="fas fa-handshake"></i>
                     </div>
@@ -1157,8 +2391,8 @@
         </div>
     </section>
 
-    <!-- Coral Divider -->
-    <div class="coral-divider"></div>
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
 
     <section id="events" class="media-section">
         <div class="container">
@@ -1199,8 +2433,129 @@
         </div>
     </section>
 
-    <!-- Coral Divider -->
-    <div class="coral-divider"></div>
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
+
+    <!-- Member Portraits Section -->
+    <section id="mitglieder-portraits" class="media-section">
+        <div class="container">
+            <h2 class="section-title">Vereinsmitglieder im Portrait</h2>
+
+            <!-- Mario Lanz Portrait -->
+            <article class="member-portrait" id="mario-lanz-portrait">
+                <div class="portrait-hero">
+                    <h2>Mario Lanz</h2>
+                    <div class="subtitle">Südamerika - Skalare - Pflanzen</div>
+                </div>
+
+                <div class="portrait-content">
+                    <div class="portrait-text">
+                        <p>Ich war schon als kleiner Junge an Fischen interessiert und bekam mit 12 Jahren mein erstes kleines Becken von 25 Liter und 2 Goldfische. Durch dieses erste Erfolgserlebnis mit dem kleinen Becken wurde meine Begeisterung zur Aquaristik und meine Becken wurden immer größer und anspruchsvoller, blieb es auch nicht nur bei einem.</p>
+
+                        <p>Momentan habe ich aus Platzgründen nur ein Aquarium mit den Maßen 160x60x60 (brutto 576L), welches ich als Raumteiler in meinem Wohn-Bereich nutze. Leider ist der Standort für ein Aquarium alles andere als perfekt. Da so gut wie den ganzen Tag direkte und indirekte Sonneneinstrahlung auf das Becken einwirken. Da mir kein anderer Standplatz zu Verfügung steht und ich nicht auf mein Aquarium aufgeben wollte, muss ich leider damit leben.</p>
+
+                        <p>Gleich nach meinen Einstieg als Aquarianer beeindruckten mich Skalare. Leider wurden mir meine ersten zwei Skalare aus unersichtlichen oder einer falschen Zusammenstellung für mein zu kleines 65 Liter Becken verkauft.</p>
+
+                        <p>Ich hatte aus meinem Fehler gelernt und hielt erst wieder in meinem 375 Liter Becken eine Gruppe von 5 Skalaren, dass im Nachhinein gesehen auch sehr grenzwertig war. Dennoch schaffte ich es dank sehr niedriger GH und KH Werte in diesen gut bepflanzten Becken regelmäßig selbst junge Skalare zu züchten.</p>
+
+                        <p>In meinem jetzigen Raumteiler gilt mein Augenmerk immer noch den Skalaren und Pflanzen. Das älteste Tier der Gruppe ist aus meiner ersten eigenen Zucht und hat mittlerweile 8 Jahre am Buckel. Ich versuche nur einigen anderen Arten noch Platz zu bieten, da ich mich sehr ungern von den alten Tieren die nicht aus Südamerika stammen nur schwer trennen kann noch schwimmen einige davon in meinem Becken rum.</p>
+
+                        <p>Bei den Pflanzen lege ich kein Augenmerk darauf, dass sie von Südamerika kommen, weil die südamerikanische Pflanzenauswahl etwas beschränkt ist.</p>
+
+                        <p>In meinem momentanen Becken habe ich folgenden Tierbesatz, Pflanzen, Wasserwerte, Einrichtung und Technik.</p>
+                    </div>
+
+                    <div class="specs-grid">
+                        <div class="spec-section">
+                            <h3>🐠 Tierbesatz</h3>
+                            <div class="two-column-list">
+                                <ul class="spec-list">
+                                    <li>Manacapuru Skalar (Rotröcken Skalar)</li>
+                                    <li>Hochzucht Skalar</li>
+                                    <li>Corydoras julii (Panzerwels)</li>
+                                    <li>Otocinclus affinis (Ohrgitterharnischwels)</li>
+                                    <li>Ancistrus</li>
+                                    <li>Paracheirodon axelrodi (Roter Neon Salmler)</li>
+                                    <li>Corossochelus obloqus (Siamesische Rüsselbarbe)</li>
+                                    <li>Turmdeckelschnecken</li>
+                                </ul>
+                                <ul class="spec-list">
+                                    <li>Microsorum pteropus Narrow</li>
+                                    <li>Myriophyllum aquaticum</li>
+                                    <li>Myriophyllum tuberculatum</li>
+                                    <li>Persicaria Sp.</li>
+                                    <li>Pogostemon quadrifolius</li>
+                                    <li>Riccia fluitans</li>
+                                    <li>Rotala rotundifolia</li>
+                                    <li>Vallisneria spiralis</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-section">
+                            <h3>🌿 Pflanzen</h3>
+                            <div class="two-column-list">
+                                <ul class="spec-list">
+                                    <li>Anubias bateri var. nana</li>
+                                    <li>Anubias bateri var. nana round leaf</li>
+                                    <li>Blyxa japonica</li>
+                                    <li>Bucephalandra spec. Wavy leaf</li>
+                                    <li>Clinopodium brownei</li>
+                                    <li>Cryptocoryne albida</li>
+                                    <li>Echinodorus grisebachii Bleherae</li>
+                                    <li>Hygrophila corymbosa</li>
+                                </ul>
+                                <ul class="spec-list">
+                                    <li>Hygrophila difformis</li>
+                                    <li>Hygrophila polysperma</li>
+                                    <li>Micranthemum tweediei</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="spec-section">
+                            <h3>💧 Wasserwerte</h3>
+                            <ul class="spec-list">
+                                <li><strong>Wassertemp:</strong> 27°C</li>
+                                <li><strong>KH:</strong> 6</li>
+                                <li><strong>GH:</strong> 12</li>
+                                <li><strong>No2:</strong> 0mg/L</li>
+                                <li><strong>No3:</strong> 15mg/L</li>
+                                <li><strong>K:</strong> 5mg/L</li>
+                                <li><strong>Fe:</strong> 0,5mg/L</li>
+                                <li><strong>Lumen:</strong> 36Lumen/L</li>
+                            </ul>
+                        </div>
+
+                        <div class="spec-section">
+                            <h3>🏗️ Einrichtung</h3>
+                            <ul class="spec-list">
+                                <li><strong>Bodengrund:</strong> Quarzsand beige Körnung 0,4-0,8mm</li>
+                                <li><strong>Dekoration:</strong> Jati Wurzeln</li>
+                            </ul>
+                        </div>
+
+                        <div class="spec-section">
+                            <h3>⚙️ Technik</h3>
+                            <ul class="spec-list">
+                                <li><strong>Filter:</strong> Eheim Professionell 3</li>
+                                <li><strong>Heizer:</strong> Tetra HT 300 Regelheizer</li>
+                                <li><strong>Beleuchtung:</strong> Daytime Matrix 120W, 21000 Lumen</li>
+                                <li><strong>CO2:</strong> Co2-Anlage</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button class="back-to-gallery-btn" onclick="scrollToSection('member-gallery')">
+                        📷 Zurück zur Galerie
+                    </button>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
 
     <section id="mitgliedschaft" class="features">
         <div class="container">
@@ -1241,8 +2596,8 @@
         </div>
     </section>
 
-    <!-- Coral Divider -->
-    <div class="coral-divider"></div>
+    <!-- Underwater Divider -->
+    <div class="underwater-divider"></div>
 
     <section id="kontakt" class="media-section">
         <div class="container">
@@ -1289,6 +2644,9 @@
 
     <footer>
         <div class="container">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="footer-logo">
+            </div>
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Aquaristikfreunde Steiermark</h3>
@@ -1358,6 +2716,59 @@
                     fishButton.style.transform = 'scale(1)';
                 }, 300);
             }
+        }
+
+        // Logo Ripple Effects
+        function createLogoRipples(event) {
+            const logo = event.currentTarget;
+            const rect = logo.getBoundingClientRect();
+
+            // Create multiple ripple waves
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const ripple = document.createElement('div');
+                    ripple.style.cssText = `
+                        position: fixed;
+                        left: ${rect.left + rect.width/2}px;
+                        top: ${rect.top + rect.height/2}px;
+                        width: 0;
+                        height: 0;
+                        border: 2px solid rgba(76, 175, 80, 0.6);
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 9999;
+                        transform: translate(-50%, -50%);
+                        animation: logoRippleExpand 2s ease-out forwards;
+                    `;
+
+                    document.body.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 2000);
+                }, i * 200);
+            }
+
+            // Add intensive glow effect to logo
+            logo.style.filter = `
+                drop-shadow(0 0 30px var(--logo-green))
+                drop-shadow(0 0 60px var(--logo-green-accent))
+                drop-shadow(0 8px 16px var(--logo-green))
+            `;
+
+            // Trigger hero logo glow
+            if (logo.classList.contains('hero-logo')) {
+                const glowEffect = logo.querySelector('::after') || logo;
+                logo.style.setProperty('--glow-opacity', '0.3');
+            }
+
+            setTimeout(() => {
+                logo.style.filter = `
+                    drop-shadow(0 8px 16px var(--logo-green))
+                    drop-shadow(0 0 30px var(--logo-green-accent))
+                `;
+                logo.style.setProperty('--glow-opacity', '0');
+            }, 1000);
         }
 
         // Bubble Trail Effect for CTA Button
@@ -1517,6 +2928,18 @@
                     transform: translateY(-100px) scale(0.5);
                 }
             }
+            @keyframes logoRippleExpand {
+                from {
+                    width: 0;
+                    height: 0;
+                    opacity: 1;
+                }
+                to {
+                    width: 300px;
+                    height: 300px;
+                    opacity: 0;
+                }
+            }
         `;
         document.head.appendChild(fadeInStyle);
 
@@ -1567,8 +2990,143 @@
             });
         }
 
+        // AVIF Support Detection and Fallback
+        function supportsAVIF() {
+            return new Promise((resolve) => {
+                const avifImg = new Image();
+                avifImg.onload = () => resolve(true);
+                avifImg.onerror = () => resolve(false);
+                avifImg.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+            });
+        }
+
+        // Enhanced Image Loading with AVIF Fallback
+        async function loadImageWithFallback(avifSrc, fallbackSrc, imgElement) {
+            const avifSupported = await supportsAVIF();
+
+            if (avifSupported) {
+                imgElement.src = avifSrc;
+            } else {
+                // Fallback to JPEG
+                const jpegSrc = avifSrc.replace('.avif', '.jpeg');
+                imgElement.src = jpegSrc;
+            }
+        }
+
+        // Initialize AVIF Images
+        function initAVIFImages() {
+            const avifImages = document.querySelectorAll('img[src*=".avif"]');
+            avifImages.forEach(img => {
+                const avifSrc = img.src;
+                loadImageWithFallback(avifSrc, avifSrc.replace('.avif', '.jpeg'), img);
+            });
+        }
+
+        // Enhanced Navigation to Portrait with Smooth Animation
+        function navigateToPortrait(memberId) {
+            const portraitSection = document.getElementById(memberId);
+            if (portraitSection) {
+                // Add visual feedback
+                const memberCards = document.querySelectorAll('.member-image-card');
+                memberCards.forEach(card => {
+                    card.style.transform = 'scale(0.98)';
+                    card.style.opacity = '0.7';
+                });
+
+                setTimeout(() => {
+                    scrollToSection('mitglieder-portraits');
+                    setTimeout(() => {
+                        portraitSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 300);
+                }, 200);
+
+                // Reset cards
+                setTimeout(() => {
+                    memberCards.forEach(card => {
+                        card.style.transform = 'scale(1)';
+                        card.style.opacity = '1';
+                    });
+                }, 1000);
+            }
+        }
+
+        // Enhanced Member Gallery Navigation
+        function showMemberGallery(memberId) {
+            scrollToSection('member-gallery');
+
+            // Highlight member cards
+            setTimeout(() => {
+                const memberCards = document.querySelectorAll(`[data-photographer="${memberId}"]`);
+                memberCards.forEach(card => {
+                    card.style.animation = 'memberHighlight 2s ease';
+                });
+            }, 500);
+        }
+
+        // Add Member Highlight Animation
+        const memberHighlightStyle = document.createElement('style');
+        memberHighlightStyle.textContent = `
+            @keyframes memberHighlight {
+                0%, 100% {
+                    transform: translateY(0) scale(1);
+                    box-shadow: 0 8px 25px rgba(0, 105, 148, 0.1);
+                }
+                50% {
+                    transform: translateY(-5px) scale(1.02);
+                    box-shadow: 0 15px 35px rgba(78, 205, 196, 0.3);
+                }
+            }
+        `;
+        document.head.appendChild(memberHighlightStyle);
+
+        // Enhanced Lightbox with Member Info
+        function openLightbox(imageSrc) {
+            document.getElementById('lightbox-img').src = imageSrc;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Track if it's a member image
+            const memberCard = document.querySelector(`img[src="${imageSrc}"]`)?.closest('.member-image-card');
+            if (memberCard) {
+                const photographer = memberCard.dataset.photographer;
+                // Could add photographer info overlay here
+            }
+        }
+
+        // Enhanced Preloading with Member Images
+        function preloadImages() {
+            const imageUrls = [
+                // Original images
+                'bilder/IMG_1290.jpeg',
+                'bilder/IMG_0231.jpeg',
+                'bilder/IMG_7911.jpeg',
+                'bilder/IMG_5864.jpeg',
+                'bilder/IMG_5865.jpeg',
+                'bilder/IMG_5868.jpeg',
+                // Mario Lanz JPEG images (converted from AVIF for mobile compatibility)
+                'bilder/marioLanz_verein1.jpg',
+                'bilder/marioLanz_verein2.jpg',
+                'bilder/mariolanz_verein3.jpg',
+                'bilder/marioLanz_verein4.jpg',
+                'bilder/marioLanz_verein5.jpg',
+                'bilder/marioLanz_verein7.jpg',
+                'bilder/marioLanz_verein8.jpg'
+            ];
+
+            imageUrls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+            });
+        }
+
         // Start preloading after page load
-        window.addEventListener('load', preloadImages);
+        window.addEventListener('load', function() {
+            preloadImages();
+            initAVIFImages();
+        });
     </script>
 </body>
 </html>
