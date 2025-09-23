@@ -41,6 +41,8 @@
             background: var(--ocean-gradient);
             overflow-x: hidden;
             position: relative;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Underwater Background Effects - Reduced */
@@ -52,9 +54,8 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(circle at 25% 75%, var(--bubble-blue) 1px, transparent 1px),
-                radial-gradient(circle at 75% 25%, var(--bubble-blue) 0.8px, transparent 0.8px);
-            background-size: 600px 600px, 500px 500px;
+                radial-gradient(circle at 50% 60%, var(--bubble-blue) 0.3px, transparent 0.3px);
+            background-size: 1800px 1800px;
             animation: bubbles 40s infinite linear;
             pointer-events: none;
             z-index: -1;
@@ -93,10 +94,8 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(circle at 15% 60%, var(--bubble-blue) 1px, transparent 1px),
-                radial-gradient(circle at 85% 30%, var(--bubble-blue) 0.8px, transparent 0.8px),
-                radial-gradient(circle at 45% 85%, var(--bubble-blue) 1.2px, transparent 1.2px);
-            background-size: 300px 300px, 250px 250px, 180px 180px;
+                radial-gradient(circle at 30% 70%, var(--bubble-blue) 0.4px, transparent 0.4px);
+            background-size: 1500px 1500px;
             animation: bubbles-slow 35s infinite linear;
             opacity: 0.3;
             transform: translateZ(-100px) scale(1.1);
@@ -110,12 +109,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 25% 70%, var(--bubble-blue) 1.5px, transparent 1.5px),
-                radial-gradient(circle at 75% 25%, var(--bubble-blue) 1px, transparent 1px),
-                radial-gradient(circle at 55% 75%, var(--bubble-blue) 1.8px, transparent 1.8px);
-            background-size: 220px 220px, 180px 180px, 160px 160px;
-            animation: bubbles-medium 25s infinite linear;
+            background: none;
+            animation: none;
             opacity: 0.5;
             transform: translateZ(-50px) scale(1.05);
         }
@@ -128,12 +123,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 30% 80%, var(--bubble-blue) 2px, transparent 2px),
-                radial-gradient(circle at 70% 20%, var(--bubble-blue) 1.5px, transparent 1.5px),
-                radial-gradient(circle at 50% 60%, var(--bubble-blue) 2.5px, transparent 2.5px);
-            background-size: 150px 150px, 120px 120px, 100px 100px;
-            animation: bubbles-fast 15s infinite linear;
+            background: none;
+            animation: none;
             opacity: 0.7;
             transform: translateZ(0px);
         }
@@ -698,13 +689,13 @@
                 transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             25% {
-                transform: translateY(-20px) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(-8px) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             50% {
-                transform: translateY(10px) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             75% {
-                transform: translateY(-15px) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(8px) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             100% {
                 left: calc(100% + 300px);
@@ -715,20 +706,20 @@
         @keyframes fish-swim-right-to-left {
             0% {
                 right: -300px;
-                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             25% {
-                transform: translateY(-15px) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(-8px) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             50% {
-                transform: translateY(20px) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             75% {
-                transform: translateY(-10px) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(8px) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             100% {
                 right: calc(100% + 300px);
-                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
         }
 
@@ -1095,18 +1086,60 @@
             25% {
                 transform: translateY(-60%) scaleX(1);
             }
-            49% {
+            50% {
                 transform: translateY(-40%) scaleX(1);
             }
-            50% {
-                transform: translateY(-40%) scaleX(-1);
-            }
             75% {
-                transform: translateY(-60%) scaleX(-1);
+                transform: translateY(-60%) scaleX(1);
             }
             100% {
                 left: calc(100% + 50px);
-                transform: translateY(-50%) scaleX(-1);
+                transform: translateY(-50%) scaleX(1);
+            }
+        }
+
+        /* Mario's Skalar Swimming Animation */
+        .mario-skalar {
+            position: fixed;
+            top: 30%;
+            right: -150px;
+            width: 80px;
+            height: 60px;
+            background-image: url('bilder/fisch freigestellt skalar mario lanz verein.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: 10;
+            pointer-events: none;
+            animation: mario-skalar-swim 25s linear infinite;
+            opacity: 0.8;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+
+        @keyframes mario-skalar-swim {
+            0% {
+                right: -150px;
+                transform: translateY(0) scaleX(-1);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.8;
+            }
+            25% {
+                transform: translateY(-30px) scaleX(-1);
+            }
+            50% {
+                transform: translateY(20px) scaleX(-1);
+            }
+            75% {
+                transform: translateY(-20px) scaleX(-1);
+            }
+            95% {
+                opacity: 0.8;
+            }
+            100% {
+                right: calc(100% + 150px);
+                transform: translateY(0) scaleX(-1);
+                opacity: 0;
             }
         }
 
@@ -1417,13 +1450,32 @@
             /* Simplified Water Layers for Mobile */
             .water-layer-1::before,
             .water-layer-2::before {
-                display: none; /* Hide background layers on mobile */
+                display: none !important; /* Hide background layers on mobile */
             }
 
             .water-layer-3::before {
-                background-size: 100px 100px, 80px 80px, 60px 60px;
-                animation-duration: 20s; /* Slower animation for battery */
-                opacity: 0.4;
+                background-size: 200px 200px;
+                animation-duration: 60s !important; /* Much slower for performance */
+                opacity: 0.2 !important;
+            }
+
+            /* Drastically reduce animations on mobile */
+            body::before {
+                animation-duration: 120s !important;
+                opacity: 0.3 !important;
+            }
+
+            /* Disable complex transforms on mobile */
+            .hero {
+                perspective: none !important;
+                transform-style: flat !important;
+            }
+
+            /* Simplify bubble effects */
+            .bubble-particles::before,
+            .bubble-particles::after {
+                animation-duration: 180s !important;
+                opacity: 0.2 !important;
             }
 
             /* Reduced Caustic Effects */
@@ -2028,6 +2080,9 @@
     </style>
 </head>
 <body>
+    <!-- Mario's Skalar Swimming Animation -->
+    <div class="mario-skalar"></div>
+
     <!-- Seaweed Side Decorations -->
     <div class="seaweed-left"></div>
     <div class="seaweed-right"></div>
@@ -2060,7 +2115,7 @@
     <header>
         <nav class="container">
             <div class="logo">
-                <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple">
+                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple">
                 <span>Aquaristikfreunde Steiermark</span>
             </div>
 
@@ -2104,7 +2159,7 @@
         </div>
 
         <div class="hero-content container">
-            <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="hero-logo" onclick="createLogoRipples(event)">
+            <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="hero-logo" onclick="createLogoRipples(event)">
             <h1>Willkommen bei den Aquaristikfreunden Steiermark</h1>
             <p>Seit Jahrzehnten die führende Aquaristik-Community in der Steiermark. Tauchen Sie ein in eine lebendige Gemeinschaft von Aquaristik-Enthusiasten mit umfassendem Fachwissen und regelmäßigen Events.</p>
             <a href="#galerie" class="cta-button" onclick="createBubbleTrail(event)">
@@ -2118,7 +2173,7 @@
 
     <section id="galerie" class="media-section">
         <div class="container">
-            <h2 class="section-title">Mario Lanz - Südamerika Aquaristik</h2>
+            <h2 class="section-title">Mario Lanz<br><span style="font-size: 0.8em; color: var(--secondary-teal);">Südamerika Aquaristik</span></h2>
 
             <div class="gallery-tabs">
                 <div class="tab-container">
@@ -2330,7 +2385,7 @@
     <section class="media-section" id="member-gallery">
         <div class="container">
             <div class="member-intro" style="text-align: center; margin: 2rem 0; padding: 2rem; background: rgba(76, 175, 80, 0.1); border-radius: 15px; border: 2px solid var(--logo-green);">
-                <h3 style="color: var(--primary-blue); font-size: 1.8rem; margin-bottom: 1rem;">Featured: Mario Lanz - Südamerika-Spezialist</h3>
+                <h3 style="color: var(--primary-blue); font-size: 1.8rem; margin-bottom: 1rem; line-height: 1.4;">Featured: Mario Lanz<br><span style="font-size: 0.9em; color: var(--secondary-teal);">Südamerika-Spezialist</span></h3>
                 <p style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--deep-blue);">
                     Seit 8 Jahren züchtet Mario erfolgreich Skalare in seinem 576L Raumteiler. Trotz direkter Sonneneinstrahlung schafft er mit seinem Eheim Professionell 3 kristallklares Wasser.
                     Seine Erfahrung: "Gleich nach meinem Einstieg beeindruckten mich Skalare" - heute schwimmen seine ältesten Zucht-Skalare seit 8 Jahren in seinem Aquarium.
@@ -2349,7 +2404,7 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-history"></i>
@@ -2360,7 +2415,7 @@
 
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
@@ -2371,7 +2426,7 @@
 
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo neu 3d.png" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-handshake"></i>
@@ -2645,7 +2700,7 @@
     <footer>
         <div class="container">
             <div style="text-align: center; margin-bottom: 2rem;">
-                <img src="bilder/logo neu 3d.png" alt="Aquaristikfreunde Steiermark Logo" class="footer-logo">
+                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="footer-logo">
             </div>
             <div class="footer-content">
                 <div class="footer-section">
