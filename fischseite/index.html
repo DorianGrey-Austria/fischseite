@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aquaristikfreunde Steiermark - Moderne Vereins-Community</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #006994;
+            --secondary-teal: #4ECDC4;
+            --accent-coral: #FF6B6B;
+            --deep-blue: #003A5C;
+            --light-blue: #E8F4F8;
+            --white: #FFFFFF;
+            --ocean-gradient: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
+            --seaweed-green: #228B22;
+            --bubble-blue: rgba(173, 216, 230, 0.8);
+            --coral-pink: #FF7F7F;
+            --sand-beige: #F4A460;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--deep-blue);
+            background: var(--ocean-gradient);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Underwater Background Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, var(--bubble-blue) 2px, transparent 2px),
+                radial-gradient(circle at 80% 20%, var(--bubble-blue) 1px, transparent 1px),
+                radial-gradient(circle at 40% 40%, var(--bubble-blue) 1.5px, transparent 1.5px);
+            background-size: 200px 200px, 150px 150px, 100px 100px;
+            animation: bubbles 20s infinite linear;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes bubbles {
+            0% { transform: translateY(100vh); }
+            100% { transform: translateY(-100vh); }
+        }
+
+        /* Seaweed Animation Sides */
+        .seaweed-left, .seaweed-right {
+            position: fixed;
+            width: 30px;
+            height: 100vh;
+            background: var(--seaweed-green);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .seaweed-left {
+            left: 0;
+            border-radius: 0 15px 15px 0;
+            animation: sway-left 4s ease-in-out infinite;
+        }
+
+        .seaweed-right {
+            right: 0;
+            border-radius: 15px 0 0 15px;
+            animation: sway-right 4s ease-in-out infinite reverse;
+        }
+
+        @keyframes sway-left {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(10px) rotate(2deg); }
+        }
+
+        @keyframes sway-right {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(-10px) rotate(-2deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Modern Mobile Navigation */
+        header {
+            background: rgba(0, 105, 148, 0.95);
+            color: var(--white);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--secondary-teal);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1002;
+        }
+
+        /* Fish Icon Animation */
+        .logo i {
+            transition: all 0.3s ease;
+            animation: fish-swim 3s ease-in-out infinite;
+        }
+
+        @keyframes fish-swim {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(5px) rotate(5deg); }
+            75% { transform: translateX(-5px) rotate(-5deg); }
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1002;
+            background: transparent;
+            border: none;
+            width: 44px;
+            height: 44px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: var(--white);
+            margin: 3px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        /* Fish Transform Animation */
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(9px, 9px);
+            background: var(--accent-coral);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+            background: var(--accent-coral);
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '🐠';
+            position: absolute;
+            left: -30px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary-teal);
+            background: rgba(78, 205, 196, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a:hover::before {
+            left: 8px;
+            opacity: 1;
+        }
+
+        /* Body Offset for Fixed Header */
+        body {
+            padding-top: 80px;
+        }
+
+        /* Immersive Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 105, 148, 0.8), rgba(0, 58, 92, 0.9));
+            color: var(--white);
+            padding: 6rem 0 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Enhanced Wave Animation */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><path d="M0,50 Q50,20 100,50 Q150,80 200,50" stroke="rgba(78,205,196,0.3)" stroke-width="2" fill="none"/></svg>') repeat-x,
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100"><path d="M0,60 Q40,30 80,60 Q120,90 150,60" stroke="rgba(173,216,230,0.2)" stroke-width="1.5" fill="none"/></svg>') repeat-x;
+            background-position: 0 20%, 0 60%;
+            animation: wave 20s linear infinite, wave2 15s linear infinite reverse;
+        }
+
+        @keyframes wave {
+            0% { background-position-x: 0, 0; }
+            100% { background-position-x: -200px, -150px; }
+        }
+
+        /* Floating Fish Animation */
+        .hero::after {
+            content: '🐠 🐟 🦈';
+            position: absolute;
+            top: 20%;
+            left: -200px;
+            font-size: 2rem;
+            animation: fish-float 25s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes fish-float {
+            0% { left: -200px; transform: translateY(0) rotateY(0deg); }
+            25% { transform: translateY(-20px) rotateY(0deg); }
+            50% { left: 50%; transform: translateY(20px) rotateY(180deg); }
+            75% { transform: translateY(-10px) rotateY(180deg); }
+            100% { left: calc(100% + 200px); transform: translateY(0) rotateY(180deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: title-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes title-glow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(78,205,196,0.3); }
+            to { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 30px rgba(78,205,196,0.6); }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Floating Fish Button */
+        .cta-button {
+            display: inline-block;
+            background: var(--accent-coral);
+            color: var(--white);
+            padding: 18px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -20px;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 50%;
+            animation: bubble-trail 2s infinite;
+        }
+
+        @keyframes bubble-trail {
+            0% { left: -20px; opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+            100% { left: calc(100% + 20px); opacity: 0; transform: translateY(-20px); }
+        }
+
+        .cta-button:hover {
+            background: #ff5252;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Media Galleries Section */
+        .media-section {
+            padding: 4rem 0;
+            background: var(--white);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary-teal);
+            border-radius: 2px;
+        }
+
+        .gallery-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .tab-button {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .tab-button:hover {
+            background: var(--secondary-teal);
+            color: var(--white);
+            border-color: var(--secondary-teal);
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .image-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 105, 148, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 105, 148, 0.2);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 1.5rem;
+        }
+
+        .image-info h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .image-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Video Gallery */
+        .video-gallery {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .video-gallery.active {
+            display: grid;
+        }
+
+        .video-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 105, 148, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 105, 148, 0.2);
+        }
+
+        .video-card video {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-info h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .video-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: var(--light-blue);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 105, 148, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--secondary-teal);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--deep-blue);
+            color: var(--white);
+            padding: 3rem 0 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--secondary-teal);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--secondary-teal);
+        }
+
+        /* Coral Dividers */
+        .coral-divider {
+            height: 40px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><path d="M0,40 Q25,10 50,40 Q75,10 100,40" fill="%23FF7F7F" opacity="0.6"/></svg>') repeat-x;
+            background-size: 100px 40px;
+            margin: 2rem 0;
+        }
+
+        /* Floating Fish Navigation Buttons */
+        .floating-fish-nav {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .fish-nav-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary-teal);
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .fish-nav-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 30%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .fish-nav-button:hover {
+            transform: scale(1.1);
+            background: var(--accent-coral);
+            animation: fish-button-swim 0.5s ease;
+        }
+
+        .fish-nav-button:hover::before {
+            transform: scale(1.2);
+        }
+
+        @keyframes fish-button-swim {
+            0%, 100% { transform: scale(1.1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        /* Enhanced Tab Buttons with Fish Theme */
+        .tab-button {
+            background: var(--light-blue);
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-button::after {
+            content: '🐠';
+            position: absolute;
+            right: -30px;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .tab-button.active {
+            background: var(--primary-blue);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .tab-button.active::after {
+            right: 8px;
+            opacity: 1;
+        }
+
+        .tab-button:hover {
+            background: var(--secondary-teal);
+            color: var(--white);
+            border-color: var(--secondary-teal);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Cards with Bubble Effects */
+        .image-card, .video-card, .feature-card {
+            position: relative;
+            overflow: visible;
+        }
+
+        .image-card::before, .video-card::before, .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--bubble-blue) 40%, transparent 40%);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover::before, .video-card:hover::before, .feature-card:hover::before {
+            opacity: 1;
+            transform: scale(1);
+            animation: bubble-pop 1s ease infinite;
+        }
+
+        @keyframes bubble-pop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Responsive Design with Mobile-First Approach */
+        @media (max-width: 768px) {
+            /* Show Hamburger Menu */
+            .hamburger {
+                display: flex;
+            }
+
+            /* Hide Desktop Navigation */
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                right: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: calc(100vh - 80px);
+                background: rgba(0, 105, 148, 0.98);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1.5rem;
+                transition: right 0.3s ease;
+                backdrop-filter: blur(10px);
+                border-left: 2px solid var(--secondary-teal);
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links li {
+                animation: fadeInRight 0.3s ease forwards;
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            .nav-links.active li {
+                animation: fadeInRight 0.3s ease forwards;
+            }
+
+            .nav-links.active li:nth-child(1) { animation-delay: 0.1s; }
+            .nav-links.active li:nth-child(2) { animation-delay: 0.2s; }
+            .nav-links.active li:nth-child(3) { animation-delay: 0.3s; }
+            .nav-links.active li:nth-child(4) { animation-delay: 0.4s; }
+            .nav-links.active li:nth-child(5) { animation-delay: 0.5s; }
+            .nav-links.active li:nth-child(6) { animation-delay: 0.6s; }
+
+            @keyframes fadeInRight {
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            /* Mobile Navigation Links */
+            .nav-links a {
+                padding: 15px 20px;
+                border-radius: 15px;
+                background: rgba(255,255,255,0.1);
+                display: block;
+                text-align: center;
+                font-size: 1.1rem;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .nav-links a::before {
+                position: static;
+                opacity: 1;
+                left: auto;
+            }
+
+            /* Mobile Hero Adjustments */
+            .hero {
+                min-height: 80vh;
+                padding: 4rem 0 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+                line-height: 1.2;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+
+            /* Hide Floating Fish Nav on Mobile */
+            .floating-fish-nav {
+                display: none;
+            }
+
+            /* Mobile Gallery Optimizations */
+            .gallery-tabs {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .tab-button {
+                width: 200px;
+                justify-content: center;
+            }
+
+            .image-gallery,
+            .video-gallery {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            /* Touch-Optimized Buttons */
+            .cta-button {
+                padding: 20px 35px;
+                font-size: 1.2rem;
+            }
+
+            /* Mobile Seaweed Adjustment */
+            .seaweed-left, .seaweed-right {
+                width: 20px;
+            }
+
+            /* Mobile Section Spacing */
+            .media-section, .features {
+                padding: 3rem 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Ultra-Wide Screen Optimizations */
+        @media (min-width: 1400px) {
+            .floating-fish-nav {
+                right: 50px;
+            }
+
+            .hero h1 {
+                font-size: 4rem;
+            }
+
+            .cta-button {
+                font-size: 1.3rem;
+                padding: 20px 50px;
+            }
+        }
+
+        /* Performance Optimizations */
+        * {
+            will-change: auto;
+        }
+
+        .hero::before,
+        .hero::after {
+            will-change: transform;
+        }
+
+        .cta-button::before {
+            will-change: transform, opacity;
+        }
+
+        /* Lightbox for images */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: var(--white);
+            font-size: 2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Seaweed Side Decorations -->
+    <div class="seaweed-left"></div>
+    <div class="seaweed-right"></div>
+
+    <!-- Floating Fish Navigation -->
+    <div class="floating-fish-nav">
+        <button class="fish-nav-button" onclick="scrollToSection('home')" title="Home">
+            🏠
+        </button>
+        <button class="fish-nav-button" onclick="scrollToSection('galerie')" title="Galerie">
+            📷
+        </button>
+        <button class="fish-nav-button" onclick="scrollToSection('verein')" title="Verein">
+            🐠
+        </button>
+        <button class="fish-nav-button" onclick="scrollToSection('events')" title="Events">
+            🎉
+        </button>
+        <button class="fish-nav-button" onclick="scrollToSection('mitgliedschaft')" title="Mitgliedschaft">
+            🤝
+        </button>
+        <button class="fish-nav-button" onclick="scrollToSection('kontakt')" title="Kontakt">
+            📞
+        </button>
+    </div>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <i class="fas fa-fish"></i>
+                Aquaristikfreunde Steiermark
+            </div>
+
+            <!-- Hamburger Menu Button -->
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#home" onclick="closeMobileMenu()">Home</a></li>
+                <li><a href="#galerie" onclick="closeMobileMenu()">Galerie</a></li>
+                <li><a href="#verein" onclick="closeMobileMenu()">Verein</a></li>
+                <li><a href="#events" onclick="closeMobileMenu()">Events</a></li>
+                <li><a href="#mitgliedschaft" onclick="closeMobileMenu()">Mitgliedschaft</a></li>
+                <li><a href="#kontakt" onclick="closeMobileMenu()">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content container">
+            <h1>Willkommen bei den Aquaristikfreunden Steiermark</h1>
+            <p>Seit Jahrzehnten die führende Aquaristik-Community in der Steiermark. Tauchen Sie ein in eine lebendige Gemeinschaft von Aquaristik-Enthusiasten mit umfassendem Fachwissen und regelmäßigen Events.</p>
+            <a href="#galerie" class="cta-button" onclick="createBubbleTrail(event)">
+                <i class="fas fa-camera"></i> Galerie erkunden
+            </a>
+        </div>
+    </section>
+
+    <!-- Coral Divider -->
+    <div class="coral-divider"></div>
+
+    <section id="galerie" class="media-section">
+        <div class="container">
+            <h2 class="section-title">Unsere Aquarium-Galerie</h2>
+
+            <div class="gallery-tabs">
+                <button class="tab-button active" onclick="showGallery('images')">
+                    <i class="fas fa-image"></i> Bilder (6)
+                </button>
+                <button class="tab-button" onclick="showGallery('videos')">
+                    <i class="fas fa-video"></i> Videos (7)
+                </button>
+            </div>
+
+            <!-- Image Gallery -->
+            <div id="images-gallery" class="image-gallery">
+                <div class="image-card" onclick="openLightbox('bilder/IMG_1290.jpeg')">
+                    <img src="bilder/IMG_1290.jpeg" alt="Tropische Fische">
+                    <div class="image-info">
+                        <h3>Tropische Meeresbewohner</h3>
+                        <p>Bunte Vielfalt im Salzwasseraquarium</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/IMG_0231.jpeg')">
+                    <img src="bilder/IMG_0231.jpeg" alt="Süßwasser Aquarium">
+                    <div class="image-info">
+                        <h3>Süßwasser Paradies</h3>
+                        <p>Perfekt eingerichtetes Süßwasseraquarium</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/IMG_7911.jpeg')">
+                    <img src="bilder/IMG_7911.jpeg" alt="Aquarium Setup">
+                    <div class="image-info">
+                        <h3>Modernes Aquarium Design</h3>
+                        <p>Professionelle Aquarium-Einrichtung</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/IMG_5864.jpeg')">
+                    <img src="bilder/IMG_5864.jpeg" alt="Fisch Portrait">
+                    <div class="image-info">
+                        <h3>Fisch Portrait</h3>
+                        <p>Detailaufnahme eines wunderschönen Fisches</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/IMG_5865.jpeg')">
+                    <img src="bilder/IMG_5865.jpeg" alt="Aquarium Landschaft">
+                    <div class="image-info">
+                        <h3>Unterwasser Landschaft</h3>
+                        <p>Natürlich gestaltete Aquarium-Szene</p>
+                    </div>
+                </div>
+
+                <div class="image-card" onclick="openLightbox('bilder/IMG_5868.jpeg')">
+                    <img src="bilder/IMG_5868.jpeg" alt="Aquarium Detail">
+                    <div class="image-info">
+                        <h3>Aquarium Details</h3>
+                        <p>Faszinierende Details aus der Unterwasserwelt</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Gallery -->
+            <div id="videos-gallery" class="video-gallery">
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_8481.MOV" type="video/quicktime">
+                        <source src="videos/IMG_8481.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Lebendiges Aquarium</h3>
+                        <p>Fische in ihrer natürlichen Bewegung</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_7427.MOV" type="video/quicktime">
+                        <source src="videos/IMG_7427.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Aquarium Panorama</h3>
+                        <p>Gesamtansicht des Aquarium-Ökosystems</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_2479.MOV" type="video/quicktime">
+                        <source src="videos/IMG_2479.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Fisch Verhalten</h3>
+                        <p>Interessantes Sozialverhalten der Fische</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_4765.MOV" type="video/quicktime">
+                        <source src="videos/IMG_4765.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Unterwasser Action</h3>
+                        <p>Dynamische Szenen aus dem Aquarium</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_1914.MOV" type="video/quicktime">
+                        <source src="videos/IMG_1914.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Aquarium Atmosphäre</h3>
+                        <p>Entspannende Aquarium-Atmosphäre</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_5863.MOV" type="video/quicktime">
+                        <source src="videos/IMG_5863.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Fisch Close-Up</h3>
+                        <p>Nahaufnahmen der wunderschönen Fische</p>
+                    </div>
+                </div>
+
+                <div class="video-card">
+                    <video controls preload="metadata">
+                        <source src="videos/IMG_8522.MOV" type="video/quicktime">
+                        <source src="videos/IMG_8522.MOV" type="video/mp4">
+                        Ihr Browser unterstützt das Video-Element nicht.
+                    </video>
+                    <div class="video-info">
+                        <h3>Aquarium Ensemble</h3>
+                        <p>Harmonie im Aquarium-Ökosystem</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coral Divider -->
+    <div class="coral-divider"></div>
+
+    <section id="verein" class="features">
+        <div class="container">
+            <h2 class="section-title">Unser Verein</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>Traditioneller Verein</h3>
+                    <p>Langjährig etablierter Verein mit umfassendem Fachwissen und langjähriger Erfahrung in der Aquaristik</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Lebendige Community</h3>
+                    <p>Aktive Mitgliedergemeinschaft für Austausch, Erfahrungen und gemeinsame Leidenschaft für Aquaristik</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Regionale Vernetzung</h3>
+                    <p>Teil des RV Süd-Ost und ÖVVÖ - optimal vernetzt in der österreichischen Aquaristik-Szene</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magazine"></i>
+                    </div>
+                    <h3>ATA Magazin</h3>
+                    <p>Mitglieder erhalten 10x jährlich das ATA (Aqua Terra Austria) Magazin mit aktuellen Fachartikeln</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coral Divider -->
+    <div class="coral-divider"></div>
+
+    <section id="events" class="media-section">
+        <div class="container">
+            <h2 class="section-title">Events & Termine</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Regelmäßige Treffen</h3>
+                    <p>Monatliche Vereinstreffen im Marktheuriger Strobl, St. Ruprecht an der Raab</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3>Aquaristik-Börsen</h3>
+                    <p>Regelmäßige Tauschbörsen für Fische, Pflanzen und Aquarium-Equipment</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3>Exkursionen</h3>
+                    <p>Gemeinsame Ausflüge zu Aquarien, Zoofachgeschäften und Aquaristik-Messen</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Fachvorträge</h3>
+                    <p>Regelmäßige Vorträge von Experten zu verschiedenen Aquaristik-Themen</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coral Divider -->
+    <div class="coral-divider"></div>
+
+    <section id="mitgliedschaft" class="features">
+        <div class="container">
+            <h2 class="section-title">Mitgliedschaft</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>Neue Mitglieder willkommen</h3>
+                    <p>Wir freuen uns über neue Aquaristik-Begeisterte jeden Alters und Erfahrungslevels</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3>Mitglieder-Vorteile</h3>
+                    <p>ATA Magazin, Börsen-Zugang, Fachberatung und Zugang zu exklusiven Events</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Wissensaustausch</h3>
+                    <p>Lernen Sie von erfahrenen Aquarianern und teilen Sie Ihr eigenes Wissen</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Gemeinschaft</h3>
+                    <p>Werden Sie Teil einer leidenschaftlichen Community von Gleichgesinnten</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coral Divider -->
+    <div class="coral-divider"></div>
+
+    <section id="kontakt" class="media-section">
+        <div class="container">
+            <h2 class="section-title">Kontakt & Anfahrt</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3>Obmann</h3>
+                    <h4>Christian Ofner</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Albersdorf 262<br>8200 Albersdorf-Prebuch</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Vereinslokal</h3>
+                    <h4>Marktheuriger Strobl</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Parkstraße 3<br>8181 St. Ruprecht an der Raab</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Online</h3>
+                    <p><i class="fas fa-link"></i> <a href="https://www.aquaristikfreunde-steiermark.at" target="_blank">www.aquaristikfreunde-steiermark.at</a></p>
+                    <p><i class="fas fa-id-card"></i> ZVR: 365230320</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h3>Mitgliedschaften</h3>
+                    <p><i class="fas fa-check"></i> RV Süd-Ost (Regionalverband)</p>
+                    <p><i class="fas fa-check"></i> ÖVVÖ (Österr. Verband der Vivarienvereine)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Aquaristikfreunde Steiermark</h3>
+                    <p>Traditionsreicher Aquaristik-Verein mit umfassendem Fachwissen</p>
+                    <p><i class="fas fa-users"></i> Lebendige Community</p>
+                    <p><i class="fas fa-calendar"></i> Regelmäßige Events & Börsen</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Vereinsregistrierung</h3>
+                    <p><i class="fas fa-id-card"></i> ZVR-Zahl: 365230320</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Steiermark, Österreich</p>
+                    <p><i class="fas fa-handshake"></i> Teil des RV Süd-Ost & ÖVVÖ</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Kontakt</h3>
+                    <p><i class="fas fa-user"></i> Obmann: Christian Ofner</p>
+                    <p><i class="fas fa-globe"></i> <a href="https://www.aquaristikfreunde-steiermark.at" target="_blank">aquaristikfreunde-steiermark.at</a></p>
+                    <p><i class="fas fa-home"></i> Vereinslokal: Marktheuriger Strobl</p>
+                </div>
+            </div>
+            <p>&copy; 2024 Aquaristikfreunde Steiermark. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <!-- Lightbox for images -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.getElementById('nav-links');
+
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const navLinks = document.getElementById('nav-links');
+
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+        }
+
+        // Floating Fish Navigation
+        function scrollToSection(sectionId) {
+            const target = document.getElementById(sectionId);
+            if (target) {
+                const headerHeight = 80;
+                const targetPosition = target.offsetTop - headerHeight;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+
+                // Add visual feedback
+                const fishButton = event.target;
+                fishButton.style.transform = 'scale(1.3) rotate(360deg)';
+                setTimeout(() => {
+                    fishButton.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+
+        // Bubble Trail Effect for CTA Button
+        function createBubbleTrail(event) {
+            const button = event.currentTarget;
+            const rect = button.getBoundingClientRect();
+
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const bubble = document.createElement('div');
+                    bubble.style.cssText = `
+                        position: fixed;
+                        left: ${rect.left + Math.random() * rect.width}px;
+                        top: ${rect.top + rect.height}px;
+                        width: ${8 + Math.random() * 12}px;
+                        height: ${8 + Math.random() * 12}px;
+                        background: rgba(173, 216, 230, 0.8);
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 9999;
+                        animation: bubble-float 2s ease-out forwards;
+                    `;
+
+                    document.body.appendChild(bubble);
+
+                    setTimeout(() => {
+                        bubble.remove();
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+
+        // Gallery Tab Switching with Fish Animation
+        function showGallery(type) {
+            // Hide all galleries
+            document.getElementById('images-gallery').style.display = 'none';
+            document.getElementById('videos-gallery').classList.remove('active');
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected gallery with animation
+            if (type === 'images') {
+                document.getElementById('images-gallery').style.display = 'grid';
+                document.querySelector('.tab-button:first-child').classList.add('active');
+            } else {
+                document.getElementById('videos-gallery').classList.add('active');
+                document.querySelector('.tab-button:last-child').classList.add('active');
+            }
+
+            // Add fish swim animation to active tab
+            const activeTab = document.querySelector('.tab-button.active');
+            activeTab.style.animation = 'fish-button-swim 0.5s ease';
+            setTimeout(() => {
+                activeTab.style.animation = '';
+            }, 500);
+        }
+
+        // Enhanced Lightbox with Touch Support
+        function openLightbox(imageSrc) {
+            document.getElementById('lightbox-img').src = imageSrc;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Touch Gestures for Lightbox
+        let touchStartY = 0;
+        document.getElementById('lightbox').addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.getElementById('lightbox').addEventListener('touchend', function(e) {
+            const touchEndY = e.changedTouches[0].clientY;
+            const difference = touchStartY - touchEndY;
+
+            // Close on swipe down
+            if (difference < -50) {
+                closeLightbox();
+            }
+        });
+
+        // Smooth scrolling for navigation with offset
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerHeight = 80;
+                    const targetPosition = target.offsetTop - headerHeight;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Parallax Effect for Hero Section
+        function parallaxEffect() {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                const speed = scrolled * 0.5;
+                hero.style.transform = `translateY(${speed}px)`;
+            }
+        }
+
+        // Intersection Observer for Animations
+        function setupIntersectionObserver() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe cards and sections
+            document.querySelectorAll('.feature-card, .image-card, .video-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Add CSS for fade in animation
+        const fadeInStyle = document.createElement('style');
+        fadeInStyle.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes bubble-float {
+                from {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-100px) scale(0.5);
+                }
+            }
+        `;
+        document.head.appendChild(fadeInStyle);
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const nav = document.getElementById('nav-links');
+            const hamburger = document.querySelector('.hamburger');
+
+            if (nav.classList.contains('active') &&
+                !nav.contains(e.target) &&
+                !hamburger.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showGallery('images');
+            setupIntersectionObserver();
+
+            // Add scroll listener for parallax (throttled)
+            let ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    requestAnimationFrame(function() {
+                        parallaxEffect();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        });
+
+        // Performance optimization: Preload images
+        function preloadImages() {
+            const imageUrls = [
+                'bilder/IMG_1290.jpeg',
+                'bilder/IMG_0231.jpeg',
+                'bilder/IMG_7911.jpeg',
+                'bilder/IMG_5864.jpeg',
+                'bilder/IMG_5865.jpeg',
+                'bilder/IMG_5868.jpeg'
+            ];
+
+            imageUrls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+            });
+        }
+
+        // Start preloading after page load
+        window.addEventListener('load', preloadImages);
+    </script>
+</body>
+</html>
