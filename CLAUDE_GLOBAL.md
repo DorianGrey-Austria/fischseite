@@ -71,6 +71,268 @@ Dieses Dokument enthält übergreifende Best Practices, Regeln und Erkenntnisse 
 
 ---
 
+## 🚦 PROJECT ROUTING & CONTEXT SWITCHING
+
+### ⚠️ Problem: Projekt-Vermischung vermeiden
+
+**HÄUFIGES PROBLEM**: Anfragen über EndlessRunner im VetScan Pro Projekt oder umgekehrt!
+
+#### Sofortige Erkennung von Projekt-Fehlzuordnungen:
+| Erwähnte Inhalte | Gehört zu Projekt | Korrekte URL |
+|------------------|-------------------|--------------|
+| Endless Runner, Gesture Control, MediaPipe, Subway Runner | **EndlessRunner** | https://ki-revolution.at |
+| VetScan Pro, Tierarzt, Bello, Dr. Eule, Medical Scanner | **VetScan Pro** | https://vibecoding.company |
+| JOE FLOW APP, Zeichenapp, Canvas, Print-on-Demand | **Zeichenapp** | https://ai-workflows.at |
+| Claude Mobile, WebSocket, Mobile Bridge | **Claude Mobile** | Local Development |
+
+### 🔄 ROUTING-WORKFLOW (IMMER BEFOLGEN!)
+
+#### Wenn falsche Projekt-Zuordnung erkannt:
+
+1. **STOP** - Keine Änderungen am aktuellen Projekt!
+2. **ROUTE** - Nachricht in CLAUDE_PROJECT_ROUTER.md speichern
+3. **INFORM** - User über Routing informieren
+4. **REDIRECT** - Zum korrekten Projekt wechseln
+
+```bash
+# Beispiel: EndlessRunner Anfrage im VetScan Pro Projekt
+echo "🎮 ROUTING: EndlessRunner Gesture Control Problem
+Schwarzer Bildschirm trotz funktionierender Gestenerkennung
+Benötigt: Troubleshooting der Game-Engine Initialisierung
+Timestamp: $(date)" >> /Users/doriangrey/Desktop/coding/CLAUDE_PROJECT_ROUTER.md
+```
+
+### 🎯 PROJEKT-IDENTIFIER & URL-MAPPINGS (Erweitert)
+
+#### 🎮 EndlessRunner (Subway Runner 3D) - VOLLSTÄNDIG
+- **Pfad**: `/Users/doriangrey/Desktop/coding/EndlessRunner/SubwayRunner/`
+- **Domain**: 🌐 https://ki-revolution.at
+- **Keywords**: Endless Runner, MediaPipe, Three.js r0.150.0, Gesture Control, Webcam, FPS, WebGL
+- **Technische Details**: Vanilla JS, Face Mesh Detection, 3-Lane System, Power-Ups
+- **Status**: V5.3.35+ - Aktive Entwicklung
+- **Typische Issues**: Console Performance, Gesture Boundaries, WebGL Context, Race Conditions
+- **Erkennungsmerkmale**: 
+  - Screenshot mit 3D-Spiel und grünem Gesture Debug Panel
+  - Mentions: "Springen", "Dücken", "links", "rechts"
+  - Console Errors: "X-failed to start session"
+
+#### 🏥 VetScan Pro 3000 (Educational Veterinary Game) - VOLLSTÄNDIG  
+- **Pfad**: `/Users/doriangrey/Desktop/coding/tierarztspiel/`
+- **Domain**: 🌐 https://vibecoding.company
+- **Keywords**: VetScan, Tierarzt, Bello, Dr. Eule, Medical Scanner, GLB, X-Ray, Ultrasound, Thermal, MRI
+- **Technische Details**: Three.js r128, React 18, Blender MCP, Progressive Loading
+- **Status**: V7.0.2 - Beta mit 3D Medical Visualization
+- **Typische Issues**: CDN Loading, Three.js Namespace, Blender Pipeline, Model Loading
+- **Erkennungsmerkmale**:
+  - Mentions: "Tierarzt", "Bello", "Dr. Eule", "Scanner", "Herz", "Temperatur"
+  - 3D-Tiermofmelle, Medical Shaders, Educational Content
+
+#### 🎨 Zeichenapp (JOE FLOW APP 2025) - VOLLSTÄNDIG
+- **Pfad**: `/Users/doriangrey/Desktop/coding/zeichenapp/`  
+- **Domain**: 🌐 https://ai-workflows.at
+- **Keywords**: JOE FLOW, Zeichenapp, Canvas, Drawing Tools, Print-on-Demand, Printful
+- **Technische Details**: HTML5 Canvas, Supabase Backend, Auth, Gallery
+- **Status**: Production - Kontinuierliche Updates
+- **Typische Issues**: Console.log Popups, Debug Monitor, Cache Problems, Service Worker
+- **Erkennungsmerkmale**:
+  - Canvas-basierte Zeichentools
+  - Mentions: "Drawing", "Brush", "Color", "Export", "Print"
+
+#### 📱 Claude Mobile (Experimental) - ENTWICKLUNGSPHASE
+- **Pfad**: `/Users/doriangrey/Desktop/coding/claude-mobile/`
+- **Domain**: Local Development (keine öffentliche URL)
+- **Keywords**: Claude Mobile, WebSocket, Bridge, Remote Control, Mobile
+- **Technische Details**: Node.js, WebSocket, React Native
+- **Status**: Experimental - Early Development
+- **Typische Issues**: WebSocket Connection, Mobile Sync, Authentication
+- **Erkennungsmerkmale**:
+  - Mobile Integration, Remote Commands, WebSocket Communication
+
+### 🔍 AUTOMATISCHE PROJEKT-ERKENNUNG
+
+#### URL-basierte Erkennung:
+```bash
+case "$mentioned_url" in
+  *ki-revolution.at*) echo "EndlessRunner" ;;
+  *vibecoding.company*) echo "VetScan Pro" ;;
+  *ai-workflows.at*) echo "Zeichenapp" ;;
+  *localhost:*) echo "Local Development" ;;
+esac
+```
+
+#### Keyword-basierte Erkennung:
+```javascript
+const projectKeywords = {
+  EndlessRunner: ['gesture control', 'mediaipe', 'endless runner', 'subway', 'webcam', 'fps'],
+  VetScanPro: ['tierarzt', 'bello', 'dr. eule', 'scanner', 'medical', 'glb', 'x-ray'],
+  Zeichenapp: ['joe flow', 'canvas', 'drawing', 'brush', 'print-on-demand', 'tools'],
+  ClaudeMobile: ['websocket', 'mobile', 'bridge', 'remote', 'sync']
+};
+
+function detectProject(text) {
+  const lowerText = text.toLowerCase();
+  for (const [project, keywords] of Object.entries(projectKeywords)) {
+    if (keywords.some(keyword => lowerText.includes(keyword))) {
+      return project;
+    }
+  }
+  return 'Unknown';
+}
+```
+
+#### Screenshot-basierte Erkennung:
+- **EndlessRunner**: 3D-Spiel mit grünem Debug-Panel, FPS-Counter, Gesture-Visualisierung
+- **VetScan Pro**: Medizinische Scanner UI, Tiermodelle, Dr. Eule Character
+- **Zeichenapp**: Canvas-Interface, Drawing-Tools, Color-Picker
+- **Claude Mobile**: Mobile Interface, Remote-Control Elements
+
+### 🚨 ROUTING-REGELN (PFLICHT!)
+
+#### Regel 1: Bei Projekt-Mismatch IMMER STOPPEN
+```javascript
+if (currentProject !== targetProject) {
+  // ❌ NIEMALS trotzdem weitermachen!
+  // ✅ IMMER Router verwenden
+  createProjectRoutingMessage(request, targetProject);
+  return `Anfrage gehört zu ${targetProject}. Bitte Projekt wechseln.`;
+}
+```
+
+#### Regel 2: Router-Nachricht Format
+```markdown
+# PROJECT ROUTING MESSAGE
+
+**FROM**: [Aktuelles Projekt]
+**TO**: [Ziel-Projekt]
+**TIMESTAMP**: [ISO Datum]
+**PRIORITY**: [Low/Medium/High/Critical]
+
+## Original Request:
+[Ursprüngliche Anfrage hier]
+
+## Context:
+[Relevante Screenshot/Error Details]
+
+## Action Required:
+[Was im Ziel-Projekt getan werden muss]
+
+---
+```
+
+#### Regel 3: Router-Nachricht nach Bearbeitung LÖSCHEN
+```bash
+# Nach erfolgreicher Bearbeitung im korrekten Projekt:
+# Router-Datei leeren oder spezifische Nachricht entfernen
+```
+
+### 📚 ROUTING-WORKFLOW BEST PRACTICES
+
+#### Schritt-für-Schritt Workflow bei Projekt-Mismatch:
+
+**1. SOFORTIGE ERKENNUNG** (< 5 Sekunden)
+```javascript
+// Bei jeder Anfrage prüfen:
+const currentPath = process.cwd();
+const requestKeywords = extractKeywords(userMessage);
+const detectedProject = detectProject(requestKeywords);
+const currentProject = determineCurrentProject(currentPath);
+
+if (detectedProject !== currentProject) {
+  initiateProjectRouting();
+}
+```
+
+**2. STOP & ROUTE** (Keine Änderungen!)
+```bash
+# NIEMALS Code im falschen Projekt ändern!
+echo "🚨 PROJEKT-MISMATCH ERKANNT!"
+echo "Anfrage: ${detectedProject}"
+echo "Aktuell: ${currentProject}"
+echo "→ ROUTING initiiert"
+```
+
+**3. ROUTER-NACHRICHT ERSTELLEN**
+```markdown
+### 🎮 [PROJEKT] [PROBLEM-KURZBESCHREIBUNG]
+**PRIORITY**: High/Critical bei Bugs, Medium bei Features, Low bei Dokumentation
+**CONTEXT**: Screenshot-Analyse, Console Errors, Specific Issues
+**ACTION**: Konkrete Handlungsanweisungen für das Zielprojekt
+```
+
+**4. USER INFORMIEREN & REDIRECT**
+```
+"Diese Anfrage gehört zum [PROJEKT] Projekt. 
+Ich habe eine Routing-Nachricht erstellt: /coding/CLAUDE_PROJECT_ROUTER.md
+Bitte wechsle zu: /Users/doriangrey/Desktop/coding/[PROJEKT_PFAD]/"
+```
+
+#### Häufige Routing-Szenarien:
+
+**Szenario 1: Screenshot-basiertes Routing**
+- Screenshot zeigt EndlessRunner → aber aktuell in VetScan Pro
+- SOFORT erkennen an: 3D-Game UI, Gesture Debug Panel, FPS Counter
+- Route zu: `/coding/EndlessRunner/SubwayRunner/`
+
+**Szenario 2: Keyword-basiertes Routing**  
+- User erwähnt "Gestensteuerung", "MediaPipe" → EndlessRunner
+- User erwähnt "Tierarzt", "Bello", "Dr. Eule" → VetScan Pro
+- User erwähnt "Canvas", "Drawing", "JOE FLOW" → Zeichenapp
+
+**Szenario 3: URL-basiertes Routing**
+- ki-revolution.at → EndlessRunner
+- vibecoding.company → VetScan Pro
+- ai-workflows.at → Zeichenapp
+
+#### Emergency Routing bei unklaren Fällen:
+```bash
+# Wenn Projekt-Zuordnung unklar:
+echo "⚠️ UNCLEAR PROJECT ROUTING
+Request: [ursprüngliche Anfrage]
+Possible Projects: [Liste möglicher Projekte]
+User: Bitte Projekt spezifizieren!" >> CLAUDE_PROJECT_ROUTER.md
+```
+
+### 🔧 ROUTER MAINTENANCE & MONITORING
+
+#### Tägliche Router-Checks:
+```bash
+# Check Router File Size (sollte klein bleiben)
+wc -l /Users/doriangrey/Desktop/coding/CLAUDE_PROJECT_ROUTER.md
+
+# Check alte unbearbeitete Nachrichten (> 24h)
+find /Users/doriangrey/Desktop/coding/CLAUDE_PROJECT_ROUTER.md -mtime +1
+
+# Stats über Routing-Häufigkeit
+grep -c "### 🎮\|### 🏥\|### 🎨\|### 📱" CLAUDE_PROJECT_ROUTER.md
+```
+
+#### Router Success Metrics:
+- **Erfolgreiche Routings pro Woche**: Ziel < 5 (bedeutet gute Projekt-Trennung)
+- **Durchschnittliche Resolution Time**: Ziel < 2 Stunden
+- **Router File Size**: Ziel < 50 Zeilen (aktive Nachrichten)
+
+#### Router Alerts:
+```bash
+# Alert bei > 10 aktiven Routing-Nachrichten
+if [ $(grep -c "### 🎯\|### 🎮\|### 🏥\|### 🎨" CLAUDE_PROJECT_ROUTER.md) -gt 10 ]; then
+  echo "🚨 ROUTER ÜBERLASTET - Nachrichten abarbeiten!"
+fi
+
+# Alert bei Nachrichten > 48h alt
+# (Implementation depends on timestamp parsing)
+```
+
+### 🏆 ERFOLG: Projekt-Vermischung eliminiert!
+
+**Ziel erreicht wenn:**
+- [x] Keine falschen Code-Änderungen in fremden Projekten
+- [x] Klare Projekt-Trennung durch URL/Keyword/Screenshot-Erkennung  
+- [x] Schnelle Routing-Resolution (< 2 Stunden)
+- [x] Saubere Dokumentation ohne Projekt-Vermischung
+- [x] User Awareness für Projekt-Kontext
+
+---
+
 ## MCP (Model Context Protocol)
 
 ### 🚀 MCP Quick Setup für neue Projekte
@@ -416,6 +678,106 @@ services:
 
 ## Backend Development
 
+### 🔥 Supabase Integration (Production-Ready)
+
+#### Supabase MCP Server Setup
+```json
+// ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "supabase-mcp",
+        "--read-only",  // EMPFOHLEN für Production
+        "--project-ref=YOUR_PROJECT_REF"
+      ],
+      "env": {
+        "SUPABASE_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN_HERE"
+      }
+    }
+  }
+}
+```
+
+#### Supabase Personal Access Token erstellen
+1. [Supabase Dashboard](https://app.supabase.com/) → Avatar → **Account Settings**
+2. **Access Tokens** → **Generate new token**
+3. Beschreibender Name (z.B. "Claude MCP Server")
+4. **Token sofort kopieren** - wird nur einmal angezeigt!
+
+#### Project Reference ID finden
+1. Supabase-Projekt öffnen → **Settings** → **General**
+2. **Reference ID** kopieren (Format: `xyzabc123456`)
+
+#### Supabase MCP Features
+```bash
+# Read-Only Modus (SICHER für Production)
+--read-only
+
+# Projekt-spezifisch (EMPFOHLEN)
+--project-ref=your-project-ref
+
+# Bestimmte Features aktivieren
+--features=database,docs,functions,storage
+```
+
+**Verfügbare Feature-Gruppen:**
+- `account` - Projekt- und Organisations-Management
+- `database` - SQL-Operationen und Schema-Management  
+- `docs` - Dokumentations-Zugriff
+- `debug` - Debugging-Tools (NICHT für Production!)
+- `development` - Entwicklungs-Tools
+- `functions` - Edge Functions Management
+- `storage` - Storage Bucket Management
+- `branching` - Database Branching
+
+#### Supabase Security Best Practices
+✅ **IMMER:**
+- `--read-only` für Production-Datenbanken
+- `--project-ref` um Zugriff zu beschränken
+- Development-Projekte für Tests verwenden
+- Access Tokens regelmäßig rotieren (alle 90 Tage)
+- Separate Tokens für Dev/Staging/Production
+
+⚠️ **NIEMALS:**
+- Production-DB ohne Read-Only
+- Service Role Keys in MCP-Config
+- Hardcoded Credentials in Git
+- Admin-Tokens für normale Entwicklung
+
+#### Supabase für verschiedene Projekte
+
+**Zeichenapp (JOE FLOW APP 2025)**
+```javascript
+// Supabase für User Authentication & Drawing Storage
+const supabase = createClient(
+  'https://your-project.supabase.co',
+  'anon-key-here'
+);
+
+// Features:
+// - User Auth mit Magic Links
+// - Drawing Gallery mit Storage
+// - Real-time Collaboration
+// - Print-on-Demand Orders
+```
+
+**EndlessRunner (Leaderboard)**
+```javascript
+// Supabase für Global Highscores
+const SUPABASE_CONFIG = {
+  url: 'https://cquahsbgcycdmslcmmdz.supabase.co',
+  anonKey: 'your-anon-key',
+  tables: {
+    leaderboard: 'highscores',
+    users: 'players',
+    achievements: 'achievements'
+  }
+};
+```
+
 ### API Design Principles
 1. **RESTful Standards**
    - Konsistente Endpoints: `/api/v1/resource`
@@ -432,11 +794,199 @@ services:
    - Connection Pooling aktivieren
    - Prepared Statements gegen SQL Injection
 
-### Hostinger Deployment
-**WICHTIG**: Hostinger hat aggressives CDN-Caching!
-- Details siehe: `zeichenapp/HOSTINGER_TIPPS.md`
-- Nach Deployment: Cache im hPanel leeren
-- FTP-Deploy braucht `security: loose`
+---
+
+## 🌐 Hosting & Deployment
+
+### Hostinger-spezifische Deployment-Probleme
+
+#### ⚠️ KRITISCH: Hostinger CDN Cache-Hölle
+**Problem**: Hostinger hat extrem aggressives CDN-Caching!
+- Alte Versionen werden stundenlang gecacht
+- Browser-Cache + CDN-Cache = doppelte Probleme
+- Deployment funktioniert, aber alte Version wird angezeigt
+
+**Lösung - Nach JEDEM Deployment:**
+1. **Hostinger hPanel** → **Performance** → **CDN** → **Purge Cache**
+2. Oder CDN temporär deaktivieren während Development
+3. Verifizieren mit: `curl -I https://yourdomain.com/`
+4. Check `last-modified` Header für Aktualität
+
+#### FTP-Deploy Configuration für Hostinger
+```yaml
+# .github/workflows/deploy.yml
+- name: Deploy to Hostinger via FTP
+  uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+  with:
+    server: ${{ secrets.FTP_SERVER }}      # ftp.yourdomain.com
+    username: ${{ secrets.FTP_USERNAME }}   # Hostinger FTP User
+    password: ${{ secrets.FTP_PASSWORD }}   # Hostinger FTP Pass
+    local-dir: ./deploy/
+    server-dir: /public_html/               # Hauptdomain
+    security: loose                         # WICHTIG für Hostinger!
+    timeout: 60000                          # 60 Sekunden
+    log-level: verbose                      # Debug-Infos
+```
+
+#### Hostinger FTP Troubleshooting
+```bash
+# Problem: "Could not connect to FTP server"
+✅ Richtig: ftp.domain.com
+❌ Falsch: https://domain.com oder domain.com
+
+# Problem: "Authentication failed"
+# → Hostinger cPanel → File Manager → FTP Accounts
+# → Neuen FTP-User erstellen oder Passwort reset
+
+# Problem: "Directory not found"
+server-dir: /public_html/          # Hauptdomain
+server-dir: /public_html/subdomain/ # Subdomain
+```
+
+#### .htaccess für Cache-Control (Hostinger)
+```apache
+# Force Cache Refresh bei Updates
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+</IfModule>
+
+# Alternative: Version Parameter verwenden
+# style.css?v=20250823
+```
+
+---
+
+## 🚀 GitHub Actions Deployment
+
+### Kritische Deployment-Regeln
+
+#### ⚠️ IMMER Branch-Trigger prüfen!
+**Problem**: Code pushed aber nicht deployed?
+**Ursache**: Branch nicht in deploy.yml triggers!
+
+```yaml
+# .github/workflows/deploy.yml
+on:
+  push:
+    branches: [ main, develop, working-baseline-3f73978 ]  # DEIN BRANCH HIER!
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Manuelles Deployment ermöglichen
+```
+
+### Versionsnummer-Management (KRITISCH!)
+
+#### Automatische Version-Injection bei Deployment
+```yaml
+# Update version info in HTML before deployment
+COMMIT_HASH=$(echo ${GITHUB_SHA} | cut -c1-7)
+BRANCH_NAME=${GITHUB_REF#refs/heads/}
+DEPLOY_TIME=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+# In HTML injizieren
+sed -i "s/Commit: [a-f0-9]\{7\}/Commit: ${COMMIT_HASH}/g" deploy/index.html
+sed -i "s/Branch: [^<]*/Branch: ${BRANCH_NAME}/g" deploy/index.html
+sed -i "s/Deploy: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}[^<]*/Deploy: ${DEPLOY_TIME}/g" deploy/index.html
+```
+
+#### Version-Verifikation nach Deployment
+```bash
+# Prüfen ob neue Version live ist
+curl -s https://yourdomain.com/ | grep -i "version\|commit"
+
+# Header-Check für Last-Modified
+curl -I https://yourdomain.com/ | grep -i "last-modified"
+
+# Force-Refresh im Browser
+# Chrome: Cmd+Shift+R (Mac) / Ctrl+Shift+R (Win)
+# Safari: Cmd+Option+R
+```
+
+### GitHub Secrets Setup
+```bash
+# Repository → Settings → Secrets and Variables → Actions
+FTP_SERVER: ftp.yourdomain.com
+FTP_USERNAME: your_username
+FTP_PASSWORD: your_password
+SUPABASE_URL: https://project.supabase.co
+SUPABASE_ANON_KEY: your_anon_key
+```
+
+### Deployment Best Practices
+
+#### Pre-Deployment Checklist
+```bash
+# 1. Backup erstellen
+./backup-essential.sh
+
+# 2. Tests laufen lassen
+npm test
+npm run test:e2e
+
+# 3. Console.logs entfernen
+grep -r "console\." --include="*.html" --include="*.js" . | wc -l
+# Sollte 0 sein!
+
+# 4. Branch in deploy.yml?
+grep "branches:" .github/workflows/deploy.yml
+```
+
+#### Post-Deployment Verification
+```bash
+# 1. Version Check
+curl -s https://domain.com | grep "VERSION"
+
+# 2. CDN Cache Clear (Hostinger)
+# hPanel → Performance → CDN → Purge
+
+# 3. Multi-Browser Test
+# Chrome, Safari, Firefox - alle testen!
+
+# 4. Mobile Test
+# Responsive Design prüfen
+```
+
+### Emergency Rollback Workflow
+```yaml
+# .github/workflows/rollback.yml
+name: Emergency Rollback
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit SHA to rollback to'
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit }}
+      
+      - name: Deploy Previous Version
+        # ... FTP Deploy Steps
+```
+
+### Multi-Environment Strategy
+```yaml
+# Separate Deployments für Dev/Staging/Production
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/develop'
+    # Deploy to dev.domain.com
+    
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    # Deploy to staging.domain.com
+    
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    # Deploy to domain.com
+```
 
 ---
 
@@ -1797,7 +2347,7 @@ mcp.github.merge_and_deploy()
 
 **Letzte Aktualisierung**: 23.08.2025  
 **Maintainer**: Claude Code & Team  
-**Version**: 2.3.0 - Erweitert mit EndlessRunner Game Dev Patterns & MediaPipe Insights  
+**Version**: 2.4.0 - Erweitert mit Supabase Backend, Hostinger Hosting & GitHub Actions Deployment  
 
 *Dieses Dokument wird kontinuierlich erweitert basierend auf Erkenntnissen aus allen Projekten.*
 

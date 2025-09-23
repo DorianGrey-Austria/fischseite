@@ -1071,30 +1071,30 @@
             content: '🐠';
             position: absolute;
             top: 50%;
-            left: -50px;
+            right: -50px;
             font-size: 2rem;
-            animation: fishSwim 30s infinite linear;
+            animation: fishSwimRtl 30s infinite linear;
             transform: translateY(-50%);
             opacity: 0.7;
         }
 
-        @keyframes fishSwim {
+        @keyframes fishSwimRtl {
             0% {
-                left: -50px;
-                transform: translateY(-50%) scaleX(1);
+                right: -50px;
+                transform: translateY(-50%) scaleX(-1);
             }
             25% {
-                transform: translateY(-60%) scaleX(1);
+                transform: translateY(-60%) scaleX(-1);
             }
             50% {
-                transform: translateY(-40%) scaleX(1);
+                transform: translateY(-40%) scaleX(-1);
             }
             75% {
-                transform: translateY(-60%) scaleX(1);
+                transform: translateY(-60%) scaleX(-1);
             }
             100% {
-                left: calc(100% + 50px);
-                transform: translateY(-50%) scaleX(1);
+                right: calc(100% + 50px);
+                transform: translateY(-50%) scaleX(-1);
             }
         }
 
@@ -1102,7 +1102,7 @@
         .mario-skalar {
             position: fixed;
             top: 30%;
-            right: -150px;
+            left: -150px;
             width: 80px;
             height: 60px;
             background-image: url('bilder/fisch freigestellt skalar mario lanz verein.png');
@@ -1110,35 +1110,35 @@
             background-repeat: no-repeat;
             z-index: 10;
             pointer-events: none;
-            animation: mario-skalar-swim 25s linear infinite;
+            animation: mario-skalar-swim-ltr 25s linear infinite;
             opacity: 0.8;
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
         }
 
-        @keyframes mario-skalar-swim {
+        @keyframes mario-skalar-swim-ltr {
             0% {
-                right: -150px;
-                transform: translateY(0) scaleX(-1);
+                left: -150px;
+                transform: translateY(0) scaleX(1);
                 opacity: 0;
             }
             5% {
                 opacity: 0.8;
             }
             25% {
-                transform: translateY(-30px) scaleX(-1);
+                transform: translateY(-30px) scaleX(1);
             }
             50% {
-                transform: translateY(20px) scaleX(-1);
+                transform: translateY(20px) scaleX(1);
             }
             75% {
-                transform: translateY(-20px) scaleX(-1);
+                transform: translateY(-20px) scaleX(1);
             }
             95% {
                 opacity: 0.8;
             }
             100% {
-                right: calc(100% + 150px);
-                transform: translateY(0) scaleX(-1);
+                left: calc(100% + 150px);
+                transform: translateY(0) scaleX(1);
                 opacity: 0;
             }
         }
@@ -1413,6 +1413,11 @@
 
         /* Responsive Design with Mobile-First Approach */
         @media (max-width: 768px) {
+            /* Extra mobile smoothing: disable heavy hero animation and slow divider fish */
+            .hero-logo { animation: none; filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.4)); }
+            .underwater-divider::after { animation-duration: 45s; }
+            .bubble-particles::before, .bubble-particles::after { animation: none !important; }
+            .caustic-lights { animation: none !important; opacity: 0.3; }
             .logo {
                 font-size: 1rem;
                 gap: 8px;
@@ -2115,7 +2120,7 @@
     <header>
         <nav class="container">
             <div class="logo">
-                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple">
+                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                 <span>Aquaristikfreunde Steiermark</span>
             </div>
 
@@ -2159,12 +2164,9 @@
         </div>
 
         <div class="hero-content container">
-            <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="hero-logo" onclick="createLogoRipples(event)">
+            <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="hero-logo" onclick="createLogoRipples(event)" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
             <h1>Willkommen bei den Aquaristikfreunden Steiermark</h1>
             <p>Seit Jahrzehnten die führende Aquaristik-Community in der Steiermark. Tauchen Sie ein in eine lebendige Gemeinschaft von Aquaristik-Enthusiasten mit umfassendem Fachwissen und regelmäßigen Events.</p>
-            <a href="#galerie" class="cta-button" onclick="createBubbleTrail(event)">
-                <i class="fas fa-camera"></i> Galerie erkunden
-            </a>
         </div>
     </section>
 
@@ -2173,7 +2175,7 @@
 
     <section id="galerie" class="media-section">
         <div class="container">
-            <h2 class="section-title">Mario Lanz<br><span style="font-size: 0.8em; color: var(--secondary-teal);">Südamerika Aquaristik</span></h2>
+            <h2 class="section-title">Bilder & Videos</h2>
 
             <div class="gallery-tabs">
                 <div class="tab-container">
@@ -2381,21 +2383,7 @@
     <!-- Underwater Divider -->
     <div class="underwater-divider"></div>
 
-    <!-- Mario Lanz Intro Section -->
-    <section class="media-section" id="member-gallery">
-        <div class="container">
-            <div class="member-intro" style="text-align: center; margin: 2rem 0; padding: 2rem; background: rgba(76, 175, 80, 0.1); border-radius: 15px; border: 2px solid var(--logo-green);">
-                <h3 style="color: var(--primary-blue); font-size: 1.8rem; margin-bottom: 1rem; line-height: 1.4;">Featured: Mario Lanz<br><span style="font-size: 0.9em; color: var(--secondary-teal);">Südamerika-Spezialist</span></h3>
-                <p style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--deep-blue);">
-                    Seit 8 Jahren züchtet Mario erfolgreich Skalare in seinem 576L Raumteiler. Trotz direkter Sonneneinstrahlung schafft er mit seinem Eheim Professionell 3 kristallklares Wasser.
-                    Seine Erfahrung: "Gleich nach meinem Einstieg beeindruckten mich Skalare" - heute schwimmen seine ältesten Zucht-Skalare seit 8 Jahren in seinem Aquarium.
-                </p>
-                <button class="portrait-link-btn" onclick="navigateToPortrait('mario-lanz-portrait')" style="background: var(--logo-green); color: var(--white); border: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; min-height: 44px;">
-                    👤 Zum ausführlichen Portrait von Mario Lanz
-                </button>
-            </div>
-        </div>
-    </section>
+    
 
 
     <section id="verein" class="features">
@@ -2404,7 +2392,7 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-history"></i>
@@ -2415,7 +2403,7 @@
 
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
@@ -2426,7 +2414,7 @@
 
                 <div class="feature-card">
                     <div class="logo-watermark">
-                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo">
+                        <img src="bilder/logo-neu-3d.jpg" alt="Logo" class="watermark-logo" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                     </div>
                     <div class="feature-icon">
                         <i class="fas fa-handshake"></i>
@@ -2700,7 +2688,7 @@
     <footer>
         <div class="container">
             <div style="text-align: center; margin-bottom: 2rem;">
-                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="footer-logo">
+                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="footer-logo" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
             </div>
             <div class="footer-content">
                 <div class="footer-section">
