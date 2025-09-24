@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gästebuch - Aquaristikfreunde Steiermark</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-blue: #006994;
+            --secondary-teal: #4ECDC4;
+            --accent-coral: #FF6B6B;
+            --deep-blue: #003A5C;
+            --light-blue: #E8F4F8;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
+            min-height: 100vh;
+            color: var(--deep-blue);
+        }
+
+        .guestbook-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .guestbook-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .guestbook-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .guestbook-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-teal);
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .emoji-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .emoji-btn {
+            background: none;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .emoji-btn:hover,
+        .emoji-btn.selected {
+            border-color: var(--secondary-teal);
+            background: rgba(78, 205, 196, 0.1);
+            transform: scale(1.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--secondary-teal), var(--primary-blue));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .guestbook-entries {
+            space-y: 20px;
+        }
+
+        .entry {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .entry-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .entry-avatar {
+            font-size: 32px;
+        }
+
+        .entry-name {
+            font-weight: bold;
+            color: var(--primary-blue);
+            font-size: 18px;
+        }
+
+        .entry-date {
+            color: var(--deep-blue);
+            opacity: 0.7;
+            font-size: 14px;
+            margin-left: auto;
+        }
+
+        .entry-message {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--deep-blue);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            font-size: 18px;
+        }
+
+        .error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid var(--accent-coral);
+            color: var(--accent-coral);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px solid var(--secondary-teal);
+            color: var(--primary-blue);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-blue);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .guestbook-container {
+                padding: 10px;
+            }
+
+            .guestbook-header h1 {
+                font-size: 2rem;
+            }
+
+            .guestbook-form,
+            .entry {
+                padding: 1rem;
+            }
+
+            .emoji-selector {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        🏠 Zurück zur Hauptseite
+    </a>
+
+    <div class="guestbook-container">
+        <div class="guestbook-header">
+            <h1>📖 Gästebuch</h1>
+            <p>Teile deine Aquaristik-Erfahrungen mit unserer Community!</p>
+        </div>
+
+        <div class="guestbook-form">
+            <h2>✍️ Neuen Eintrag schreiben</h2>
+            <form id="guestbook-form">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required maxlength="50" placeholder="Dein Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Nachricht:</label>
+                    <textarea id="message" name="message" required maxlength="500" placeholder="Teile deine Gedanken, Erfahrungen oder Fragen zur Aquaristik..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Wähle einen Avatar:</label>
+                    <div class="emoji-selector">
+                        <button type="button" class="emoji-btn selected" data-emoji="🐠">🐠</button>
+                        <button type="button" class="emoji-btn" data-emoji="🐟">🐟</button>
+                        <button type="button" class="emoji-btn" data-emoji="🐡">🐡</button>
+                        <button type="button" class="emoji-btn" data-emoji="🦈">🦈</button>
+                        <button type="button" class="emoji-btn" data-emoji="🐙">🐙</button>
+                        <button type="button" class="emoji-btn" data-emoji="🦑">🦑</button>
+                        <button type="button" class="emoji-btn" data-emoji="🦐">🦐</button>
+                        <button type="button" class="emoji-btn" data-emoji="🦞">🦞</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌱">🌱</button>
+                        <button type="button" class="emoji-btn" data-emoji="🪸">🪸</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    💬 Eintrag hinzufügen
+                </button>
+            </form>
+        </div>
+
+        <div id="message-container"></div>
+
+        <div class="guestbook-entries">
+            <h2 style="color: white; text-align: center; margin-bottom: 2rem;">💭 Einträge unserer Community</h2>
+            <div id="entries-container">
+                <div class="loading">
+                    🐠 Einträge werden geladen...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SUPABASE KONFIGURATION
+        // TODO: Ersetze mit deinen echten Supabase Credentials
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+
+        // Supabase Client initialisieren
+        let supabase = null;
+
+        // Prüfe ob Credentials gesetzt sind
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        class Guestbook {
+            constructor() {
+                this.selectedEmoji = '🐠';
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadEntries();
+            }
+
+            setupEventListeners() {
+                // Form Submit
+                const form = document.getElementById('guestbook-form');
+                form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+                // Emoji Selection
+                const emojiButtons = document.querySelectorAll('.emoji-btn');
+                emojiButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectEmoji(e));
+                });
+            }
+
+            selectEmoji(e) {
+                // Remove previous selection
+                document.querySelectorAll('.emoji-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+
+                // Add selection to clicked button
+                e.target.classList.add('selected');
+                this.selectedEmoji = e.target.dataset.emoji;
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+
+                const submitBtn = document.getElementById('submit-btn');
+                const messageContainer = document.getElementById('message-container');
+
+                // Check if Supabase is configured
+                if (!supabase) {
+                    this.showMessage('❌ Supabase ist noch nicht konfiguriert. Bitte Credentials in guestbook.html eingeben.', 'error');
+                    return;
+                }
+
+                // Get form data
+                const formData = new FormData(e.target);
+                const name = formData.get('name').trim();
+                const message = formData.get('message').trim();
+
+                if (!name || !message) {
+                    this.showMessage('❌ Bitte fülle alle Felder aus.', 'error');
+                    return;
+                }
+
+                // Disable submit button
+                submitBtn.disabled = true;
+                submitBtn.textContent = '📝 Wird gespeichert...';
+
+                try {
+                    // Insert into Supabase
+                    const { data, error } = await supabase
+                        .from('guestbook')
+                        .insert([{
+                            name: name,
+                            message: message,
+                            avatar_emoji: this.selectedEmoji
+                        }]);
+
+                    if (error) throw error;
+
+                    // Success
+                    this.showMessage('✅ Dein Eintrag wurde erfolgreich hinzugefügt!', 'success');
+                    e.target.reset();
+                    this.selectedEmoji = '🐠';
+                    this.selectDefaultEmoji();
+                    this.loadEntries(); // Reload entries
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showMessage('❌ Fehler beim Speichern. Bitte versuche es später erneut.', 'error');
+                } finally {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '💬 Eintrag hinzufügen';
+                }
+            }
+
+            selectDefaultEmoji() {
+                document.querySelectorAll('.emoji-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.querySelector('.emoji-btn[data-emoji="🐠"]').classList.add('selected');
+            }
+
+            async loadEntries() {
+                const container = document.getElementById('entries-container');
+
+                if (!supabase) {
+                    container.innerHTML = `
+                        <div class="error">
+                            <h3>⚙️ Supabase Setup erforderlich</h3>
+                            <p>Um das Gästebuch zu nutzen, müssen die Supabase Credentials in der guestbook.html Datei konfiguriert werden.</p>
+                            <br>
+                            <p><strong>Schritte:</strong></p>
+                            <ol>
+                                <li>Supabase Account erstellen auf <a href="https://supabase.com" target="_blank">supabase.com</a></li>
+                                <li>Neues Projekt erstellen</li>
+                                <li>SQL Tabelle erstellen (siehe README)</li>
+                                <li>URL und ANON_KEY in guestbook.html eintragen</li>
+                            </ol>
+                        </div>
+                    `;
+                    return;
+                }
+
+                try {
+                    const { data, error } = await supabase
+                        .from('guestbook')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(50);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        this.renderEntries(data);
+                    } else {
+                        container.innerHTML = `
+                            <div class="entry">
+                                <div class="entry-header">
+                                    <div class="entry-avatar">🐠</div>
+                                    <div class="entry-name">Aquaristikfreunde Steiermark</div>
+                                </div>
+                                <div class="entry-message">
+                                    Willkommen in unserem Gästebuch! Sei der erste, der einen Eintrag hinterlässt.
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                } catch (error) {
+                    console.error('Error loading entries:', error);
+                    container.innerHTML = `
+                        <div class="error">
+                            ❌ Fehler beim Laden der Einträge. Bitte lade die Seite neu.
+                        </div>
+                    `;
+                }
+            }
+
+            renderEntries(entries) {
+                const container = document.getElementById('entries-container');
+
+                container.innerHTML = entries.map(entry => `
+                    <div class="entry">
+                        <div class="entry-header">
+                            <div class="entry-avatar">${entry.avatar_emoji || '🐠'}</div>
+                            <div class="entry-name">${this.escapeHtml(entry.name)}</div>
+                            <div class="entry-date">${this.formatDate(entry.created_at)}</div>
+                        </div>
+                        <div class="entry-message">${this.escapeHtml(entry.message)}</div>
+                    </div>
+                `).join('');
+            }
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('de-DE', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            showMessage(message, type) {
+                const container = document.getElementById('message-container');
+                container.innerHTML = `<div class="${type}">${message}</div>`;
+
+                // Auto-hide success messages
+                if (type === 'success') {
+                    setTimeout(() => {
+                        container.innerHTML = '';
+                    }, 5000);
+                }
+            }
+        }
+
+        // Initialize Guestbook
+        document.addEventListener('DOMContentLoaded', () => {
+            new Guestbook();
+        });
+    </script>
+</body>
+</html>
