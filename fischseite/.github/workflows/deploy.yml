@@ -40,21 +40,21 @@ jobs:
 
     - name: Prepare Deployment Files
       run: |
-        # Remove development files that shouldn't be deployed
-        rm -rf node_modules/ || true
-        rm -rf .github/ || true
-        rm -rf test-results/ || true
-        rm -rf docs/ || true
-        rm -f .DS_Store || true
-        rm -f package*.json || true
-        rm -f test-*.js || true
-        rm -f *.md || true
-        rm -f *.sql || true
-        rm -f *.py || true
+        # Create temporary deployment directory
+        mkdir -p deployment_temp
+
+        # Copy only production files to temp directory
+        find . -maxdepth 1 -name "*.html" -exec cp {} deployment_temp/ \;
+        find . -maxdepth 1 -name "*.js" -not -name "test-*" -exec cp {} deployment_temp/ \;
+        find . -maxdepth 1 -name "*.css" -exec cp {} deployment_temp/ \;
+
+        # Copy media directories
+        [ -d "bilder" ] && cp -r bilder deployment_temp/ || echo "No bilder directory"
+        [ -d "videos" ] && cp -r videos deployment_temp/ || echo "No videos directory"
 
         # List files that will be deployed
-        echo "Files to be deployed:"
-        find . -type f -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.mov" -o -name "*.mp4" -o -name "*.avif" | sort
+        echo "Files to be deployed from deployment_temp:"
+        find deployment_temp/ -type f | sort
 
     - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -63,18 +63,9 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: ${{ secrets.FTP_PATH }}
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          **/test-results/**
-          **/docs/**
-          **/*.md
-          **/*.sql
-          **/*.py
-          **/test-*.js
-          **/package*.json
-          **/.DS_Store
+        local-dir: ./deployment_temp/
+        dry-run: false
+        log-level: verbose
 
     - name: Deployment Success Notification
       if: success()
