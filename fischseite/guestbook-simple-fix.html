@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- VERSION 2.2 - Simple Fix Version -->
+    <title>Gästebuch - Aquaristikfreunde Steiermark</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .guestbook-form {
+            background: rgba(255,255,255,0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .submit-btn {
+            background: #4ECDC4;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            background: #45b7b8;
+        }
+        .entries-container {
+            margin-top: 2rem;
+        }
+        .entry {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #4ECDC4;
+        }
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .entry-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .entry-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .entry-message {
+            line-height: 1.5;
+        }
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .success {
+            background: #4ECDC4;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐠 Gästebuch der Aquaristikfreunde Steiermark 🐠</h1>
+            <p>Teilt eure Erfahrungen und Geschichten aus der Aquaristik-Welt!</p>
+        </div>
+
+        <div class="guestbook-form">
+            <h2>✍️ Neuen Eintrag verfassen</h2>
+            <form id="guestbookForm">
+                <div class="form-group">
+                    <label for="name">👤 Name:</label>
+                    <input type="text" id="name" required maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="message">💬 Nachricht:</label>
+                    <textarea id="message" required maxlength="500" rows="4" placeholder="Erzählt uns von euren Aquarien, Fischen oder Erfahrungen..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">📝 Eintrag absenden</button>
+            </form>
+            <div id="message-container"></div>
+        </div>
+
+        <div class="entries-container">
+            <h2>📖 Alle Gästebuch-Einträge</h2>
+            <div id="loading" class="loading">🔄 Lade Einträge...</div>
+            <div id="entries"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://gnhsauvbqrxywtgppetm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduaHNhdXZicXJ4eXd0Z3BwZXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2Njc0MjcsImV4cCI6MjA3NDI0MzQyN30.DHPTMZR6NOT7mDvCOI_1fzx87dhX9syBFek_cKkOaSc';
+
+        // Initialize Supabase
+        let supabase = null;
+
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase initialized');
+        } catch (error) {
+            console.error('❌ Supabase initialization failed:', error);
+        }
+
+        // Show message function
+        function showMessage(text, type) {
+            const container = document.getElementById('message-container');
+            container.innerHTML = `<div class="${type}">${text}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Load entries function
+        async function loadEntries() {
+            const loadingEl = document.getElementById('loading');
+            const entriesEl = document.getElementById('entries');
+
+            if (!supabase) {
+                entriesEl.innerHTML = '<div class="error">❌ Supabase nicht verfügbar</div>';
+                loadingEl.style.display = 'none';
+                return;
+            }
+
+            try {
+                console.log('🔄 Loading entries from Supabase...');
+
+                const { data, error } = await supabase
+                    .from('guestbook')
+                    .select('*')
+                    .eq('is_approved', true)
+                    .order('created_at', { ascending: false });
+
+                loadingEl.style.display = 'none';
+
+                if (error) {
+                    console.error('❌ Error loading entries:', error);
+                    entriesEl.innerHTML = '<div class="error">❌ Fehler beim Laden der Einträge: ' + error.message + '</div>';
+                    return;
+                }
+
+                console.log('✅ Loaded entries:', data.length);
+
+                if (data.length === 0) {
+                    entriesEl.innerHTML = '<div class="entry">📝 Noch keine Einträge vorhanden. Sei der erste!</div>';
+                    return;
+                }
+
+                entriesEl.innerHTML = data.map(entry => `
+                    <div class="entry">
+                        <div class="entry-header">
+                            <div class="entry-name">${entry.avatar_emoji || '🐠'} ${escapeHtml(entry.name)}</div>
+                            <div class="entry-date">${new Date(entry.created_at).toLocaleDateString('de-DE')}</div>
+                        </div>
+                        <div class="entry-message">${escapeHtml(entry.message)}</div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('❌ Exception loading entries:', error);
+                entriesEl.innerHTML = '<div class="error">❌ Fehler: ' + error.message + '</div>';
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Submit entry function
+        async function submitEntry(event) {
+            event.preventDefault();
+
+            if (!supabase) {
+                showMessage('❌ Supabase nicht verfügbar', 'error');
+                return;
+            }
+
+            const name = document.getElementById('name').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !message) {
+                showMessage('❌ Bitte alle Felder ausfüllen', 'error');
+                return;
+            }
+
+            try {
+                console.log('📝 Submitting entry...');
+
+                const { data, error } = await supabase
+                    .from('guestbook')
+                    .insert([{
+                        name: name,
+                        message: message,
+                        avatar_emoji: '🐠'
+                    }]);
+
+                if (error) {
+                    console.error('❌ Error submitting:', error);
+                    showMessage('❌ Fehler beim Speichern: ' + error.message, 'error');
+                    return;
+                }
+
+                console.log('✅ Entry submitted');
+                showMessage('✅ Eintrag erfolgreich gespeichert!', 'success');
+
+                // Clear form
+                document.getElementById('name').value = '';
+                document.getElementById('message').value = '';
+
+                // Reload entries
+                setTimeout(loadEntries, 1000);
+
+            } catch (error) {
+                console.error('❌ Exception submitting:', error);
+                showMessage('❌ Fehler: ' + error.message, 'error');
+            }
+        }
+
+        // Escape HTML function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 Initializing guestbook...');
+
+            // Setup form
+            document.getElementById('guestbookForm').addEventListener('submit', submitEntry);
+
+            // Load entries
+            loadEntries();
+
+            console.log('✅ Guestbook initialized');
+        });
+
+        // Make functions globally available for debugging
+        window.loadEntries = loadEntries;
+        window.supabase = supabase;
+    </script>
+</body>
+</html>
