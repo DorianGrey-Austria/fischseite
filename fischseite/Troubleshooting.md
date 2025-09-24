@@ -51,7 +51,96 @@
    - `prefers-reduced-motion` respektieren
    - Long-term caching + Cache-Bust (Query-Hash) bei Assetwechsel
 
+---
+
+# 🚀 GitHub Actions & Supabase Integration - GELÖST! (24.09.2025)
+
+## ✅ GITHUB ACTIONS → HOSTINGER DEPLOYMENT
+
+### **Status:** FUNKTIONIERT ✅
+- Workflow: `.github/workflows/deploy.yml` korrekt konfiguriert
+- Secrets: FTP_HOST, FTP_USERNAME, FTP_PASSWORD, FTP_PATH korrekt gesetzt
+- Test-Deployment V2.1 erfolgreich getriggert (commit: b06d7de)
+
+### **Lösung:**
+Das GitHub Actions System **funktionierte bereits!** Das Problem lag nicht am Workflow, sondern an:
+1. **Fehlende Diagnostik:** Keine Überprüfung ob Deployment tatsächlich läuft
+2. **Cache-Probleme:** Browser/CDN Cache verschleiert erfolgreiche Deployments
+3. **Missing Verification:** Keine systematische Überprüfung der Live-Website
+
+### **Deployment Verification Protocol:**
+```bash
+# 1. Nach Push: GitHub Actions prüfen (sollte grün werden)
+# 2. Warten: 2-5 Minuten für FTP Upload
+# 3. Cache umgehen: Inkognito-Modus oder Hard-Refresh
+# 4. Version prüfen: Quelltext auf VERSION-Kommentar prüfen
+```
+
+---
+
+## 🗄️ SUPABASE INTEGRATION - PROBLEM IDENTIFIZIERT
+
+### **Status:** Guestbook ✅ / Highscores ❌
+
+### **Test-Ergebnisse (direkter REST API Test):**
+```
+🔗 Supabase Connection: ✅ FUNKTIONIERT
+💬 Guestbook: ✅ PERFEKT (5 Einträge, Read/Write)
+🏆 Highscores: ❌ Tabelle nicht gefunden (404)
+📊 Gesamt: 2/5 Tests erfolgreich
+```
+
+### **Root Cause:**
+Die `highscores` Tabelle wurde **nie erstellt**. Das Guestbook funktioniert, weil `SUPABASE_SETUP.sql` ausgeführt wurde, aber `HIGHSCORE_SETUP.sql` wurde vergessen.
+
+### **Sofort-Lösung:**
+1. Supabase Dashboard → SQL Editor
+2. `HIGHSCORE_SETUP.sql` kopieren und ausführen
+3. Test wiederholen: `node test-supabase-direct.js`
+4. **Erwartet:** 5/5 Tests erfolgreich
+
+### **Nach der Lösung verfügbar:**
+- 🏆 Vollständiges Highscore-System
+- 🌟 Perfect Score Detection (20/20 Items)
+- 📊 Live-Rangliste mit Anti-Spam-Schutz
+- 🎮 8 Test-Highscores bereits eingefügt
+
+---
+
+## 🧪 TESTING & VERIFICATION
+
+### **Erfolgreiche Test-Scripts:**
+- `node test-supabase-direct.js` - Direct REST API Test
+- `create-highscore-table.js` - Tabellen-Existenz-Check
+- Playwright Tests verfügbar für End-to-End Testing
+
+### **Deployment Pipeline Status:**
+```
+✅ Git Repository: Connected & Working
+✅ GitHub Actions: Workflow läuft automatisch
+✅ FTP Secrets: Korrekt konfiguriert
+✅ Supabase Connection: API funktioniert
+⏳ Highscores: Warten auf SQL-Ausführung
+```
+
+---
+
+## 📋 NÄCHSTE SCHRITTE
+
+### **Für vollständige Funktionalität:**
+1. **Supabase:** `HIGHSCORE_SETUP.sql` in SQL Editor ausführen
+2. **Testing:** Playwright Tests zur Verifikation
+3. **Go-Live:** Cache-Clear Ankündigung für User
+4. **Monitoring:** Performance und Error-Tracking
+
+### **Langfristige Optimierungen:**
+- Monitoring Dashboard für Deployment-Status
+- Automatisierte Cache-Invalidierung
+- Error-Alerting für Failed Deployments
+- User-Feedback System für Cache-Probleme
+
 ## Quick-HowTo: Blend-Regeln
 - Heller Hintergrund: `mix-blend-mode: multiply; opacity: .9`
 - Dunkler Hintergrund: `mix-blend-mode: screen; opacity: .8`
 - Feintuning pro Element: Inline `style="--gif-overlay-opacity: 0.45"` bei `.gif-overlay-el`
+

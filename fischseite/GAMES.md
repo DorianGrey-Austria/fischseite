@@ -26,3 +26,4 @@
 - Höhe der Divider (ca. 80px) bestimmt Fischhöhe, Hitboxen und Hindernisdesign.
 
 
+

@@ -46,6 +46,22 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* 🚨 DEPLOYMENT TEST BANNER */
+        .deployment-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #00ff00;
+            color: black;
+            padding: 10px;
+            text-align: center;
+            z-index: 999999;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
         /* 🏆 HIGHSCORE DIALOG STYLES */
         .highscore-dialog {
             position: fixed;
@@ -2548,6 +2564,11 @@
     </style>
 </head>
 <body>
+    <!-- 🚨 DEPLOYMENT TEST BANNER -->
+    <div class="deployment-banner">
+        VERSION 2.2 - GitHub Actions Test - Deployed: September 24, 2025 14:52 CET
+    </div>
+
     <!-- Animated Fish School -->
     <!-- Old fish school removed - unified system handles all fish -->
 
