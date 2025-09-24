@@ -1,0 +1,31 @@
+name: Test GitHub Actions
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Test Actions Working
+      run: |
+        echo "🎉 GitHub Actions is working!"
+        echo "📝 Current commit: ${{ github.sha }}"
+        echo "📅 Date: $(date)"
+        echo "🌿 Branch: ${{ github.ref_name }}"
+        ls -la
+
+    - name: Check for HTML files
+      run: |
+        echo "📁 HTML Files found:"
+        find . -name "*.html" -type f
+
+    - name: Deployment Status
+      run: |
+        echo "🚀 This proves GitHub Actions can run!"
+        echo "✅ Next step: Configure FTP secrets for actual deployment"
