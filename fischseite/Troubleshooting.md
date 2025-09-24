@@ -1,4 +1,93 @@
-# Troubleshooting: Transparenz bei Logo und Fischen (Desktop & Mobil)
+# Troubleshooting: GitHub Actions Deployment & Transparenz Probleme
+
+## 🚨 KRITISCHES DEPLOYMENT PROBLEM (4+ Stunden Debugging)
+
+### **Problem:** GitHub Actions läuft ÜBERHAUPT NICHT
+- **Symptom:** "Get started with GitHub Actions" Seite statt Workflow-Runs
+- **Vergleich:** EndlessRunner2 hat 720 erfolgreiche Runs ✅, Fischseite hat 0 Runs ❌
+- **Impact:** Alle Deployments fehlgeschlagen, keine Live-Updates auf vibecoding.company
+
+### **Root Cause Analysis:**
+1. **Repository-Level Problem** - GitHub erkennt Workflows nicht
+2. **Möglicherweise Fork-Status** - Actions standardmäßig deaktiviert
+3. **Workflow-Parsing Fehler** - YAML nicht korrekt interpretiert
+4. **Branch/Permissions Problem** - Default branch oder Settings Issue
+
+### **Lösungsversuche (chronologisch):**
+
+#### **Versuch 1-3:** Komplexe Workflow-Debugging (FEHLGESCHLAGEN)
+- Multiple YAML-Revisionen mit verschiedenen Syntax-Varianten
+- FTP-Konfiguration Optimierungen (server vs FTP_HOST, etc.)
+- **Ergebnis:** Workflows wurden nie von GitHub erkannt
+
+#### **Versuch 4:** Repository Settings Deep-Check (TEILWEISE ERFOLGREICH)
+- ✅ Actions sind enabled
+- ✅ Secrets sind konfiguriert (FTP_SERVER, FTP_USERNAME, etc.)
+- ✅ Main branch ist default branch
+- ❌ Workflows triggern immer noch nicht
+
+#### **Versuch 5:** MASTER FIX - EndlessRunner2 Template (IN PROGRESS)
+- ❌ Alte problematische Workflows gelöscht (deploy.yml, test-actions.yml)
+- ✅ Neue bewährte Workflows erstellt:
+  - `ultra-simple-test.yml` - Minimaler Test ohne Abhängigkeiten
+  - `hostinger-deploy.yml` - Bewährte FTP-Konfiguration mit workflow_dispatch
+- ✅ VERSION 2.7 deployed mit grünem Banner für Deployment-Beweis
+- **Status:** Waiting for GitHub Actions to trigger...
+
+### **Wenn GitHub Actions immer noch nicht funktioniert:**
+
+#### **Backup Plan A: Repository Settings Nuclear Fix**
+1. Actions komplett deaktivieren und wieder aktivieren
+2. Repository Permissions Reset
+3. Manual Workflow Trigger via GitHub Web UI
+
+#### **Backup Plan B: Alternative Deployment**
+1. **Netlify/Vercel Migration** - Instant deployment ohne FTP
+2. **Manual FTP Upload** - Direct rsync/FileZilla als Fallback
+3. **GitHub Pages** - Kostenlose Alternative mit automatischem Deployment
+
+### **Lessons Learned für alle zukünftigen Projekte:**
+
+#### **Was NICHT funktioniert:**
+- ❌ Komplexe Multi-Step Workflows beim ersten Setup
+- ❌ Custom YAML ohne bewährte Basis
+- ❌ FTP_HOST vs FTP_SERVER Varianten mixing
+- ❌ Stundenlange Debugging ohne funktionierende Baseline
+
+#### **Was funktioniert (EndlessRunner2 Proven):**
+- ✅ Minimaler Test-Workflow ZUERST
+- ✅ workflow_dispatch für manuelles Triggering
+- ✅ SamKirkland/FTP-Deploy-Action@v4.3.5 (latest stable)
+- ✅ IP-Adresse statt Domain für FTP_SERVER
+- ✅ Ultra-einfache erste Version, dann iterativ verbessern
+
+#### **5-Minuten Setup Template für zukünftige Projekte:**
+```yaml
+name: 🚀 Deploy to Hostinger
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  deploy:
+    name: 🎉 Deploy Website
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+    - name: 📂 Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: /public_html/
+```
+
+---
+
+## 🎨 TRANSPARENZ PROBLEME: Logo und Fischen (Desktop & Mobil)
 
 ## Aktueller Status
 - Logo wird GIF-first geladen (`bilder/logo neu 3d.gif`) mit JPG-Fallback.
