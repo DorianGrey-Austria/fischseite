@@ -45,6 +45,255 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* 🏆 HIGHSCORE DIALOG STYLES */
+        .highscore-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+            animation: dialog-fade-in 0.3s ease-out;
+        }
+
+        @keyframes dialog-fade-in {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(5px);
+            }
+        }
+
+        .highscore-dialog-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 3px solid var(--secondary-teal);
+            animation: dialog-slide-up 0.4s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highscore-dialog-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--secondary-teal), var(--accent-coral), var(--secondary-teal));
+            animation: rainbow-slide 3s linear infinite;
+        }
+
+        @keyframes dialog-slide-up {
+            from {
+                transform: translateY(50px) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes rainbow-slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .highscore-header {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score-summary {
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .score-item:last-child {
+            border-bottom: none;
+        }
+
+        .score-item.total {
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(255, 215, 0, 0.2);
+            margin: 10px -10px -10px -10px;
+            padding: 15px 10px;
+            border-radius: 10px;
+            border: none;
+        }
+
+        .score-item .label {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .score-item .value {
+            font-weight: bold;
+            color: var(--secondary-teal);
+            font-size: 16px;
+        }
+
+        .rank-info {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-coral);
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+        }
+
+        .name-input-section {
+            margin-bottom: 25px;
+        }
+
+        .name-input-section label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .name-input-section input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--secondary-teal);
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .name-input-section input:focus {
+            outline: none;
+            border-color: var(--accent-coral);
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+            transform: scale(1.02);
+        }
+
+        .name-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .primary-btn, .secondary-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .primary-btn {
+            background: linear-gradient(45deg, var(--secondary-teal), var(--primary-blue));
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .secondary-btn {
+            background: rgba(102, 102, 102, 0.1);
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .secondary-btn:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .save-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        .save-status.loading {
+            background: rgba(78, 205, 196, 0.2);
+            color: var(--primary-blue);
+        }
+
+        .save-status.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2E7D32;
+        }
+
+        .save-status.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #C62828;
+        }
+
+        /* Mobile Anpassungen für Dialog */
+        @media (max-width: 768px) {
+            .highscore-dialog-content {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .highscore-header {
+                font-size: 24px;
+            }
+
+            .dialog-buttons {
+                flex-direction: column;
+            }
+
+            .primary-btn, .secondary-btn {
+                margin-bottom: 10px;
+            }
+        }
+
         /* Underwater Background Effects - Reduced */
         body::before {
             content: '';
@@ -252,6 +501,16 @@
             }
         }
 
+        /* Fish Game Canvas Overlay (fills divider without altering layout) */
+        .fish-game-canvas {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
         /* Seaweed Animation Sides */
         .seaweed-left, .seaweed-right {
             position: fixed;
@@ -340,40 +599,50 @@
             height: 60px;
             object-fit: contain;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3));
             perspective: 1000px;
             transform-style: preserve-3d;
             will-change: transform;
             position: relative;
             flex-shrink: 0;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
         }
 
         .logo-image:hover {
             transform: rotateY(15deg) scale(1.05);
-            filter: drop-shadow(0 8px 16px var(--logo-green))
-                    drop-shadow(0 0 20px var(--logo-green-accent));
+            box-shadow:
+                0 0 20px rgba(76, 175, 80, 0.4),
+                0 0 40px rgba(76, 175, 80, 0.2),
+                0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Glassmorphism Background für Logo */
-        .logo-image::before {
+        /* Glow-Effekt nur an Kanten */
+        .logo-image::after {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(135deg,
-                rgba(76, 175, 80, 0.1) 0%,
-                rgba(102, 187, 106, 0.05) 100%);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            inset: -3px;
+            background: linear-gradient(45deg,
+                var(--logo-green),
+                var(--secondary-teal),
+                var(--logo-green-accent),
+                var(--secondary-teal));
+            border-radius: 10px;
             opacity: 0;
-            transition: opacity 0.3s ease;
             z-index: -1;
+            filter: blur(10px);
+            transition: opacity 0.4s ease;
         }
 
-        .logo-image:hover::before {
-            opacity: 1;
+        .logo-image:hover::after {
+            opacity: 0.6;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { filter: blur(10px); opacity: 0.6; }
+            50% { filter: blur(15px); opacity: 0.8; }
         }
 
         /* Floating Animation für Hero Logo */
@@ -381,12 +650,16 @@
             width: var(--logo-hero-size);
             height: auto;
             animation: floating 6s ease-in-out infinite;
-            filter: drop-shadow(0 8px 16px var(--logo-green))
-                    drop-shadow(0 0 30px var(--logo-green-accent));
-            margin: 2rem 0;
+            margin: 2rem auto;
             cursor: pointer;
             transition: transform 0.3s ease;
             position: relative;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow:
+                0 10px 30px rgba(76, 175, 80, 0.2),
+                0 5px 15px rgba(0, 105, 148, 0.1);
         }
 
         .hero-logo:hover {
@@ -531,41 +804,93 @@
             background: var(--accent-coral);
         }
 
-        /* Navigation Links */
+        /* Moderne Navigation mit Glassmorphism */
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 2rem;
+            gap: 1rem;
             margin: 0;
             transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 8px 15px;
         }
 
         .nav-links a {
             color: var(--white);
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
-            padding: 8px 16px;
+            padding: 12px 20px;
             border-radius: 20px;
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.5px;
         }
 
+        /* Fisch-Animation KORREKT */
         .nav-links a::before {
             content: '🐠';
             position: absolute;
-            left: -30px;
+            left: -35px;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: scaleX(1); /* Fisch schaut nach rechts */
+            font-size: 16px;
+        }
+
+        /* Wellen-Effekt beim Hover */
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(78, 205, 196, 0.3),
+                transparent
+            );
+            transform: translateY(-50%) rotate(45deg);
+            transition: left 0.6s;
         }
 
         .nav-links a:hover {
             color: var(--secondary-teal);
-            background: rgba(78, 205, 196, 0.2);
+            background: rgba(78, 205, 196, 0.15);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.2);
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
         }
 
         .nav-links a:hover::before {
+            left: 8px; /* Stoppt VOR dem Text */
+            opacity: 1;
+            animation: fish-wiggle 2s ease-in-out infinite;
+        }
+
+        .nav-links a:hover::after {
+            left: 100%;
+        }
+
+        @keyframes fish-wiggle {
+            0%, 100% { transform: translateY(0) scaleX(1) rotate(0deg); }
+            25% { transform: translateY(-3px) scaleX(1) rotate(5deg); }
+            75% { transform: translateY(3px) scaleX(1) rotate(-5deg); }
+        }
+
+        /* Active State */
+        .nav-links a.active {
+            background: rgba(78, 205, 196, 0.3);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .nav-links a.active::before {
             left: 8px;
             opacity: 1;
         }
@@ -586,6 +911,8 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
+            z-index: 100;
+            isolation: isolate;
         }
 
         /* Enhanced Wave Animation */
@@ -649,9 +976,9 @@
             content: '🐠';
             position: absolute;
             top: 25%;
-            left: -250px;
+            right: -250px;
             font-size: 1.5rem;
-            animation: fish-swim-left-to-right 35s linear infinite;
+            animation: fish-swim-right-to-left 35s linear infinite;
             opacity: 0.5;
             transform: translateZ(0px);
             animation-delay: -15s;
@@ -662,9 +989,9 @@
             content: '🦈';
             position: absolute;
             top: 45%;
-            left: -400px;
+            right: -400px;
             font-size: 2rem;
-            animation: fish-swim-left-to-right 45s linear infinite;
+            animation: fish-swim-right-to-left 45s linear infinite;
             opacity: 0.4;
             transform: translateZ(20px);
             animation-delay: -20s;
@@ -689,13 +1016,13 @@
                 transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             25% {
-                transform: translateY(-8px) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(-8px) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             50% {
                 transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             75% {
-                transform: translateY(8px) scaleX(-1) translateZ(var(--fish-depth, 0));
+                transform: translateY(8px) scaleX(1) translateZ(var(--fish-depth, 0));
             }
             100% {
                 left: calc(100% + 300px);
@@ -706,20 +1033,20 @@
         @keyframes fish-swim-right-to-left {
             0% {
                 right: -300px;
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             25% {
-                transform: translateY(-8px) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(-8px) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             50% {
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             75% {
-                transform: translateY(8px) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(8px) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
             100% {
                 right: calc(100% + 300px);
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
+                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
             }
         }
 
@@ -801,6 +1128,10 @@
         .media-section {
             padding: 4rem 0;
             background: var(--white);
+            position: relative;
+            z-index: 60;
+            isolation: isolate;
+            margin-top: -1px;
         }
 
         .section-title {
@@ -809,6 +1140,7 @@
             color: var(--primary-blue);
             margin-bottom: 3rem;
             position: relative;
+            z-index: 2;
         }
 
         .section-title::after {
@@ -868,6 +1200,21 @@
             transition: all 0.3s ease;
             position: relative;
         }
+
+        /* Transparent GIF overlay system */
+        .gif-overlay-el {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            opacity: var(--gif-overlay-opacity, 0.6);
+            mix-blend-mode: multiply; /* reduce white backgrounds */
+            image-rendering: -webkit-optimize-contrast;
+            will-change: transform, opacity;
+        }
+        .gif-overlay-el.screen { mix-blend-mode: screen; }
 
         .image-card:hover {
             transform: translateY(-5px);
@@ -983,6 +1330,8 @@
             height: 30px;
             object-fit: contain;
             filter: grayscale(100%);
+            opacity: 0.9;
+            mix-blend-mode: multiply;
         }
 
         .feature-card:hover .logo-watermark {
@@ -1034,6 +1383,74 @@
             color: var(--secondary-teal);
         }
 
+        /* Animated Fish School */
+        .fish-school {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .fish {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: swimAcross 40s linear infinite;
+            opacity: 0.6;
+        }
+
+        .fish:nth-child(1) {
+            top: 20%;
+            animation-duration: 35s;
+            animation-delay: 0s;
+            font-size: 1.2rem;
+        }
+        .fish:nth-child(2) {
+            top: 40%;
+            animation-duration: 42s;
+            animation-delay: 5s;
+            font-size: 1.8rem;
+        }
+        .fish:nth-child(3) {
+            top: 60%;
+            animation-duration: 38s;
+            animation-delay: 10s;
+            font-size: 1.4rem;
+        }
+        .fish:nth-child(4) {
+            top: 80%;
+            animation-duration: 45s;
+            animation-delay: 15s;
+            font-size: 1.6rem;
+        }
+        .fish:nth-child(5) {
+            top: 30%;
+            animation-duration: 40s;
+            animation-delay: 20s;
+            font-size: 1.3rem;
+        }
+
+        @keyframes swimAcross {
+            0% {
+                left: -50px;
+                transform: translateY(0) scaleX(1);
+            }
+            25% {
+                transform: translateY(-20px) scaleX(1);
+            }
+            50% {
+                transform: translateY(20px) scaleX(1);
+            }
+            75% {
+                transform: translateY(-10px) scaleX(1);
+            }
+            100% {
+                left: calc(100% + 50px);
+                transform: translateY(0) scaleX(1);
+            }
+        }
+
         /* Underwater Section Dividers */
         .underwater-divider {
             height: 80px;
@@ -1044,6 +1461,8 @@
                 rgba(78, 205, 196, 0.1) 0%,
                 rgba(0, 105, 148, 0.1) 50%,
                 rgba(78, 205, 196, 0.1) 100%);
+            z-index: 50;
+            isolation: isolate;
         }
 
         .underwater-divider::before {
@@ -1071,30 +1490,30 @@
             content: '🐠';
             position: absolute;
             top: 50%;
-            right: -50px;
+            left: -50px;
             font-size: 2rem;
-            animation: fishSwimRtl 30s infinite linear;
+            animation: fishSwimLtr 30s infinite linear;
             transform: translateY(-50%);
             opacity: 0.7;
         }
 
-        @keyframes fishSwimRtl {
+        @keyframes fishSwimLtr {
             0% {
-                right: -50px;
-                transform: translateY(-50%) scaleX(-1);
+                left: -50px;
+                transform: translateY(-50%) scaleX(1);
             }
             25% {
-                transform: translateY(-60%) scaleX(-1);
+                transform: translateY(-60%) scaleX(1);
             }
             50% {
-                transform: translateY(-40%) scaleX(-1);
+                transform: translateY(-40%) scaleX(1);
             }
             75% {
-                transform: translateY(-60%) scaleX(-1);
+                transform: translateY(-60%) scaleX(1);
             }
             100% {
-                right: calc(100% + 50px);
-                transform: translateY(-50%) scaleX(-1);
+                left: calc(100% + 50px);
+                transform: translateY(-50%) scaleX(1);
             }
         }
 
@@ -2082,9 +2501,133 @@
             font-size: 2rem;
             cursor: pointer;
         }
+
+        /* Logo-Klick Animation */
+        .returning-home {
+            animation: home-pulse 1s ease-out;
+        }
+
+        @keyframes home-pulse {
+            0% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2) drop-shadow(0 0 20px var(--secondary-teal));
+            }
+            100% {
+                filter: brightness(1);
+            }
+        }
+
+        /* Transparenz-Fixes für Logo und Fische */
+        .logo-image, .hero-logo, .footer-logo, .watermark-logo {
+            mix-blend-mode: multiply;
+            filter: brightness(1.1) contrast(1.2);
+            background: transparent !important;
+        }
+
+        .mario-skalar {
+            mix-blend-mode: multiply;
+            filter: brightness(1.05) contrast(1.1) drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+
+        /* Fallback für bessere Transparenz */
+        .logo-image:hover, .hero-logo:hover {
+            filter: brightness(1.2) contrast(1.3) drop-shadow(0 4px 12px var(--logo-green));
+        }
+
+        /* Aquarium Collector Game Styles */
+        .aquarium-game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            box-shadow: inset 0 0 50px rgba(0,105,148,0.3);
+        }
+
+        .game-exit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 59, 59, 0.8);
+            border: 2px solid white;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .game-exit-btn:hover {
+            background: rgba(255, 59, 59, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 59, 59, 0.4);
+        }
+
+        .game-start-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, var(--secondary-teal), var(--primary-blue));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            z-index: 1000;
+        }
+
+        .game-start-btn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            color: var(--primary-blue);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+
+        .game-ui > div {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .score-display { color: var(--accent-coral); }
+        .items-display { color: var(--secondary-teal); }
+        .timer-display { color: var(--deep-blue); }
     </style>
 </head>
 <body>
+    <!-- Animated Fish School -->
+    <div class="fish-school">
+        <div class="fish">🐠</div>
+        <div class="fish">🐟</div>
+        <div class="fish">🐡</div>
+        <div class="fish">🦈</div>
+        <div class="fish">🐠</div>
+    </div>
+
     <!-- Mario's Skalar Swimming Animation -->
     <div class="mario-skalar"></div>
 
@@ -2117,7 +2660,7 @@
         </button>
     </div>
 
-    <header>
+    <header style="position: relative; z-index: 110; isolation: isolate; background: white;">
         <nav class="container">
             <div class="logo">
                 <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
@@ -2137,6 +2680,7 @@
                 <li><a href="#verein" onclick="closeMobileMenu()">Verein</a></li>
                 <li><a href="#events" onclick="closeMobileMenu()">Events</a></li>
                 <li><a href="#mitglieder-portraits" onclick="closeMobileMenu()">Mitglieder-Portraits</a></li>
+                <li><a href="guestbook.html">📖 Gästebuch</a></li>
                 <li><a href="#mitgliedschaft" onclick="closeMobileMenu()">Mitgliedschaft</a></li>
                 <li><a href="#kontakt" onclick="closeMobileMenu()">Kontakt</a></li>
             </ul>
@@ -2208,6 +2752,7 @@
             <div id="images-gallery" class="image-gallery">
                 <div class="image-card" onclick="openLightbox('bilder/marioLanz_verein1.jpg')" data-photographer="Mario Lanz">
                     <img src="bilder/marioLanz_verein1.jpg" alt="Südamerika Biotop mit Skalaren" loading="lazy">
+                    <img class="gif-overlay-el" src="bilder/fish gif skala.gif" alt="Skalar Overlay" onerror="this.style.display='none'">
                     <div class="author-badge">📸 Mario Lanz</div>
                     <div class="portrait-link-indicator" onclick="event.stopPropagation(); navigateToPortrait('mario-lanz-portrait')">
                         👤 Portrait
@@ -2424,8 +2969,8 @@
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-magazine"></i>
+                    <div class="feature-icon" style="display:flex; align-items:center; justify-content:center;">
+                        <img src="bilder/logo alt.avif" alt="ATA Logo" style="width:56px; height:auto; object-fit:contain; opacity:0.9;" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                     </div>
                     <h3>ATA Magazin</h3>
                     <p>Mitglieder erhalten 10x jährlich das ATA (Aqua Terra Austria) Magazin mit aktuellen Fachartikeln</p>
@@ -3170,6 +3715,189 @@
             preloadImages();
             initAVIFImages();
         });
+
+        // Background sound toggle
+        (function() {
+            // Create a DOM <audio> element for more reliable playback across browsers
+            const audio = document.createElement('audio');
+            audio.id = 'bg-audio';
+            audio.preload = 'auto';
+            audio.loop = true;
+            audio.volume = 0.6;
+            audio.style.display = 'none';
+            audio.setAttribute('aria-hidden', 'true');
+            audio.setAttribute('playsinline', '');
+
+            // URL-encode the filename to handle the space in "river sound.wav"
+            const audioSrc = 'sound/' + encodeURIComponent('river sound.wav');
+            const source = document.createElement('source');
+            source.src = audioSrc;
+            source.type = 'audio/wav';
+            audio.appendChild(source);
+            document.body.appendChild(audio);
+
+            let soundEnabled = true;
+
+            const button = document.createElement('button');
+            button.id = 'sound-toggle';
+            button.type = 'button';
+            button.setAttribute('aria-pressed', 'true');
+            button.textContent = '🔊 Sound an';
+            button.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 14px;border-radius:10px;cursor:pointer;backdrop-filter:blur(4px);font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);';
+            document.body.appendChild(button);
+
+            function updateButton() {
+                button.textContent = soundEnabled ? '🔊 Sound an' : '🔇 Sound aus';
+                button.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+            }
+
+            function attemptPlay() {
+                // Ensure the element is loaded before play attempts
+                audio.load();
+                return audio.play().then(() => {
+                    soundEnabled = true;
+                    updateButton();
+                }).catch(() => {
+                    // Autoplay likely blocked; keep UI as enabled and wait for user gesture
+                    soundEnabled = true;
+                    updateButton();
+                });
+            }
+
+            button.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                if (soundEnabled) {
+                    attemptPlay();
+                } else {
+                    audio.pause();
+                    updateButton();
+                }
+            });
+
+            // Try to start once the page is ready
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                attemptPlay();
+            } else {
+                window.addEventListener('load', attemptPlay, { once: true });
+            }
+
+            // First user interaction reliably unlocks playback on iOS/Safari
+            const unlock = () => {
+                if (soundEnabled) {
+                    attemptPlay();
+                }
+            };
+            document.addEventListener('click', unlock, { once: true });
+            document.addEventListener('touchstart', unlock, { once: true });
+
+            // Pause when tab hidden, resume when visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    audio.pause();
+                } else if (soundEnabled) {
+                    audio.play().catch(() => {});
+                }
+            });
+        })();
+
+        // Logo-Klick zum Start-Screen
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
+            // Optional: Highlight Animation
+            document.body.classList.add('returning-home');
+            setTimeout(() => {
+                document.body.classList.remove('returning-home');
+            }, 1000);
+        }
+
+        // Alle Logo-Klicks
+        document.addEventListener('DOMContentLoaded', function() {
+            const logos = document.querySelectorAll('.logo-image, .hero-logo, .footer-logo');
+            logos.forEach(logo => {
+                logo.style.cursor = 'pointer';
+                logo.addEventListener('click', scrollToTop);
+            });
+
+            // Logo-Wrapper auch klickbar machen
+            const logoWrapper = document.querySelector('.logo');
+            if (logoWrapper) {
+                logoWrapper.style.cursor = 'pointer';
+                logoWrapper.addEventListener('click', scrollToTop);
+            }
+        });
+
+        // Interaktiver Bubble-Cursor
+        let bubbleTimer;
+        document.addEventListener('mousemove', function(e) {
+            clearTimeout(bubbleTimer);
+            bubbleTimer = setTimeout(() => {
+                createCursorBubble(e.clientX, e.clientY);
+            }, 100);
+        });
+
+        function createCursorBubble(x, y) {
+            const bubble = document.createElement('div');
+            const size = Math.random() * 15 + 5;
+
+            bubble.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle at 30% 30%,
+                    rgba(255, 255, 255, 0.8),
+                    rgba(173, 216, 230, 0.6));
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9998;
+                transform: translate(-50%, -50%);
+                animation: bubbleRise 3s ease-out forwards;
+            `;
+
+            document.body.appendChild(bubble);
+
+            setTimeout(() => bubble.remove(), 3000);
+        }
+
+        // CSS für Bubble-Animation
+        const bubbleStyle = document.createElement('style');
+        bubbleStyle.textContent = `
+            @keyframes bubbleRise {
+                0% {
+                    transform: translate(-50%, -50%) scale(0);
+                    opacity: 0;
+                }
+                20% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: translate(-50%, -250%) scale(1.5);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(bubbleStyle);
+
+        // Click-Explosion Bubbles
+        document.addEventListener('click', function(e) {
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const offsetX = (Math.random() - 0.5) * 50;
+                    const offsetY = (Math.random() - 0.5) * 50;
+                    createCursorBubble(e.clientX + offsetX, e.clientY + offsetY);
+                }, i * 50);
+            }
+        });
     </script>
+    <script src="video-preloader.js" defer></script>
+    <script src="aquarium-collector-game.js" defer></script>
+    <script src="interactive-fish-spawner.js" defer></script>
+    <script src="highscore-display.js" defer></script>
 </body>
 </html>
