@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐠 Supabase Connection Test - Fischseite</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section h2 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        #console-output {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-pending { background: #ffa500; }
+        .status-success { background: #00ff88; }
+        .status-error { background: #ff4444; }
+
+        .manual-test {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin: 5px 0;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐠 Supabase Database Test</h1>
+
+        <div class="test-section">
+            <h2>🔗 Connection Status</h2>
+            <p><span id="connection-status" class="status-indicator status-pending"></span>
+               <span id="connection-text">Waiting for test...</span></p>
+            <button class="btn" onclick="runConnectionTest()">Test Connection</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Highscore System Test</h2>
+            <p><span id="highscore-status" class="status-indicator status-pending"></span>
+               <span id="highscore-text">Waiting for test...</span></p>
+            <button class="btn" onclick="runHighscoreTest()">Test Highscores</button>
+
+            <div class="manual-test">
+                <h3>Manual Highscore Entry</h3>
+                <input type="text" id="player-name" placeholder="Player Name" value="TestPlayer">
+                <input type="number" id="score" placeholder="Score" value="250">
+                <input type="number" id="items" placeholder="Items Collected" value="18">
+                <button class="btn" onclick="addTestHighscore()">Add Test Entry</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>💬 Guestbook System Test</h2>
+            <p><span id="guestbook-status" class="status-indicator status-pending"></span>
+               <span id="guestbook-text">Waiting for test...</span></p>
+            <button class="btn" onclick="runGuestbookTest()">Test Guestbook</button>
+
+            <div class="manual-test">
+                <h3>Manual Guestbook Entry</h3>
+                <input type="text" id="guest-name" placeholder="Your Name" value="Test Visitor">
+                <input type="email" id="guest-email" placeholder="Your Email" value="test@example.com">
+                <textarea id="guest-message" placeholder="Your Message" rows="3">Test message from Supabase connection test!</textarea>
+                <button class="btn" onclick="addTestGuestbookEntry()">Add Test Entry</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Full Test Suite</h2>
+            <button class="btn" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn" onclick="clearConsole()">Clear Console</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Console Output</h2>
+            <div id="console-output">Waiting for tests to run...</div>
+        </div>
+    </div>
+
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load our test script -->
+    <script src="test-supabase-connection.js"></script>
+
+    <script>
+        // Console output capture
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        const consoleOutput = document.getElementById('console-output');
+
+        function appendToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : '📝';
+            consoleOutput.innerHTML += `[${timestamp}] ${prefix} ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            appendToConsole(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            appendToConsole(args.join(' '), 'error');
+        };
+
+        // UI Functions
+        function updateStatus(elementId, textId, status, text) {
+            const indicator = document.getElementById(elementId);
+            const textElement = document.getElementById(textId);
+
+            indicator.className = `status-indicator status-${status}`;
+            textElement.textContent = text;
+        }
+
+        async function runConnectionTest() {
+            updateStatus('connection-status', 'connection-text', 'pending', 'Testing connection...');
+
+            const tester = new SupabaseConnectionTester();
+            const success = await tester.init() && await tester.testConnection();
+
+            updateStatus('connection-status', 'connection-text',
+                success ? 'success' : 'error',
+                success ? 'Connection successful!' : 'Connection failed!');
+        }
+
+        async function runHighscoreTest() {
+            updateStatus('highscore-status', 'highscore-text', 'pending', 'Testing highscore operations...');
+
+            const tester = new SupabaseConnectionTester();
+            await tester.init();
+            const success = await tester.testHighscoreOperations();
+
+            updateStatus('highscore-status', 'highscore-text',
+                success ? 'success' : 'error',
+                success ? 'Highscore operations successful!' : 'Highscore operations failed!');
+        }
+
+        async function runGuestbookTest() {
+            updateStatus('guestbook-status', 'guestbook-text', 'pending', 'Testing guestbook operations...');
+
+            const tester = new SupabaseConnectionTester();
+            await tester.init();
+            const success = await tester.testGuestbookOperations();
+
+            updateStatus('guestbook-status', 'guestbook-text',
+                success ? 'success' : 'error',
+                success ? 'Guestbook operations successful!' : 'Guestbook operations failed!');
+        }
+
+        async function runAllTests() {
+            clearConsole();
+            console.log('🚀 Starting comprehensive Supabase test suite...\n');
+
+            const tester = new SupabaseConnectionTester();
+            await tester.runAllTests();
+        }
+
+        async function addTestHighscore() {
+            const name = document.getElementById('player-name').value;
+            const score = parseInt(document.getElementById('score').value);
+            const items = parseInt(document.getElementById('items').value);
+
+            console.log(`🎮 Adding manual highscore: ${name} - ${score} points, ${items} items`);
+
+            const tester = new SupabaseConnectionTester();
+            await tester.init();
+
+            const { data, error } = await tester.supabase
+                .from('highscores')
+                .insert([{
+                    player_name: name,
+                    score: score,
+                    collected_items: items,
+                    game_time: Math.floor(Math.random() * 60) + 30,
+                    ip_address: '127.0.0.1'
+                }])
+                .select();
+
+            if (error) {
+                console.error('❌ Manual highscore entry failed:', error.message);
+            } else {
+                console.log('✅ Manual highscore entry successful:', data[0]);
+            }
+        }
+
+        async function addTestGuestbookEntry() {
+            const name = document.getElementById('guest-name').value;
+            const email = document.getElementById('guest-email').value;
+            const message = document.getElementById('guest-message').value;
+
+            console.log(`💬 Adding manual guestbook entry: ${name}`);
+
+            const tester = new SupabaseConnectionTester();
+            await tester.init();
+
+            const { data, error } = await tester.supabase
+                .from('guestbook')
+                .insert([{
+                    name: name,
+                    message: message,
+                    ip_address: '127.0.0.1'
+                }])
+                .select();
+
+            if (error) {
+                console.error('❌ Manual guestbook entry failed:', error.message);
+            } else {
+                console.log('✅ Manual guestbook entry successful:', data[0]);
+            }
+        }
+
+        function clearConsole() {
+            consoleOutput.innerHTML = 'Console cleared.\n';
+        }
+
+        // Auto-run basic connection test on load
+        window.addEventListener('load', () => {
+            setTimeout(runConnectionTest, 1000);
+        });
+    </script>
+</body>
+</html>

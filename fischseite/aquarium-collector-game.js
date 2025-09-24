@@ -51,7 +51,7 @@ class SupabaseHighscoreManager {
         });
     }
 
-    async saveHighscore(playerName, score, collectedItems, gameTime, actualDuration) {
+    async saveHighscore(playerName, score, collectedItems, gameTime, actualDuration, gameLevel = 1) {
         if (!this.isConnected || !this.supabase) {
             console.warn('⚠️ Cannot save highscore - offline mode');
             return { success: false, error: 'Offline mode', data: null };
@@ -90,9 +90,9 @@ class SupabaseHighscoreManager {
     calculateBonusPoints(collectedItems, gameTime, actualDuration) {
         let bonus = 0;
 
-        // Perfect Score Bonus
-        if (collectedItems === 20) {  // Angepasst an neue Item-Anzahl (20 Fische)
-            bonus += 100;
+        // Perfect Score Bonus - dynamisch basierend auf totalItems
+        if (collectedItems >= 20) {  // Ab 20 Fischen gibt es Perfect Score Bonus
+            bonus += 100 + (collectedItems - 20) * 10; // Extra Bonus für mehr Items
         }
 
         // Speed Bonus (je schneller, desto mehr Bonus)
@@ -182,23 +182,25 @@ class SupabaseHighscoreManager {
 }
 
 class AquariumCollectorGame {
-    constructor(containerEl) {
+    constructor(containerEl, gameNumber = 1) {
         this.container = containerEl;
+        this.gameNumber = gameNumber;
         this.canvas = document.createElement('canvas');
         this.canvas.className = 'aquarium-game-canvas';
         this.ctx = this.canvas.getContext('2d');
         this.container.appendChild(this.canvas);
 
-        // Game State
-        this.totalItems = 20;  // 20 Fische können gesammelt werden
+        // Schwierigkeitsbasierte Game State
+        this.difficulty = this.calculateDifficulty(gameNumber);
+        this.totalItems = this.difficulty.items;
         this.collected = 0;
         this.missed = 0;
         this.score = 0;
-        this.gameTime = 120; // Mehr Zeit für 20 Items
+        this.gameTime = this.difficulty.time;
         this.timeLeft = this.gameTime;
         this.gameRunning = false;
         this.gameEnded = false;
-        this.firstFishClicked = false; // Tracking für erste Fisch-Interaktion
+        this.firstFishClicked = false;
 
         // 🏆 Highscore System
         this.highscoreManager = new SupabaseHighscoreManager();
@@ -257,6 +259,21 @@ class AquariumCollectorGame {
         this.initControls();
         this.spawnInitialItems();
         this.createUI();
+    }
+
+    calculateDifficulty(gameNumber) {
+        const difficulties = [
+            { level: 1, items: 15, time: 90, speedMultiplier: 1.0, pointsMultiplier: 1.0 },
+            { level: 2, items: 18, time: 85, speedMultiplier: 1.2, pointsMultiplier: 1.5 },
+            { level: 3, items: 20, time: 80, speedMultiplier: 1.4, pointsMultiplier: 2.0 },
+            { level: 4, items: 22, time: 75, speedMultiplier: 1.6, pointsMultiplier: 2.5 },
+            { level: 5, items: 25, time: 70, speedMultiplier: 1.8, pointsMultiplier: 3.0 },
+            { level: 6, items: 25, time: 65, speedMultiplier: 2.0, pointsMultiplier: 4.0 }
+        ];
+
+        // Falls mehr als 6 Spiele, verwende das schwerste Level
+        const index = Math.min(gameNumber - 1, difficulties.length - 1);
+        return difficulties[index];
     }
 
     setup() {
@@ -350,9 +367,9 @@ class AquariumCollectorGame {
         exitBtn.onclick = () => this.showExitDialog();
         this.container.appendChild(exitBtn);
 
-        // Start Button
+        // Start Button mit Spielnummer
         const startBtn = document.createElement('button');
-        startBtn.innerHTML = '🎮 Spiel Starten';
+        startBtn.innerHTML = `🎮 Spiel ${this.gameNumber} starten`;
         startBtn.className = 'game-start-btn';
         startBtn.onclick = () => this.startGame();
         this.container.appendChild(startBtn);
@@ -441,7 +458,9 @@ class AquariumCollectorGame {
             if (this.checkCollision(this.playerFish, item)) {
                 item.collected = true;
                 this.collected++;
-                this.score += item.points;
+                // Schwierigkeits-Multiplikator für höhere Punkte
+                const points = Math.floor(item.points * this.difficulty.pointsMultiplier);
+                this.score += points;
 
                 // Zeige Fisch-Summe beim ersten gesammelten Fisch
                 if (!this.firstFishClicked) {
@@ -799,7 +818,8 @@ class AquariumCollectorGame {
             this.score,
             this.collected,
             this.gameTime,
-            actualDuration
+            actualDuration,
+            this.gameNumber
         );
 
         if (result.success) {
@@ -838,7 +858,7 @@ class AquariumCollectorGame {
         this.collected = 0;
         this.missed = 0;
         this.score = 0;
-        this.timeLeft = this.gameTime;
+        this.timeLeft = this.difficulty.time;
         this.gameStartTime = null;
         this.gameEndTime = null;
         this.isPerfectScore = false;
@@ -887,10 +907,55 @@ const AquariumGameManager = {
     init() {
         const containers = document.querySelectorAll('.underwater-divider');
         containers.forEach((container, index) => {
-            const game = new AquariumCollectorGame(container);
+            const gameNumber = index + 1;
+            const game = new AquariumCollectorGame(container, gameNumber);
             this.instances.push(game);
-            this.addGameControls(container, game, index);
+            this.addGameControlsOutside(container, game, gameNumber);
         });
+    },
+
+    addGameControlsOutside(container, game, gameNumber) {
+        // Erstelle Wrapper für das gesamte Spiel + Controls
+        const gameWrapper = document.createElement('div');
+        gameWrapper.className = 'game-wrapper';
+        gameWrapper.style.cssText = `
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        `;
+
+        // Verschiebe den Container in den Wrapper
+        const parent = container.parentNode;
+        parent.insertBefore(gameWrapper, container);
+        gameWrapper.appendChild(container);
+
+        // Erstelle Control-Container unterhalb des Spiels
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'game-controls-external';
+        controlsContainer.style.cssText = `
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        `;
+
+        // Erstelle die drei Buttons
+        const stopGameBtn = this.createControlButton(`⏸️ Spiel ${gameNumber} stoppen`, () => this.stopGame(game));
+        const stopAllBtn = this.createControlButton('⏹️ Alle Spiele stoppen', () => this.stopAllGames());
+        const restartBtn = this.createControlButton(`🔄 Spiel ${gameNumber} neu starten`, () => this.restartGame(game));
+
+        controlsContainer.appendChild(stopGameBtn);
+        controlsContainer.appendChild(stopAllBtn);
+        controlsContainer.appendChild(restartBtn);
+
+        // Füge Controls zum Wrapper hinzu
+        gameWrapper.appendChild(controlsContainer);
     },
 
     addGameControls(container, game, index) {

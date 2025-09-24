@@ -4,48 +4,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Fischseite** is a modern, mobile-responsive website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. This is a single-page HTML application with an aquatic/underwater theme, featuring extensive CSS animations, responsive design, and multimedia galleries.
+**Fischseite** is a modern, interactive website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. This is a multi-module application featuring a main HTML page with extensive interactive JavaScript components, including games, animations, and dynamic content management.
 
 ## Architecture
 
-### Single-File Structure
-- **`index.html`** - Complete self-contained website with embedded CSS and JavaScript
-- **No build process** - Direct HTML file with inline styles and scripts
-- **No external dependencies** - Uses only CDN resources (Font Awesome)
+### Hybrid Structure
+- **`index.html`** - Main page with embedded CSS and core JavaScript
+- **Interactive Modules** - External JavaScript files for games and features
+- **No build process** - Direct HTML/JS with runtime module loading
+- **Minimal dependencies** - CDN resources only (Font Awesome, optional Supabase)
 
-### Key Directories
-- **`bilder/`** - Image gallery (6 JPEG images + 7 AVIF member images)
-- **`videos/`** - Video gallery (7 MOV files for aquarium videos)
-- **`docs/`** - Contains comprehensive PRD (Product Requirements Document)
-- **`test-*.js`** - Playwright testing scripts for functionality validation
+### Key Files & Directories
+- **`index.html`** - Main aquarium-themed website
+- **`guestbook.html`** - Supabase-integrated guestbook feature
+- **`bilder/`** - Image gallery (6 JPEG images)
+- **`videos/`** - Video gallery (7 MOV files)
+- **`docs/prd.md`** - Comprehensive Product Requirements Document
+- **Interactive JavaScript Modules:**
+  - `aquarium-collector-game.js` - Main collection game with scoring
+  - `interactive-fish-spawner.js` - Dynamic fish spawning system
+  - `video-preloader.js` - Smart video loading with animations
+  - `highscore-display.js` - Supabase-connected highscore system
+  - `fish-game.js` - Legacy game module
+- **Testing Scripts:** `test-*.js` - Comprehensive Playwright test suite
 
 ## Development Commands
 
-### Testing
+### Testing (Playwright-based)
 ```bash
-# Run main website test
+# Core website functionality
 node test-website.js
 
-# Run complete functionality test
+# Complete feature testing
 node test-complete-website.js
 
-# Run member portraits test
+# Specific feature tests
 node test-member-portraits.js
+node test-3d-underwater-effects.js
+node test-game-controls.js
+node test-menu-visibility.js
 ```
 
 ### Local Development
 ```bash
-# Simple HTTP server (Python)
+# Install Playwright dependencies
+npm install
+
+# Python HTTP server (recommended)
 python3 -m http.server 8000
 
-# Open directly in browser
+# Direct browser opening (limited functionality)
 open index.html
+
+# Access guestbook
+open http://localhost:8000/guestbook.html
 ```
 
-### Dependencies
+### Database Setup (Optional)
 ```bash
-# Install testing dependencies
-npm install
+# Supabase SQL setup for highscores and guestbook
+# Execute HIGHSCORE_SETUP.sql in Supabase SQL Editor
+# Execute SUPABASE_SETUP.sql for guestbook functionality
 ```
 
 ## Code Architecture
@@ -59,13 +78,16 @@ npm install
   - Fish swimming animations
   - Seaweed swaying
 
-### JavaScript Features
+### Interactive JavaScript System
+- **Modular Architecture** - External JS files loaded on demand
+- **Game Engine** - Aquarium collector game with physics and scoring
+- **Fish Spawning System** - Click-to-spawn interactive animations
+- **Smart Video Preloading** - Intersection Observer with animated loading
 - **Gallery Management** - Tab switching between images/videos
-- **Lightbox System** - Full-screen image viewing
-- **Mobile Navigation** - Hamburger menu with animations
-- **Smooth Scrolling** - Anchor-based navigation with offset calculations
-- **Touch Gestures** - Swipe to close lightbox
-- **Performance Optimizations** - Intersection Observer for animations, image preloading
+- **Lightbox System** - Full-screen image viewing with touch gestures
+- **Mobile Navigation** - Hamburger menu with glassmorphism effects
+- **Performance Optimizations** - RequestAnimationFrame animations, object pooling
+- **Database Integration** - Supabase for highscores and guestbook functionality
 
 ### Design System
 **Color Palette:**
@@ -77,13 +99,15 @@ npm install
 --light-blue: #E8F4F8
 ```
 
-**Key Components:**
-- Hero section with animated background
-- Floating fish navigation
-- Image/video galleries with tabs
-- Member portrait system
-- Coral dividers
-- Feature cards with hover effects
+**Key Interactive Components:**
+- Hero section with animated underwater background and spawnable fish
+- Floating fish navigation with glassmorphism effects
+- Aquarium collector game with 5 different food types and scoring
+- Image/video galleries with smart preloading and lightbox
+- Interactive fish spawner (click to spawn, max 10 fish)
+- Supabase-powered highscore system with perfect score detection
+- Video preloader with aquarium-themed loading animations
+- Coral dividers and bubble effects
 
 ## Content Management
 
@@ -95,42 +119,60 @@ npm install
 
 ### Video Standards
 - **Format:** MOV (QuickTime) with HTML5 video elements
-- **Controls:** Native browser controls enabled
-- **Preload:** Metadata only for performance
+- **Smart Loading:** Dynamic preloading via `video-preloader.js`
+- **Loading Animation:** Custom aquarium-themed progress indicators
+- **Controls:** Native browser controls with custom overlays
+- **Performance:** Intersection Observer triggers, parallel loading (3 videos max)
 
 ## Testing Strategy
 
 ### Automated Testing (Playwright)
-- **Responsive Design** - Tests multiple viewport sizes
-- **Gallery Functionality** - Tab switching, lightbox operations
-- **Performance Metrics** - Load time and resource counting
-- **Media Validation** - Checks all images and videos load correctly
-- **Accessibility** - Basic alt text and navigation testing
+- **Interactive Game Testing** - Aquarium collector game mechanics and scoring
+- **Fish Spawning** - Dynamic fish generation and click interactions
+- **Video Preloading** - Smart loading system and progress indicators
+- **3D Underwater Effects** - Animation performance and visual effects
+- **Menu Visibility** - Navigation states and glassmorphism effects
+- **Responsive Design** - Multiple viewport sizes and mobile interactions
+- **Gallery Functionality** - Tab switching, lightbox operations, touch gestures
+- **Performance Metrics** - Load time, resource counting, animation frame rates
+- **Media Validation** - All images, videos, and interactive elements load correctly
 
 ### Manual Testing Checklist
-1. Test on multiple devices (desktop, tablet, mobile)
-2. Verify all animations perform smoothly
-3. Check gallery tab switching
-4. Test lightbox functionality
-5. Validate mobile hamburger menu
-6. Confirm touch gestures work on mobile
+1. **Game Functionality** - Play aquarium collector game, verify scoring and perfect score detection
+2. **Interactive Fish** - Click fish to spawn new ones, test maximum limit (10 fish)
+3. **Video Preloading** - Scroll to video sections, verify loading animations appear
+4. **Supabase Integration** - Test highscore submission and guestbook (requires database setup)
+5. **Responsive Design** - Test on multiple devices and orientations
+6. **Animation Performance** - Verify smooth fish swimming, bubble effects, wave animations
+7. **Touch Interactions** - Test mobile touch gestures for games and navigation
+8. **Cross-browser Compatibility** - Test on Chrome, Safari, Firefox, Edge
 
 ## Deployment
 
 ### File Structure for Hosting
 ```
 fischseite/
-├── index.html          # Main entry point
-├── bilder/             # Image assets
-├── videos/             # Video assets
-└── (optional test files)
+├── index.html                      # Main website entry point
+├── guestbook.html                  # Supabase guestbook feature
+├── aquarium-collector-game.js      # Main collection game
+├── interactive-fish-spawner.js     # Fish spawning system
+├── video-preloader.js              # Smart video loading
+├── highscore-display.js           # Highscore system
+├── bilder/                        # Image gallery assets
+├── videos/                        # Video gallery assets
+├── HIGHSCORE_SETUP.sql           # Database setup script
+├── SUPABASE_SETUP.sql            # Guestbook database setup
+└── docs/prd.md                   # Product requirements
 ```
 
 ### Performance Considerations
+- **JavaScript Modules:** External JS files loaded on demand for better caching
+- **Animation Optimization:** RequestAnimationFrame for smooth 60fps animations
+- **Video Loading:** Smart preloading prevents unnecessary bandwidth usage
+- **Object Pooling:** Bubble and particle effects use efficient memory management
 - **Image Optimization:** Consider WebP conversion for better compression
-- **CDN:** Images and videos should be served from CDN in production
-- **Caching:** Set appropriate cache headers for static assets
-- **Bundle Size:** Single HTML file is ~81KB (manageable size)
+- **CDN:** Static assets (images/videos) should be served from CDN in production
+- **Supabase:** Database queries optimized with rate limiting and error handling
 
 ## Key Development Guidelines
 
@@ -141,36 +183,67 @@ fischseite/
 - Ensure proper contrast ratios for accessibility
 
 ### JavaScript Patterns
-- Event delegation for dynamic content
-- Throttled scroll listeners for performance
-- Promise-based async operations
-- Clean up event listeners appropriately
+- **Modular Architecture** - External files for major features, loaded via script tags
+- **Game State Management** - Object-oriented approach for games with proper cleanup
+- **Animation Framework** - RequestAnimationFrame with performance monitoring
+- **Async Loading** - Promise-based operations for Supabase and video preloading
+- **Event Management** - Proper delegation and cleanup for dynamic content
+- **Error Handling** - Graceful degradation when database features unavailable
 
 ### Content Updates
 - **New Images:** Add to `bilder/` directory and update gallery HTML
-- **New Videos:** Add to `videos/` directory and update video gallery
-- **Member Portraits:** Follow existing pattern with AVIF/JPEG fallbacks
+- **New Videos:** Add to `videos/` directory, update gallery HTML, consider preloader integration
+- **Game Content:** Modify `aquarium-collector-game.js` for new food types or scoring
+- **Interactive Features:** Update spawner configurations in `interactive-fish-spawner.js`
+- **Database Content:** Use Supabase dashboard for highscore and guestbook management
 
 ## Troubleshooting
 
 ### Common Issues
-1. **AVIF Support:** Fallback to JPEG implemented for older browsers
-2. **Video Playback:** MOV files may need server MIME type configuration
-3. **Mobile Performance:** Monitor animation performance on older devices
-4. **Memory Usage:** Large number of media files - implement cleanup if needed
+1. **Game Performance:** If animations lag, check RequestAnimationFrame implementation in game modules
+2. **Supabase Connection:** Verify credentials in JavaScript files and check network connectivity
+3. **Video Loading:** If preloader fails, check MOV file accessibility and server MIME types
+4. **Fish Spawning:** Maximum 10 fish limit prevents performance issues - check spawner logic
+5. **Mobile Touch:** Touch events may conflict with click events - test on actual devices
+6. **Cross-Origin:** Local file:// access limits some features - use HTTP server for full functionality
 
 ### Browser Compatibility
-- **Primary:** Chrome 90+, Safari 14+, Firefox 88+
-- **Fallbacks:** Basic IE 11 support for core functionality
-- **Mobile:** iOS Safari, Android Chrome optimized
+- **Primary:** Chrome 90+, Safari 14+, Firefox 88+ (full feature support)
+- **JavaScript Games:** Require modern browser with RequestAnimationFrame support
+- **Supabase Features:** Require fetch API and Promise support
+- **Mobile:** iOS Safari, Android Chrome optimized with touch event handling
+- **Fallback:** Core website functionality works in older browsers without interactive features
 
-## Future Enhancements
+## Interactive Features Architecture
 
-Based on the PRD, planned features include:
-- User authentication system
-- Event management functionality
-- Member profiles and discussion forums
-- Marketplace for equipment trading
-- Mobile app (PWA) capabilities
+### Game System (`aquarium-collector-game.js`)
+- **Food Types:** 5 different collectibles with varying point values (10-25 points)
+- **Scoring:** Perfect score detection (20/20 items) triggers highscore submission
+- **Physics:** Custom collision detection and item movement
+- **UI:** Real-time score display, timer, and game state management
 
-The current implementation serves as the visual foundation for these future community platform features.
+### Fish Spawner (`interactive-fish-spawner.js`)
+- **Click-to-Spawn:** Click any fish to generate new fish (max 10)
+- **Fish Types:** 7 different species with unique animations
+- **Animations:** Natural swimming patterns with random movement
+- **Reset System:** Counter display with reset functionality
+
+### Video System (`video-preloader.js`)
+- **Smart Triggering:** Intersection Observer detects when user approaches video areas
+- **Parallel Loading:** Loads up to 3 videos simultaneously for efficiency
+- **Progress Feedback:** Aquarium-themed loading animations with percentage display
+- **Fallback Handling:** Skip button and timeout protection (30 seconds)
+
+### Database Integration (`highscore-display.js`)
+- **Supabase Connection:** Real-time highscore storage and retrieval
+- **Rate Limiting:** 5 entries per IP per hour to prevent spam
+- **Error Handling:** Graceful degradation when database unavailable
+- **Display System:** Scrolling highscore ticker with golden badges for perfect scores
+
+## BMAD Method Integration
+
+This project includes BMAD (Breakthrough Method for Agile AI-Driven Development) framework:
+- **`.bmad-core/`** - Core BMAD system with specialized agents
+- **Agents Available:** PO, Architect, Developer, QA, Scrum Master, UX Expert
+- **Task Management:** Structured development workflow with agent-driven planning
+- **Documentation:** Comprehensive PRD and architectural guidelines in `docs/`

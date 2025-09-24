@@ -985,109 +985,9 @@
             z-index: 1;
         }
 
-        /* School Fish - Background Layer */
-        .fish-school-1::before {
-            content: '🐠 🐟 🐠';
-            position: absolute;
-            top: 15%;
-            left: -300px;
-            font-size: 1rem;
-            animation: fish-swim-left-to-right 25s linear infinite;
-            opacity: 0.3;
-            transform: translateZ(-50px);
-            animation-delay: -8s;
-        }
+        /* Background fish removed - replaced by unified fish system */
 
-        .fish-school-2::before {
-            content: '🐟 🐠';
-            position: absolute;
-            top: 35%;
-            right: -200px;
-            font-size: 0.9rem;
-            animation: fish-swim-right-to-left 30s linear infinite;
-            opacity: 0.35;
-            transform: translateZ(-30px);
-            animation-delay: -12s;
-        }
-
-        /* Main Fish - Middle Layer */
-        .hero::after {
-            content: '🐠';
-            position: absolute;
-            top: 25%;
-            right: -250px;
-            font-size: 1.5rem;
-            animation: fish-swim-right-to-left 35s linear infinite;
-            opacity: 0.5;
-            transform: translateZ(0px);
-            animation-delay: -15s;
-        }
-
-        /* Large Fish - Foreground Layer */
-        .fish-large::before {
-            content: '🦈';
-            position: absolute;
-            top: 45%;
-            right: -400px;
-            font-size: 2rem;
-            animation: fish-swim-right-to-left 45s linear infinite;
-            opacity: 0.4;
-            transform: translateZ(20px);
-            animation-delay: -20s;
-        }
-
-        /* Bottom Dwellers */
-        .fish-bottom::before {
-            content: '🐡';
-            position: absolute;
-            bottom: 15%;
-            right: -250px;
-            font-size: 1.3rem;
-            animation: fish-swim-right-to-left 38s linear infinite;
-            opacity: 0.4;
-            animation-delay: -18s;
-        }
-
-        /* Biologically Correct Swimming Animations */
-        @keyframes fish-swim-left-to-right {
-            0% {
-                left: -300px;
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
-            }
-            25% {
-                transform: translateY(-8px) scaleX(1) translateZ(var(--fish-depth, 0));
-            }
-            50% {
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
-            }
-            75% {
-                transform: translateY(8px) scaleX(1) translateZ(var(--fish-depth, 0));
-            }
-            100% {
-                left: calc(100% + 300px);
-                transform: translateY(0) scaleX(1) translateZ(var(--fish-depth, 0));
-            }
-        }
-
-        @keyframes fish-swim-right-to-left {
-            0% {
-                right: -300px;
-                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
-            }
-            25% {
-                transform: translateY(-8px) scaleX(-1) translateZ(var(--fish-depth, 0));
-            }
-            50% {
-                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
-            }
-            75% {
-                transform: translateY(8px) scaleX(-1) translateZ(var(--fish-depth, 0));
-            }
-            100% {
-                right: calc(100% + 300px);
-                transform: translateY(0) scaleX(-1) translateZ(var(--fish-depth, 0));
-            }
-        }
+        /* Old fish animations removed - unified system handles all fish */
 
         .hero-content {
             position: relative;
@@ -1580,105 +1480,9 @@
             }
         }
 
-        /* Mario's Skalar Swimming Animation */
-        .mario-skalar {
-            position: fixed;
-            top: 30%;
-            left: -150px;
-            width: 80px;
-            height: 60px;
-            background-image: url('bilder/fisch freigestellt skalar mario lanz verein.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            z-index: 10;
-            pointer-events: none;
-            animation: mario-skalar-swim-ltr 25s linear infinite;
-            opacity: 0.8;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
-        }
+        /* Mario's Skalar animation removed - unified fish system handles all fish */
 
-        @keyframes mario-skalar-swim-ltr {
-            0% {
-                left: -150px;
-                transform: translateY(0) scaleX(-1);  /* Gespiegelt für richtige Richtung */
-                opacity: 0;
-            }
-            5% {
-                opacity: 0.8;
-            }
-            25% {
-                transform: translateY(-30px) scaleX(-1);
-            }
-            50% {
-                transform: translateY(20px) scaleX(-1);
-            }
-            75% {
-                transform: translateY(-20px) scaleX(-1);
-            }
-            95% {
-                opacity: 0.8;
-            }
-            100% {
-                left: calc(100% + 150px);
-                transform: translateY(0) scaleX(-1);
-                opacity: 0;
-            }
-        }
 
-        /* Floating Fish Navigation Buttons */
-        .floating-fish-nav {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 900;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .fish-nav-button {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--secondary-teal);
-            border: none;
-            color: var(--white);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-            position: relative;
-            overflow: hidden;
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        .fish-nav-button::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 30%, transparent 70%);
-            transform: scale(0);
-            transition: transform 0.3s ease;
-        }
-
-        .fish-nav-button:hover {
-            transform: scale(1.1);
-            background: var(--accent-coral);
-            animation: fish-button-swim 0.5s ease;
-        }
-
-        .fish-nav-button:hover::before {
-            transform: scale(1.2);
-        }
-
-        @keyframes fish-button-swim {
-            0%, 100% { transform: scale(1.1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(5deg); }
-            75% { transform: scale(1.1) rotate(-5deg); }
-        }
 
         /* Modern Underwater Tab System */
         .tab-container {
@@ -2091,10 +1895,6 @@
                 padding: 0 1rem;
             }
 
-            /* Hide Floating Fish Nav on Mobile */
-            .floating-fish-nav {
-                display: none;
-            }
 
             /* Mobile Gallery Optimizations */
             .gallery-tabs {
@@ -2223,9 +2023,6 @@
 
         /* Ultra-Wide Screen Optimizations */
         @media (min-width: 1400px) {
-            .floating-fish-nav {
-                right: 50px;
-            }
 
             .hero h1 {
                 font-size: 4rem;
@@ -2589,10 +2386,7 @@
             background: transparent !important;
         }
 
-        .mario-skalar {
-            mix-blend-mode: multiply;
-            filter: brightness(1.05) contrast(1.1) drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
-        }
+        /* Mario skalar styling removed */
 
         /* Fallback für bessere Transparenz */
         .logo-image:hover, .hero-logo:hover {
@@ -2648,7 +2442,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-            z-index: 1000;
+            z-index: 10000;
         }
 
         .game-start-btn:hover {
@@ -2683,45 +2477,14 @@
 </head>
 <body>
     <!-- Animated Fish School -->
-    <div class="fish-school">
-        <div class="fish">🐠</div>
-        <div class="fish">🐟</div>
-        <div class="fish">🐡</div>
-        <div class="fish">🦈</div>
-        <div class="fish">🐠</div>
-    </div>
+    <!-- Old fish school removed - unified system handles all fish -->
 
-    <!-- Mario's Skalar Swimming Animation -->
-    <div class="mario-skalar"></div>
+    <!-- Mario's Skalar removed - unified fish system replaces all animations -->
 
     <!-- Seaweed Side Decorations -->
     <div class="seaweed-left"></div>
     <div class="seaweed-right"></div>
 
-    <!-- Floating Fish Navigation -->
-    <div class="floating-fish-nav">
-        <button class="fish-nav-button" onclick="scrollToSection('home')" title="Home">
-            🏠
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('galerie')" title="Galerie">
-            📷
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('verein')" title="Verein">
-            🐠
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('events')" title="Events">
-            🎉
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('mitglieder-portraits')" title="Mitglieder-Portraits">
-            👤
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('mitgliedschaft')" title="Mitgliedschaft">
-            🤝
-        </button>
-        <button class="fish-nav-button" onclick="scrollToSection('kontakt')" title="Kontakt">
-            📞
-        </button>
-    </div>
 
     <header style="position: relative; z-index: 1000; isolation: isolate; background: white;">
         <nav class="container">
@@ -2764,10 +2527,7 @@
 
         <!-- Advanced 3D Underwater Life Layers -->
         <div class="underwater-life">
-            <div class="fish-school-1"></div>
-            <div class="fish-school-2"></div>
-            <div class="fish-large"></div>
-            <div class="fish-bottom"></div>
+            <!-- Old fish elements removed - unified system replaces all -->
         </div>
 
         <div class="hero-content container">
@@ -3965,9 +3725,9 @@
             }
         });
     </script>
+    <script src="unified-fish-manager.js" defer></script>
     <script src="video-preloader.js" defer></script>
     <script src="aquarium-collector-game.js" defer></script>
-    <script src="interactive-fish-spawner.js" defer></script>
     <script src="highscore-display.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,89 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [closed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.pull_request.merged == true)
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js (for potential build steps)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies (if package.json exists)
+      run: |
+        if [ -f package.json ]; then
+          npm ci
+        else
+          echo "No package.json found, skipping npm install"
+        fi
+
+    - name: Run Tests (if available)
+      run: |
+        if [ -f package.json ] && npm list playwright > /dev/null 2>&1; then
+          echo "Running Playwright tests..."
+          npm test
+        else
+          echo "No tests configured, skipping test step"
+        fi
+
+    - name: Prepare Deployment Files
+      run: |
+        # Remove development files that shouldn't be deployed
+        rm -rf node_modules/ || true
+        rm -rf .github/ || true
+        rm -rf test-results/ || true
+        rm -rf docs/ || true
+        rm -f .DS_Store || true
+        rm -f package*.json || true
+        rm -f test-*.js || true
+        rm -f *.md || true
+        rm -f *.sql || true
+        rm -f *.py || true
+
+        # List files that will be deployed
+        echo "Files to be deployed:"
+        find . -type f -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.mov" -o -name "*.mp4" -o -name "*.avif" | sort
+
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: ${{ secrets.FTP_PATH }}
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/test-results/**
+          **/docs/**
+          **/*.md
+          **/*.sql
+          **/*.py
+          **/test-*.js
+          **/package*.json
+          **/.DS_Store
+
+    - name: Deployment Success Notification
+      if: success()
+      run: |
+        echo "🎉 Deployment successful!"
+        echo "🌐 Website updated: https://$(echo ${{ secrets.FTP_HOST }} | sed 's/ftp\.//')"
+
+    - name: Deployment Failure Notification
+      if: failure()
+      run: |
+        echo "❌ Deployment failed!"
+        echo "Check the logs above for details."
