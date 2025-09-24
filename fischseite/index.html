@@ -573,75 +573,146 @@
             padding: 0 20px;
         }
 
-        /* Modern Mobile Navigation */
+        /* PROFESSIONELLE NAVIGATION 2024 */
         header {
-            background: rgba(0, 105, 148, 0.95) !important;
-            color: var(--white);
-            padding: 0.8rem 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid var(--secondary-teal);
-            height: 80px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(0, 58, 92, 0.98);
+            backdrop-filter: blur(25px);
+            border-bottom: 3px solid rgba(78, 205, 196, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 75px;
         }
 
         nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
             height: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
+            position: relative;
         }
 
+        /* PREMIUM LOGO DESIGN */
         .logo {
-            font-size: 1.2rem;
-            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
             z-index: 1002;
             position: relative;
-            flex-shrink: 0;
-            max-width: 60%;
         }
 
-        .logo span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .logo:hover {
+            transform: scale(1.02);
         }
 
-        /* 3D Logo Styles */
-        .logo-image {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            perspective: 1000px;
-            transform-style: preserve-3d;
-            will-change: transform;
-            position: relative;
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.75);  /* Höhere Transparenz */
-            padding: 4px;
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
-        }
-
-        .logo-image:hover {
-            transform: rotateY(15deg) scale(1.05);
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
             box-shadow:
-                0 0 20px rgba(76, 175, 80, 0.4),
-                0 0 40px rgba(76, 175, 80, 0.2),
-                0 4px 15px rgba(0, 0, 0, 0.1);
+                0 8px 25px rgba(78, 205, 196, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: perspective(100px) rotateX(5deg);
+        }
+
+        .logo:hover .logo-icon {
+            transform: perspective(100px) rotateX(0deg) rotateY(-8deg) scale(1.1);
+            box-shadow:
+                0 12px 35px rgba(78, 205, 196, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 0 3px rgba(78, 205, 196, 0.2);
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        /* DESKTOP NAVIGATION */
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-links li {
+            position: relative;
+        }
+
+        .nav-links a {
+            display: block;
+            padding: 14px 22px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 50px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                rgba(78, 205, 196, 0.2),
+                rgba(255, 107, 107, 0.2));
+            border-radius: 50px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .nav-links a.active {
+            background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
+            color: white;
+            box-shadow: 0 6px 25px rgba(78, 205, 196, 0.4);
+            transform: translateY(-2px);
         }
 
         /* Glow-Effekt nur an Kanten */
@@ -2486,27 +2557,27 @@
     <div class="seaweed-right"></div>
 
 
-    <header style="position: relative; z-index: 1000; isolation: isolate; background: white;">
-        <nav class="container">
-            <div class="logo">
-                <img src="bilder/logo-neu-3d.jpg" alt="Aquaristikfreunde Steiermark Logo" class="logo-image logo-ripple" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
-                <span>Aquaristikfreunde Steiermark</span>
-            </div>
+    <!-- ✨ PROFESSIONELLE NAVIGATION V2.0 ✨ -->
+    <header>
+        <nav>
+            <a href="#home" class="logo">
+                <div class="logo-icon">🐠</div>
+                <span class="logo-text">Aquaristikfreunde</span>
+            </a>
 
-            <!-- Hamburger Menu Button -->
-            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menü öffnen">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
 
             <ul class="nav-links" id="nav-links">
-                <li><a href="#home" onclick="closeMobileMenu()">Home</a></li>
+                <li><a href="#home" class="active" onclick="closeMobileMenu()">Home</a></li>
                 <li><a href="#galerie" onclick="closeMobileMenu()">Galerie</a></li>
                 <li><a href="#verein" onclick="closeMobileMenu()">Verein</a></li>
                 <li><a href="#events" onclick="closeMobileMenu()">Events</a></li>
-                <li><a href="#mitglieder-portraits" onclick="closeMobileMenu()">Mitglieder-Portraits</a></li>
-                <li><a href="guestbook.html">📖 Gästebuch</a></li>
+                <li><a href="#mitglieder-portraits" onclick="closeMobileMenu()">Portraits</a></li>
+                <li><a href="guestbook.html" onclick="closeMobileMenu()">Gästebuch</a></li>
                 <li><a href="#mitgliedschaft" onclick="closeMobileMenu()">Mitgliedschaft</a></li>
                 <li><a href="#kontakt" onclick="closeMobileMenu()">Kontakt</a></li>
             </ul>
