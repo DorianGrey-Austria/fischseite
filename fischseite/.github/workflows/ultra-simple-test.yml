@@ -1,0 +1,12 @@
+name: 🧪 Ultra Simple Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🎯 GITHUB ACTIONS IS WORKING
+      run: echo "SUCCESS - GitHub Actions is functional!"
