@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Fischseite** is a modern, interactive website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. This is a multi-module application featuring a main HTML page with extensive interactive JavaScript components, including games, animations, and dynamic content management.
 
-**Current Status:** Version 2.7 - Stable with unified fish system, deployed to **vibecoding.company/fischseite**
+**Current Status:** Version 3.0 - Smart Fish System with deployment verification, deployed to **vibecoding.company/fischseite**
 
 ## Architecture
 
@@ -57,21 +57,20 @@ node test-simple-fish.js
 
 ### Local Development
 ```bash
-# Install Playwright dependencies
+# Install dependencies (Playwright for testing)
 npm install
 
-# Python HTTP server (recommended for full functionality)
-python3 -m http.server 8000
+# Local server (required for full functionality - file:// has CORS limitations)
+python3 -m http.server 8000    # Recommended
+# OR
+npx serve . -p 8000            # Node.js alternative
 
-# Alternative Node.js server
-npx serve . -p 8000
+# Access locally
+open http://localhost:8000                # Main site
+open http://localhost:8000/guestbook.html # Guestbook
 
-# Direct browser opening (limited functionality - no CORS features)
+# Direct file access (limited - no database features, video preloading issues)
 open index.html
-
-# Access via local server
-open http://localhost:8000
-open http://localhost:8000/guestbook.html
 ```
 
 ### Database Setup (Optional)
@@ -89,16 +88,17 @@ node test-supabase-connection.js
 
 ### Deployment & Verification
 ```bash
-# GitHub Actions deployment to Hostinger (auto-deploys on push to main)
-# Active workflow: .github/workflows/hostinger-deploy.yml
-# Deployment documentation: GITHUB_DEPLOYMENT_SETUP.md
+# Auto-deploy to vibecoding.company/fischseite via GitHub Actions
+git add . && git commit -m "description" && git push
 
-# Deploy to vibecoding.company/fischseite:
-git add . && git commit -m "deploy" && git push
+# Deployment configuration:
+# - Workflow: .github/workflows/hostinger-deploy.yml
+# - Target: Hostinger FTP (vibecoding.company/fischseite/)
+# - Documentation: GITHUB_DEPLOYMENT_SETUP.md
 
-# Verify deployment status
-node deployment-monitor.js
-node comprehensive-deployment-test.js
+# Verify deployment
+node deployment-monitor.js          # Monitor deployment status
+node comprehensive-deployment-test.js # Complete verification
 ```
 
 ## Code Architecture
@@ -243,6 +243,7 @@ fischseite/
 6. **Mobile Touch:** Touch events may conflict with click events - test on actual devices
 7. **Cross-Origin:** Local file:// access limits some features - use HTTP server for full functionality
 8. **Deployment Issues:** Check GitHub Actions logs and use deployment verification scripts
+9. **Cache Problems:** After deployment, old versions may be cached. Use deployment verification banners and wait 5+ minutes for propagation
 
 ### Browser Compatibility
 - **Primary:** Chrome 90+, Safari 14+, Firefox 88+ (full feature support)
