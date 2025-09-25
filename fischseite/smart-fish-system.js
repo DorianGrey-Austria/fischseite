@@ -14,21 +14,21 @@
 
     console.log('🐟 Smart Fish System V3.0 loading...');
 
-    // Fish database with anatomically correct orientations
+    // Fish database with anatomically correct orientations - SLOWER SPEEDS
     const FISH_DATABASE = {
         // Traditional fish - swim left to right, head pointing right
-        '🐠': { front: 'left', baseSpeed: 1.8, group: 'tropical', scaleX: -1 },
-        '🐟': { front: 'left', baseSpeed: 2.1, group: 'tropical', scaleX: -1 },
-        '🐡': { front: 'left', baseSpeed: 1.5, group: 'tropical', scaleX: -1 },
-        '🦈': { front: 'left', baseSpeed: 2.8, group: 'predator', scaleX: -1 },
+        '🐠': { front: 'left', baseSpeed: 0.6, group: 'tropical', scaleX: -1 },    // Much slower
+        '🐟': { front: 'left', baseSpeed: 0.7, group: 'tropical', scaleX: -1 },    // Much slower
+        '🐡': { front: 'left', baseSpeed: 0.5, group: 'tropical', scaleX: -1 },    // Much slower
+        '🦈': { front: 'left', baseSpeed: 0.9, group: 'predator', scaleX: -1 },    // Much slower
 
         // Crustaceans - different swimming pattern, often backwards/sideways
-        '🦐': { front: 'right', baseSpeed: 2.3, group: 'crustacean', scaleX: 1 },
-        '🦞': { front: 'right', baseSpeed: 1.0, group: 'crustacean', scaleX: 1 },
+        '🦐': { front: 'right', baseSpeed: 0.8, group: 'crustacean', scaleX: 1 },  // Much slower
+        '🦞': { front: 'right', baseSpeed: 0.4, group: 'crustacean', scaleX: 1 },  // Much slower
 
         // Cephalopods - no clear front/back, can move in any direction
-        '🐙': { front: 'random', baseSpeed: 1.3, group: 'cephalopod', scaleX: 1 },
-        '🦑': { front: 'random', baseSpeed: 1.4, group: 'cephalopod', scaleX: 1 }
+        '🐙': { front: 'random', baseSpeed: 0.5, group: 'cephalopod', scaleX: 1 }, // Much slower
+        '🦑': { front: 'random', baseSpeed: 0.6, group: 'cephalopod', scaleX: 1 }  // Much slower
     };
 
     const FISH_EMOJIS = Object.keys(FISH_DATABASE);

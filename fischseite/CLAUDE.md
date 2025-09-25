@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Fischseite** is a modern, interactive website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. This is a multi-module application featuring a main HTML page with extensive interactive JavaScript components, including games, animations, and dynamic content management.
 
+**Current Status:** Version 2.7 - Stable with unified fish system, deployed to **vibecoding.company/fischseite**
+
 ## Architecture
 
 ### Hybrid Structure
@@ -21,11 +23,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`videos/`** - Video gallery (7 MOV files)
 - **`docs/prd.md`** - Comprehensive Product Requirements Document
 - **Interactive JavaScript Modules:**
+  - `smart-fish-system.js` - Current unified fish spawning system
   - `aquarium-collector-game.js` - Main collection game with scoring
-  - `interactive-fish-spawner.js` - Dynamic fish spawning system
   - `video-preloader.js` - Smart video loading with animations
   - `highscore-display.js` - Supabase-connected highscore system
-  - `fish-game.js` - Legacy game module
+  - `fish-game.js` - Legacy game module (deprecated)
 - **Testing Scripts:** `test-*.js` - Comprehensive Playwright test suite
 
 ## Development Commands
@@ -38,11 +40,19 @@ node test-website.js
 # Complete feature testing
 node test-complete-website.js
 
+# Final verification tests (recommended)
+node test-final-verification.js
+node test-final-fish.js
+
 # Specific feature tests
 node test-member-portraits.js
 node test-3d-underwater-effects.js
 node test-game-controls.js
 node test-menu-visibility.js
+
+# Fish system testing
+node test-smart-fish-system.js
+node test-simple-fish.js
 ```
 
 ### Local Development
@@ -50,13 +60,17 @@ node test-menu-visibility.js
 # Install Playwright dependencies
 npm install
 
-# Python HTTP server (recommended)
+# Python HTTP server (recommended for full functionality)
 python3 -m http.server 8000
 
-# Direct browser opening (limited functionality)
+# Alternative Node.js server
+npx serve . -p 8000
+
+# Direct browser opening (limited functionality - no CORS features)
 open index.html
 
-# Access guestbook
+# Access via local server
+open http://localhost:8000
 open http://localhost:8000/guestbook.html
 ```
 
@@ -65,6 +79,26 @@ open http://localhost:8000/guestbook.html
 # Supabase SQL setup for highscores and guestbook
 # Execute HIGHSCORE_SETUP.sql in Supabase SQL Editor
 # Execute SUPABASE_SETUP.sql for guestbook functionality
+
+# Quick highscore table creation
+node create-highscore-table.js
+
+# Test Supabase connection
+node test-supabase-connection.js
+```
+
+### Deployment & Verification
+```bash
+# GitHub Actions deployment to Hostinger (auto-deploys on push to main)
+# Active workflow: .github/workflows/hostinger-deploy.yml
+# Deployment documentation: GITHUB_DEPLOYMENT_SETUP.md
+
+# Deploy to vibecoding.company/fischseite:
+git add . && git commit -m "deploy" && git push
+
+# Verify deployment status
+node deployment-monitor.js
+node comprehensive-deployment-test.js
 ```
 
 ## Code Architecture
@@ -154,12 +188,12 @@ open http://localhost:8000/guestbook.html
 fischseite/
 ├── index.html                      # Main website entry point
 ├── guestbook.html                  # Supabase guestbook feature
+├── smart-fish-system.js           # Current unified fish system
 ├── aquarium-collector-game.js      # Main collection game
-├── interactive-fish-spawner.js     # Fish spawning system
 ├── video-preloader.js              # Smart video loading
 ├── highscore-display.js           # Highscore system
-├── bilder/                        # Image gallery assets
-├── videos/                        # Video gallery assets
+├── bilder/                        # Image gallery assets (JPEG + AVIF/PNG logos)
+├── videos/                        # Video gallery assets (7 MOV files)
 ├── HIGHSCORE_SETUP.sql           # Database setup script
 ├── SUPABASE_SETUP.sql            # Guestbook database setup
 └── docs/prd.md                   # Product requirements
@@ -184,6 +218,7 @@ fischseite/
 
 ### JavaScript Patterns
 - **Modular Architecture** - External files for major features, loaded via script tags
+- **Unified Fish System** - All fish interactions consolidated in `smart-fish-system.js`
 - **Game State Management** - Object-oriented approach for games with proper cleanup
 - **Animation Framework** - RequestAnimationFrame with performance monitoring
 - **Async Loading** - Promise-based operations for Supabase and video preloading
@@ -194,18 +229,20 @@ fischseite/
 - **New Images:** Add to `bilder/` directory and update gallery HTML
 - **New Videos:** Add to `videos/` directory, update gallery HTML, consider preloader integration
 - **Game Content:** Modify `aquarium-collector-game.js` for new food types or scoring
-- **Interactive Features:** Update spawner configurations in `interactive-fish-spawner.js`
+- **Interactive Features:** Update spawner configurations in `smart-fish-system.js`
 - **Database Content:** Use Supabase dashboard for highscore and guestbook management
 
 ## Troubleshooting
 
 ### Common Issues
-1. **Game Performance:** If animations lag, check RequestAnimationFrame implementation in game modules
-2. **Supabase Connection:** Verify credentials in JavaScript files and check network connectivity
-3. **Video Loading:** If preloader fails, check MOV file accessibility and server MIME types
-4. **Fish Spawning:** Maximum 10 fish limit prevents performance issues - check spawner logic
-5. **Mobile Touch:** Touch events may conflict with click events - test on actual devices
-6. **Cross-Origin:** Local file:// access limits some features - use HTTP server for full functionality
+1. **Fish System:** Use `smart-fish-system.js` - unified system for all fish interactions
+2. **Game Performance:** If animations lag, check RequestAnimationFrame implementation in game modules
+3. **Supabase Connection:** Verify credentials in JavaScript files and check network connectivity
+4. **Video Loading:** If preloader fails, check MOV file accessibility and server MIME types
+5. **Fish Spawning:** Maximum 10 fish limit prevents performance issues - check spawner logic in smart-fish-system.js
+6. **Mobile Touch:** Touch events may conflict with click events - test on actual devices
+7. **Cross-Origin:** Local file:// access limits some features - use HTTP server for full functionality
+8. **Deployment Issues:** Check GitHub Actions logs and use deployment verification scripts
 
 ### Browser Compatibility
 - **Primary:** Chrome 90+, Safari 14+, Firefox 88+ (full feature support)
@@ -222,11 +259,12 @@ fischseite/
 - **Physics:** Custom collision detection and item movement
 - **UI:** Real-time score display, timer, and game state management
 
-### Fish Spawner (`interactive-fish-spawner.js`)
+### Fish Spawner (`smart-fish-system.js`)
 - **Click-to-Spawn:** Click any fish to generate new fish (max 10)
 - **Fish Types:** 7 different species with unique animations
 - **Animations:** Natural swimming patterns with random movement
 - **Reset System:** Counter display with reset functionality
+- **Unified System:** Replaces multiple legacy fish modules
 
 ### Video System (`video-preloader.js`)
 - **Smart Triggering:** Intersection Observer detects when user approaches video areas
