@@ -229,6 +229,19 @@ fischseite/
 
 ## Troubleshooting
 
+### 🚨 CRITICAL: TROUBLESHOOTING.md POLICY
+**Bei Problemen, die länger als 30 Minuten dauern:**
+1. **SOFORT dokumentieren** in `docs/Troubleshooting.md`
+2. **Problem-Symptome** detailliert beschreiben
+3. **Lösungsversuche** chronologisch festhalten
+4. **Root Cause** und finale Lösung dokumentieren
+5. **Lessons Learned** für zukünftige Projekte
+6. **Automatisierung** erstellen wenn möglich
+
+**Ziel:** Nie wieder dasselbe Problem 2x debuggen!
+
+### Common Issues
+
 ### Common Issues
 1. **Fish System:** Use `smart-fish-system.js` - unified system for all fish interactions
 2. **Game Performance:** If animations lag, check RequestAnimationFrame implementation in game modules
