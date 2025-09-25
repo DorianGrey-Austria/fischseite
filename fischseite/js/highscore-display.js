@@ -17,6 +17,8 @@ class HighscoreDisplay {
         this.visibleItems = 5; // Anzahl sichtbarer Items
         this.scrollSpeed = 0.5; // Pixel pro Frame
         this.isScrolling = true;
+        this.newScoreHighlight = null; // Für neue Score Highlights
+        this.particleEffects = [];
 
         this.init();
     }
@@ -85,7 +87,11 @@ class HighscoreDisplay {
 
         this.container.innerHTML = `
             <div class="highscore-strip-header">
-                <h3>🏆 Top Scores</h3>
+                <h3>🏆 Top Scores 🏆</h3>
+                <div class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>LIVE</span>
+                </div>
                 <div class="strip-controls">
                     <button id="toggle-scroll" class="control-btn" title="Scroll pausieren/fortsetzen">⏸️</button>
                     <button id="refresh-scores" class="control-btn" title="Aktualisieren">🔄</button>

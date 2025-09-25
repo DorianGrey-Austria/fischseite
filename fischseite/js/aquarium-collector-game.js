@@ -229,6 +229,97 @@ class AquariumCollectorGame {
         this.gameEnded = false;
         this.firstFishClicked = false;
 
+        // 🔥 COMBO SYSTEM
+        this.combo = {
+            streak: 0,
+            multiplier: 1.0,
+            maxMultiplier: 5.0,
+            comboTimer: 3000, // 3 Sekunden für nächsten Combo
+            lastCollectionTime: 0,
+            displayTimer: null
+        };
+
+        // ⚡ POWER-UPS SYSTEM
+        this.powerUps = [];
+        this.activePowerUps = [];
+        this.powerUpTypes = [
+            {
+                type: 'speed_boost',
+                emoji: '💨',
+                duration: 5000,
+                spawnChance: 0.1,
+                color: '#FFD700',
+                effect: () => {
+                    this.playerFish.speed *= 2;
+                    this.showPowerUpEffect('SPEED BOOST!');
+                }
+            },
+            {
+                type: 'time_freeze',
+                emoji: '❄️',
+                duration: 3000,
+                spawnChance: 0.08,
+                color: '#00FFFF',
+                effect: () => {
+                    this.timeFrozen = true;
+                    this.showPowerUpEffect('TIME FREEZE!');
+                }
+            },
+            {
+                type: 'magnet',
+                emoji: '🧲',
+                duration: 6000,
+                spawnChance: 0.06,
+                color: '#FF1493',
+                effect: () => {
+                    this.magnetActive = true;
+                    this.magnetRadius = 150;
+                    this.showPowerUpEffect('MAGNET!');
+                }
+            },
+            {
+                type: 'double_points',
+                emoji: '💎',
+                duration: 8000,
+                spawnChance: 0.05,
+                color: '#9370DB',
+                effect: () => {
+                    this.pointMultiplier = 2;
+                    this.showPowerUpEffect('DOUBLE POINTS!');
+                }
+            }
+        ];
+        this.timeFrozen = false;
+        this.magnetActive = false;
+        this.magnetRadius = 0;
+        this.pointMultiplier = 1;
+
+        // 🎨 VISUAL EFFECTS
+        this.screenShake = {
+            active: false,
+            intensity: 0,
+            duration: 0,
+            startTime: 0
+        };
+        this.colorOverlay = {
+            active: false,
+            color: 'rgba(0,0,0,0)',
+            duration: 0,
+            startTime: 0
+        };
+        this.comboEffects = [];
+        this.powerUpEffects = [];
+
+        // 🔊 SOUND SYSTEM
+        this.soundEnabled = true;
+        this.sounds = {
+            collect: this.createSound(800, 0.1, 0.1),
+            combo: this.createSound(1200, 0.1, 0.15),
+            powerup: this.createSound(1500, 0.2, 0.2),
+            perfect: this.createSound(2000, 0.3, 0.3),
+            gameOver: this.createSound(300, 0.5, 0.2)
+        };
+
         // 🏆 Highscore System
         this.highscoreManager = new SupabaseHighscoreManager();
         this.gameStartTime = null;
@@ -258,6 +349,7 @@ class AquariumCollectorGame {
         this.collectibles = [];
         this.particles = [];
         this.bubbles = [];
+        this.playerTrails = []; // Spieler-Trails für visuelle Effekte
 
         // Hintergrund laden
         this.backgroundImg = new Image();
@@ -420,6 +512,259 @@ class AquariumCollectorGame {
             }
         `;
         document.head.appendChild(styles);
+    }
+
+    // 🎨 NEUE VISUELLE EFFEKT METHODEN
+    drawPlayerTrails() {
+        this.playerTrails.forEach(trail => {
+            this.ctx.save();
+            this.ctx.globalAlpha = trail.opacity;
+            this.ctx.font = '40px Arial';
+            this.ctx.fillText('🐠', trail.x - 20, trail.y + 15);
+            this.ctx.restore();
+        });
+    }
+
+    drawPowerUps() {
+        this.powerUps.forEach(powerUp => {
+            this.ctx.save();
+            this.ctx.translate(powerUp.x, powerUp.y);
+            this.ctx.rotate(powerUp.rotation);
+
+            // Glow-Effekt
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = powerUp.color;
+
+            // Power-Up zeichnen
+            this.ctx.font = `${powerUp.size}px Arial`;
+            this.ctx.fillText(powerUp.emoji, -powerUp.size/2, powerUp.size/2);
+
+            this.ctx.restore();
+        });
+    }
+
+    drawComboEffects() {
+        this.comboEffects.forEach(effect => {
+            this.ctx.save();
+            this.ctx.globalAlpha = effect.opacity;
+            this.ctx.font = `bold ${20 * effect.scale}px Arial`;
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.strokeStyle = '#FF6B6B';
+            this.ctx.lineWidth = 2;
+            this.ctx.fillText(effect.text, effect.x, effect.y);
+            this.ctx.strokeText(effect.text, effect.x, effect.y);
+            this.ctx.restore();
+        });
+    }
+
+    drawPowerUpEffects() {
+        this.powerUpEffects.forEach(effect => {
+            this.ctx.save();
+            this.ctx.globalAlpha = effect.opacity;
+            this.ctx.font = 'bold 24px Arial';
+            this.ctx.fillStyle = effect.color || '#FFFFFF';
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeText(effect.text, effect.x, effect.y);
+            this.ctx.fillText(effect.text, effect.x, effect.y);
+            this.ctx.restore();
+        });
+    }
+
+    drawComboMeter() {
+        const x = this.canvas.width - 150;
+        const y = 100;
+
+        this.ctx.save();
+
+        // Combo-Hintergrund
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        this.ctx.fillRect(x, y, 120, 40);
+
+        // Combo-Text
+        this.ctx.font = 'bold 16px Arial';
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.fillText(`COMBO x${this.combo.streak}`, x + 10, y + 18);
+
+        // Multiplikator
+        this.ctx.font = '14px Arial';
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillText(`${this.combo.multiplier.toFixed(1)}x Points`, x + 10, y + 34);
+
+        this.ctx.restore();
+    }
+
+    drawActivePowerUps() {
+        const x = 10;
+        let y = 200;
+
+        this.activePowerUps.forEach(active => {
+            const remaining = Math.ceil((active.duration - (Date.now() - active.startTime)) / 1000);
+
+            this.ctx.save();
+            this.ctx.font = '16px Arial';
+            this.ctx.fillStyle = active.powerUp.color;
+            this.ctx.fillText(`${active.powerUp.emoji} ${remaining}s`, x, y);
+            this.ctx.restore();
+
+            y += 25;
+        });
+    }
+
+    // 🔥 COMBO UND EFFEKT METHODEN
+    showComboEffect(text) {
+        this.comboEffects.push({
+            text: text,
+            x: this.canvas.width / 2,
+            y: 100,
+            opacity: 1.0,
+            scale: 1.0
+        });
+    }
+
+    showPowerUpEffect(text) {
+        this.powerUpEffects.push({
+            text: text,
+            x: this.canvas.width / 2,
+            y: 150,
+            opacity: 1.0,
+            color: '#FFFF00'
+        });
+
+        // Farb-Overlay aktivieren
+        this.colorOverlay.active = true;
+        this.colorOverlay.color = 'rgba(255, 255, 0, 0.1)';
+        this.colorOverlay.duration = 500;
+        this.colorOverlay.startTime = Date.now();
+    }
+
+    createPointsAnimation(x, y, text, isCombo) {
+        const color = isCombo ? '#FFD700' : '#FFFFFF';
+        this.powerUpEffects.push({
+            text: text,
+            x: x,
+            y: y,
+            opacity: 1.0,
+            color: color
+        });
+    }
+
+    triggerScreenShake(intensity, duration) {
+        this.screenShake.active = true;
+        this.screenShake.intensity = intensity;
+        this.screenShake.duration = duration;
+        this.screenShake.startTime = Date.now();
+    }
+
+    // ⚡ POWER-UP METHODEN
+    spawnPowerUp() {
+        // Zufällig Power-Ups spawnen
+        this.powerUpTypes.forEach(type => {
+            if (Math.random() < type.spawnChance * 0.1) { // Reduzierte Chance pro Update
+                this.powerUps.push({
+                    ...type,
+                    x: Math.random() * (this.canvas.width - 60) + 30,
+                    y: -50,
+                    width: 40,
+                    height: 40,
+                    size: 35,
+                    speed: 1.5,
+                    rotation: 0
+                });
+            }
+        });
+    }
+
+    activatePowerUp(powerUp) {
+        // Aktiviere Power-Up Effekt
+        powerUp.effect();
+
+        // Füge zu aktiven Power-Ups hinzu
+        this.activePowerUps.push({
+            powerUp: powerUp,
+            startTime: Date.now(),
+            duration: powerUp.duration
+        });
+
+        // Screen-Effekte
+        this.triggerScreenShake(10, 300);
+        this.colorOverlay.active = true;
+        this.colorOverlay.color = `${powerUp.color}33`; // 20% opacity
+        this.colorOverlay.duration = 300;
+        this.colorOverlay.startTime = Date.now();
+
+        // Sound abspielen
+        this.playSound('powerup');
+    }
+
+    deactivatePowerUp(active) {
+        // Power-Up Effekte zurücksetzen
+        switch(active.powerUp.type) {
+            case 'speed_boost':
+                this.playerFish.speed = 5;
+                break;
+            case 'time_freeze':
+                this.timeFrozen = false;
+                break;
+            case 'magnet':
+                this.magnetActive = false;
+                this.magnetRadius = 0;
+                break;
+            case 'double_points':
+                this.pointMultiplier = 1;
+                break;
+        }
+    }
+
+    createCollectionEffect(x, y, color, count = 8) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                size: Math.random() * 6 + 2,
+                color: color,
+                life: 1
+            });
+        }
+    }
+
+    // 🔊 SOUND METHODEN
+    createSound(frequency, duration, volume) {
+        return {
+            frequency: frequency,
+            duration: duration * 1000, // in ms
+            volume: volume
+        };
+    }
+
+    playSound(type) {
+        if (!this.soundEnabled) return;
+
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const sound = this.sounds[type];
+            if (!sound) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = sound.frequency;
+            gainNode.gain.value = sound.volume;
+
+            oscillator.start(0);
+            oscillator.stop(audioContext.currentTime + sound.duration / 1000);
+
+            // Fade out
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration / 1000);
+        } catch (error) {
+            // Ignoriere Audio-Fehler (Browser-Kompatibilität)
+            console.warn('Audio not available:', error);
+        }
     }
 
     calculateDifficulty(gameNumber) {
@@ -619,9 +964,34 @@ class AquariumCollectorGame {
             if (this.checkCollision(this.playerFish, item)) {
                 item.collected = true;
                 this.collected++;
-                // Schwierigkeits-Multiplikator für höhere Punkte
-                const points = Math.floor(item.points * this.difficulty.pointsMultiplier);
+
+                // 🔥 COMBO SYSTEM UPDATE
+                const now = Date.now();
+                if (now - this.combo.lastCollectionTime < this.combo.comboTimer) {
+                    this.combo.streak++;
+                    this.combo.multiplier = Math.min(1 + (this.combo.streak * 0.3), this.combo.maxMultiplier);
+                    this.showComboEffect(`${this.combo.streak}x COMBO!`);
+                    this.triggerScreenShake(5, 200);
+                } else {
+                    this.combo.streak = 0;
+                    this.combo.multiplier = 1.0;
+                }
+                this.combo.lastCollectionTime = now;
+
+                // Schwierigkeits-Multiplikator + Combo + Power-Up Multiplikator
+                const basePoints = Math.floor(item.points * this.difficulty.pointsMultiplier);
+                const points = Math.floor(basePoints * this.combo.multiplier * this.pointMultiplier);
                 this.score += points;
+
+                // Zeige Punkte-Animation
+                this.createPointsAnimation(item.x, item.y, `+${points}`, this.combo.streak > 0);
+
+                // Sound abspielen
+                if (this.combo.streak > 5) {
+                    this.playSound('combo');
+                } else {
+                    this.playSound('collect');
+                }
 
                 // Zeige Fisch-Summe beim ersten gesammelten Fisch
                 if (!this.firstFishClicked) {
@@ -633,14 +1003,65 @@ class AquariumCollectorGame {
                     }
                 }
 
-                // Partikel-Effekt
-                this.createCollectionEffect(item.x, item.y, item.color);
+                // Partikel-Effekt (verstärkt bei Combo)
+                const particleCount = this.combo.streak > 0 ? 15 : 8;
+                this.createCollectionEffect(item.x, item.y, item.color, particleCount);
 
                 // Item entfernen
                 this.collectibles.splice(index, 1);
 
                 this.updateUI();
             }
+        });
+
+        // Power-Ups bewegen und checken
+        this.powerUps.forEach((powerUp, index) => {
+            powerUp.y += powerUp.speed;
+            powerUp.rotation += 0.05;
+
+            // Magnet-Effekt auf Power-Ups
+            if (this.magnetActive) {
+                const dx = this.playerFish.x - powerUp.x;
+                const dy = this.playerFish.y - powerUp.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < this.magnetRadius) {
+                    powerUp.x += dx * 0.08;
+                    powerUp.y += dy * 0.08;
+                }
+            }
+
+            // Kollision mit Spieler
+            if (this.checkCollision(this.playerFish, powerUp)) {
+                this.activatePowerUp(powerUp);
+                this.powerUps.splice(index, 1);
+            }
+
+            // Entfernen wenn außerhalb
+            if (powerUp.y > this.canvas.height + 50) {
+                this.powerUps.splice(index, 1);
+            }
+        });
+
+        // Aktive Power-Ups verwalten
+        this.activePowerUps = this.activePowerUps.filter(active => {
+            if (Date.now() - active.startTime > active.duration) {
+                this.deactivatePowerUp(active);
+                return false;
+            }
+            return true;
+        });
+
+        // Spieler-Trails bei Speed Boost
+        if (this.playerFish.speed > 5) {
+            this.playerTrails.push({
+                x: this.playerFish.x,
+                y: this.playerFish.y,
+                opacity: 0.5
+            });
+        }
+        this.playerTrails = this.playerTrails.filter(trail => {
+            trail.opacity -= 0.05;
+            return trail.opacity > 0;
         });
 
         // Blasen bewegen
@@ -659,6 +1080,21 @@ class AquariumCollectorGame {
             particle.life -= 0.02;
             particle.size *= 0.99;
             return particle.life > 0;
+        });
+
+        // Combo-Effekte aktualisieren
+        this.comboEffects = this.comboEffects.filter(effect => {
+            effect.y -= 2;
+            effect.opacity -= 0.02;
+            effect.scale += 0.02;
+            return effect.opacity > 0;
+        });
+
+        // Power-Up-Effekte aktualisieren
+        this.powerUpEffects = this.powerUpEffects.filter(effect => {
+            effect.y -= 1.5;
+            effect.opacity -= 0.015;
+            return effect.opacity > 0;
         });
     }
 
@@ -686,6 +1122,21 @@ class AquariumCollectorGame {
     }
 
     draw() {
+        this.ctx.save();
+
+        // Screen Shake Effekt
+        if (this.screenShake.active) {
+            const now = Date.now();
+            const elapsed = now - this.screenShake.startTime;
+            if (elapsed < this.screenShake.duration) {
+                const shakeX = (Math.random() - 0.5) * this.screenShake.intensity;
+                const shakeY = (Math.random() - 0.5) * this.screenShake.intensity;
+                this.ctx.translate(shakeX, shakeY);
+            } else {
+                this.screenShake.active = false;
+            }
+        }
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Hintergrund
@@ -694,14 +1145,48 @@ class AquariumCollectorGame {
         // Blasen
         this.drawBubbles();
 
+        // Spieler-Trails
+        this.drawPlayerTrails();
+
         // Sammelobjekte
         this.drawCollectibles();
+
+        // Power-Ups
+        this.drawPowerUps();
 
         // Spieler-Fisch
         this.drawPlayerFish();
 
         // Partikel-Effekte
         this.drawParticles();
+
+        // Combo-Effekte
+        this.drawComboEffects();
+
+        // Power-Up Effekte
+        this.drawPowerUpEffects();
+
+        // Farb-Overlay für Power-Ups
+        if (this.colorOverlay.active) {
+            const now = Date.now();
+            const elapsed = now - this.colorOverlay.startTime;
+            if (elapsed < this.colorOverlay.duration) {
+                this.ctx.fillStyle = this.colorOverlay.color;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            } else {
+                this.colorOverlay.active = false;
+            }
+        }
+
+        // Combo-Anzeige
+        if (this.combo.streak > 0) {
+            this.drawComboMeter();
+        }
+
+        // Aktive Power-Ups Anzeige
+        this.drawActivePowerUps();
+
+        this.ctx.restore();
 
         // Game Over Overlay
         if (this.gameEnded) {
