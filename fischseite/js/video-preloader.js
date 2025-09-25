@@ -15,15 +15,32 @@ class VideoPreloader {
         this.userInitiated = false;
     }
 
-    // Wird nur aufgerufen, wenn User Videos ansehen möchte
-    startPreloading() {
+    // Wird nur aufgerufen, wenn User auf Videos-Tab klickt
+    startPreloadingOnDemand() {
         if (this.isActive || this.loadingComplete) {
             return;
         }
 
-        console.log('🎬 Video-Preloader wird gestartet...');
+        console.log('🎬 Smart Video-Preloader: Nur 1. Video + Progressive Loading...');
         this.userInitiated = true;
-        this.init();
+        this.initSmartLoading();
+    }
+
+    // Neue smarte Methode - nur das erste Video vollständig, Rest progressiv
+    initSmartLoading() {
+        this.isActive = true;
+        this.findVideos();
+
+        if (this.videos.length === 0) {
+            console.log('📹 Keine Videos gefunden');
+            return;
+        }
+
+        // Erstes Video zu 75% laden
+        this.preloadFirstVideo().then(() => {
+            console.log('✅ Erstes Video geladen - starte progressive Preloading');
+            this.progressivePreload();
+        });
     }
 
     init() {
@@ -70,6 +87,144 @@ class VideoPreloader {
 
         this.total = this.videos.length;
         console.log(`🎬 Found ${this.total} videos to preload:`, this.videos);
+    }
+
+    async preloadFirstVideo() {
+        if (this.videos.length === 0) return;
+
+        const firstVideoUrl = this.videos[0];
+        console.log(`📹 Lade erstes Video: ${firstVideoUrl}`);
+
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'auto';
+            video.src = firstVideoUrl;
+
+            // Partial Loading - stoppe bei 75%
+            video.addEventListener('progress', () => {
+                if (video.buffered.length > 0) {
+                    const loaded = video.buffered.end(0) / video.duration;
+                    if (loaded >= 0.75) {
+                        console.log('✅ Erstes Video 75% geladen');
+                        this.showVideoPreloadIndicator(firstVideoUrl, 100);
+                        resolve();
+                    }
+                }
+            });
+
+            video.addEventListener('canplaythrough', () => {
+                console.log('✅ Erstes Video vollständig geladen');
+                this.showVideoPreloadIndicator(firstVideoUrl, 100);
+                resolve();
+            });
+
+            video.addEventListener('error', () => {
+                console.warn('⚠️ Erstes Video Ladefehler');
+                resolve();
+            });
+
+            video.style.display = 'none';
+            document.body.appendChild(video);
+
+            // Timeout fallback
+            setTimeout(resolve, 5000);
+        });
+    }
+
+    async progressivePreload() {
+        console.log('🔄 Progressive Preloading gestartet...');
+
+        // Videos 2-4: 50% laden
+        const midVideos = this.videos.slice(1, 4);
+        for (let i = 0; i < midVideos.length; i++) {
+            setTimeout(() => {
+                this.preloadVideoPartial(midVideos[i], 0.5, 50);
+            }, i * 2000); // Alle 2 Sekunden
+        }
+
+        // Videos 5+: 25% laden
+        const restVideos = this.videos.slice(4);
+        for (let i = 0; i < restVideos.length; i++) {
+            setTimeout(() => {
+                this.preloadVideoPartial(restVideos[i], 0.25, 25);
+            }, (i + 3) * 3000); // Nach den mittleren Videos
+        }
+    }
+
+    async preloadVideoPartial(url, percentage, indicatorPercent) {
+        return new Promise((resolve) => {
+            console.log(`📹 Lade ${url} zu ${percentage * 100}%`);
+
+            const video = document.createElement('video');
+            video.preload = 'auto';
+            video.src = url;
+
+            let resolved = false;
+
+            video.addEventListener('progress', () => {
+                if (resolved) return;
+                if (video.buffered.length > 0) {
+                    const loaded = video.buffered.end(0) / video.duration;
+                    if (loaded >= percentage) {
+                        resolved = true;
+                        console.log(`✅ ${url} ${percentage * 100}% geladen`);
+                        this.showVideoPreloadIndicator(url, indicatorPercent);
+                        resolve();
+                    }
+                }
+            });
+
+            video.addEventListener('error', () => {
+                if (!resolved) {
+                    resolved = true;
+                    resolve();
+                }
+            });
+
+            video.style.display = 'none';
+            document.body.appendChild(video);
+
+            // Timeout pro Video
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    resolve();
+                }
+            }, 8000);
+        });
+    }
+
+    showVideoPreloadIndicator(videoUrl, percentage) {
+        // Visual indicator für geladene Videos
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+            if (video.src.includes(videoUrl.split('/').pop())) {
+                const container = video.closest('.video-card') || video.parentElement;
+                if (container) {
+                    let indicator = container.querySelector('.preload-indicator');
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.className = 'preload-indicator';
+                        indicator.style.cssText = `
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            background: rgba(76, 175, 80, 0.9);
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            font-size: 11px;
+                            font-weight: bold;
+                            z-index: 10;
+                            transition: all 0.3s ease;
+                        `;
+                        container.style.position = 'relative';
+                        container.appendChild(indicator);
+                    }
+                    indicator.textContent = percentage === 100 ? '✅ Bereit' : `${percentage}% ⬇️`;
+                }
+            }
+        });
     }
 
     createLoadingScreen() {
@@ -482,44 +637,58 @@ document.addEventListener('DOMContentLoaded', () => {
     setupVideoTriggers();
 });
 
-// Setup für automatische Triggers
+// Setup für automatische Triggers - NUR bei Videos Tab-Klick
 function setupVideoTriggers() {
-    // 1. Wenn User zu Video-Galerie scrollt
-    const videoSections = document.querySelectorAll('[class*="video"], [class*="galerie"]');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && videoPreloader && !videoPreloader.isActive) {
-                console.log('📺 User scrollt zu Video-Bereich - starte Preloader');
-                videoPreloader.startPreloading();
-            }
-        });
-    }, {
-        rootMargin: '200px' // Starte schon 200px bevor Sektion sichtbar wird
-    });
-
-    videoSections.forEach(section => observer.observe(section));
-
-    // 2. Beim ersten Klick auf ein Video
+    // 1. Wenn User auf Videos Tab klickt (primärer Trigger)
     document.addEventListener('click', (e) => {
+        const target = e.target;
+
+        // Video Tab Button Detection
+        if ((target.textContent && target.textContent.includes('Videos')) ||
+            (target.closest && target.closest('.tab-button')) ||
+            target.classList.contains('tab-button')) {
+
+            if (videoPreloader && !videoPreloader.isActive) {
+                console.log('🎬 User klickt Videos Tab - starte Smart Preloading');
+                videoPreloader.startPreloadingOnDemand();
+            }
+        }
+
+        // Direkte Video-Klicks
         const video = e.target.closest('video');
         if (video && videoPreloader && !videoPreloader.isActive) {
-            console.log('🎬 User klickt auf Video - starte Preloader');
-            videoPreloader.startPreloading();
+            console.log('🎬 User klickt auf Video - starte Smart Preloading');
+            videoPreloader.startPreloadingOnDemand();
         }
     });
 
-    // 3. Manual Trigger über Button (optional)
-    const videoButtons = document.querySelectorAll('[data-action="preload-videos"]');
-    videoButtons.forEach(btn => {
+    // 2. Gallery Tab Switching Detection
+    const tabButtons = document.querySelectorAll('.tab-button, [onclick*="showGallery"]');
+    tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            if (videoPreloader && !videoPreloader.isActive) {
-                console.log('🎥 Manual Video-Preloader Start');
-                videoPreloader.startPreloading();
+            if (btn.textContent.includes('Video') && videoPreloader && !videoPreloader.isActive) {
+                console.log('🎥 Video Tab aktiviert - starte Smart Preloading');
+                setTimeout(() => videoPreloader.startPreloadingOnDemand(), 100);
             }
         });
     });
 
-    console.log('✅ Video-Trigger eingerichtet - Preloader startet bei Bedarf');
+    // 3. Intersection Observer nur als Backup (deaktiviert für bessere Performance)
+    /*
+    const videoSections = document.querySelectorAll('[class*="video"]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && videoPreloader && !videoPreloader.isActive) {
+                console.log('📺 Video-Bereich sichtbar - starte Preloader');
+                videoPreloader.startPreloadingOnDemand();
+            }
+        });
+    }, { rootMargin: '100px' });
+
+    videoSections.forEach(section => observer.observe(section));
+    */
+
+    console.log('✅ Smart Video-Trigger eingerichtet - Startet nur bei Videos Tab-Klick');
 }
 
 // Event Listener für bessere Video-Performance

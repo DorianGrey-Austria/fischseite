@@ -623,7 +623,7 @@
         .logo-icon {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
+            background: linear-gradient(135deg, var(--logo-green), var(--logo-green-accent));
             border-radius: 15px;
             display: flex;
             align-items: center;
@@ -631,8 +631,9 @@
             font-size: 24px;
             color: white;
             box-shadow:
-                0 8px 25px rgba(78, 205, 196, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                0 8px 25px rgba(76, 175, 80, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(76, 175, 80, 0.2);
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform: perspective(100px) rotateX(5deg);
         }
@@ -646,11 +647,15 @@
         }
 
         .logo-text {
-            background: linear-gradient(135deg, var(--secondary-teal), var(--accent-coral));
+            background: linear-gradient(135deg, var(--logo-green), var(--logo-green-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 800;
+            margin-right: 40px; /* Mehr Abstand zum Menü */
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
         /* DESKTOP NAVIGATION */
@@ -993,16 +998,35 @@
             75% { transform: translateY(3px) scaleX(1) rotate(-5deg); }
         }
 
-        /* Active State */
+        /* Active State - Fisch schwimmt ein */
         .nav-links a.active {
             background: rgba(78, 205, 196, 0.3);
             color: var(--white);
             font-weight: 600;
+            position: relative;
         }
 
         .nav-links a.active::before {
             left: 8px;
             opacity: 1;
+            animation: fish-swim-in 0.8s ease-out;
+        }
+
+        @keyframes fish-swim-in {
+            0% {
+                left: 150px;
+                opacity: 0;
+                transform: scaleX(-1); /* Von rechts kommend */
+            }
+            50% {
+                opacity: 1;
+                transform: scaleX(-1);
+            }
+            100% {
+                left: 8px;
+                opacity: 1;
+                transform: scaleX(1); /* Dreht sich zur normalen Position */
+            }
         }
 
         /* Body Offset for Fixed Header */
@@ -3076,22 +3100,6 @@
             </div>
             <p>&copy; 2024 Aquaristikfreunde Steiermark. Alle Rechte vorbehalten.</p>
 
-            <!-- 🚨 DEPLOYMENT PROOF - Sichtbare Version für User -->
-            <div style="background: rgba(78, 205, 196, 0.2); border: 2px solid #4ECDC4; border-radius: 10px; padding: 15px; margin: 20px auto; max-width: 600px; text-align: center;">
-                <h4 style="color: #4ECDC4; margin: 0 0 10px 0; font-size: 18px;">🚀 DEPLOYMENT STATUS</h4>
-                <p style="margin: 5px 0; font-size: 16px; font-weight: bold;">
-                    <span style="color: #4ECDC4;">📝 VERSION:</span> <span style="color: #FF6B6B;">V2.7 MASTER WORKFLOW</span>
-                </p>
-                <p style="margin: 5px 0; font-size: 14px;">
-                    <span style="color: #4ECDC4;">📅 Deployed:</span> <span id="deploymentTime">24. September 2025, 16:45 Uhr</span>
-                </p>
-                <p style="margin: 5px 0; font-size: 14px;">
-                    <span style="color: #4ECDC4;">🌐 Domain:</span> vibecoding.company/fischseite
-                </p>
-                <p style="margin: 5px 0; font-size: 12px; color: #ccc;">
-                    Claude Code Deployment System ✅ AKTIV
-                </p>
-            </div>
         </div>
     </footer>
 
@@ -3384,10 +3392,49 @@
             }
         });
 
+        // Dynamic Navigation Fish Indicator System
+        function updateActiveNavigation() {
+            const sections = ['home', 'galerie', 'verein', 'events', 'mitglieder-portraits', 'mitgliedschaft'];
+            const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+
+            // Bestimme aktuelle Sektion basierend auf Scroll-Position
+            let currentSection = 'home';
+            const scrollPosition = window.scrollY + 100;
+
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section && scrollPosition >= section.offsetTop) {
+                    currentSection = sectionId;
+                }
+            });
+
+            // Update active class mit Fisch-Animation
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === '#' + currentSection) {
+                    if (!link.classList.contains('active')) {
+                        // Entferne active von allen anderen
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        // Füge active mit Animation hinzu
+                        link.classList.add('active');
+                        console.log(`🐠 Fisch schwimmt zu: ${currentSection}`);
+                    }
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             showGallery('images');
             setupIntersectionObserver();
+            updateActiveNavigation(); // Initial update
+
+            // Update Navigation beim Scrollen
+            window.addEventListener('scroll', function() {
+                updateActiveNavigation();
+            });
 
             // Add scroll listener for parallax (throttled)
             let ticking = false;
@@ -3580,16 +3627,127 @@
             let soundEnabled = true;
 
             const button = document.createElement('button');
+            // Sound Control Container mit Volume Slider
+            const soundContainer = document.createElement('div');
+            soundContainer.id = 'sound-control-container';
+            soundContainer.style.cssText = `
+                position: fixed;
+                top: 16px;
+                right: 16px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+            `;
+
             button.id = 'sound-toggle';
             button.type = 'button';
             button.setAttribute('aria-pressed', 'true');
-            button.textContent = '🔊 Sound an';
-            button.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;background:rgba(0,0,0,0.55);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 14px;border-radius:10px;cursor:pointer;backdrop-filter:blur(4px);font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);';
-            document.body.appendChild(button);
+            button.textContent = '🔊';
+            button.style.cssText = `
+                background: rgba(0, 58, 92, 0.8);
+                color: #4ECDC4;
+                border: 2px solid rgba(78, 205, 196, 0.4);
+                padding: 12px 16px;
+                border-radius: 15px;
+                cursor: pointer;
+                backdrop-filter: blur(10px);
+                font-weight: 600;
+                font-size: 18px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+                min-width: 50px;
+                text-align: center;
+            `;
+
+            // Volume Control Slider
+            const volumeControl = document.createElement('div');
+            volumeControl.id = 'volume-control';
+            volumeControl.style.cssText = `
+                background: rgba(0, 58, 92, 0.9);
+                border: 2px solid rgba(78, 205, 196, 0.4);
+                border-radius: 20px;
+                padding: 15px 10px;
+                backdrop-filter: blur(10px);
+                opacity: 0;
+                transform: translateY(-10px);
+                transition: all 0.3s ease;
+                pointer-events: none;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            `;
+
+            const volumeSlider = document.createElement('input');
+            volumeSlider.type = 'range';
+            volumeSlider.min = '0';
+            volumeSlider.max = '1';
+            volumeSlider.step = '0.1';
+            volumeSlider.value = localStorage.getItem('aquarium-volume') || '0.3';
+            audio.volume = parseFloat(volumeSlider.value);
+
+            volumeSlider.style.cssText = `
+                writing-mode: bt-lr; /* IE */
+                -webkit-appearance: slider-vertical; /* WebKit */
+                width: 30px;
+                height: 100px;
+                background: linear-gradient(to top, rgba(78, 205, 196, 0.2), rgba(78, 205, 196, 0.6));
+                outline: none;
+                border-radius: 10px;
+                cursor: pointer;
+            `;
+
+            const volumeLabel = document.createElement('div');
+            volumeLabel.style.cssText = `
+                color: #4ECDC4;
+                font-size: 10px;
+                text-align: center;
+                margin-top: 8px;
+                font-weight: 500;
+            `;
+            updateVolumeLabel();
+
+            function updateVolumeLabel() {
+                const percentage = Math.round(volumeSlider.value * 100);
+                volumeLabel.textContent = percentage + '%';
+            }
+
+            // Volume Control Events
+            volumeSlider.addEventListener('input', () => {
+                audio.volume = volumeSlider.value;
+                localStorage.setItem('aquarium-volume', volumeSlider.value);
+                updateVolumeLabel();
+            });
+
+            // Hover Effects
+            soundContainer.addEventListener('mouseenter', () => {
+                volumeControl.style.opacity = '1';
+                volumeControl.style.transform = 'translateY(0)';
+                volumeControl.style.pointerEvents = 'auto';
+                button.style.background = 'rgba(78, 205, 196, 0.2)';
+                button.style.color = 'white';
+                button.style.borderColor = 'rgba(78, 205, 196, 0.8)';
+            });
+
+            soundContainer.addEventListener('mouseleave', () => {
+                volumeControl.style.opacity = '0';
+                volumeControl.style.transform = 'translateY(-10px)';
+                volumeControl.style.pointerEvents = 'none';
+                button.style.background = 'rgba(0, 58, 92, 0.8)';
+                button.style.color = '#4ECDC4';
+                button.style.borderColor = 'rgba(78, 205, 196, 0.4)';
+            });
+
+            volumeControl.appendChild(volumeSlider);
+            volumeControl.appendChild(volumeLabel);
+            soundContainer.appendChild(button);
+            soundContainer.appendChild(volumeControl);
+            document.body.appendChild(soundContainer);
 
             function updateButton() {
-                button.textContent = soundEnabled ? '🔊 Sound an' : '🔇 Sound aus';
+                button.textContent = soundEnabled ? '🔊' : '🔇';
                 button.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+                button.style.color = soundEnabled ? '#4ECDC4' : '#FF6B6B';
             }
 
             function attemptPlay() {
@@ -3736,9 +3894,28 @@
             }
         });
     </script>
+    <!-- 🚀 DEPLOYMENT BANNER - Rechts unten, sehr transparent -->
+    <div id="deployment-banner" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; opacity: 0.15; transition: opacity 0.3s ease; pointer-events: none;">
+        <div style="background: rgba(78, 205, 196, 0.1); border: 1px solid rgba(78, 205, 196, 0.2); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #4ECDC4; font-family: monospace; text-align: right; backdrop-filter: blur(5px);">
+            <div>V3.0</div>
+            <div style="font-size: 9px; opacity: 0.7;">25.09.2025</div>
+        </div>
+    </div>
+
     <script src="js/smart-fish-system.js" defer></script>
     <script src="js/video-preloader.js" defer></script>
     <script src="js/aquarium-collector-game.js" defer></script>
     <script src="js/highscore-display.js" defer></script>
+
+    <script>
+        // Banner nach 10 Sekunden ausblenden
+        setTimeout(() => {
+            const banner = document.getElementById('deployment-banner');
+            if (banner) {
+                banner.style.opacity = '0.05';
+                setTimeout(() => banner.style.display = 'none', 5000);
+            }
+        }, 10000);
+    </script>
 </body>
 </html>

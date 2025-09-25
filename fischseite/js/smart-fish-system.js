@@ -14,21 +14,21 @@
 
     console.log('🐟 Smart Fish System V3.0 loading...');
 
-    // Fish database with anatomically correct orientations - SLOWER SPEEDS
+    // Fish database with anatomically correct orientations + Physics Properties
     const FISH_DATABASE = {
         // Traditional fish - swim left to right, head pointing right
-        '🐠': { front: 'left', baseSpeed: 0.6, group: 'tropical', scaleX: -1 },    // Much slower
-        '🐟': { front: 'left', baseSpeed: 0.7, group: 'tropical', scaleX: -1 },    // Much slower
-        '🐡': { front: 'left', baseSpeed: 0.5, group: 'tropical', scaleX: -1 },    // Much slower
-        '🦈': { front: 'left', baseSpeed: 0.9, group: 'predator', scaleX: -1 },    // Much slower
+        '🐠': { front: 'left', baseSpeed: 0.6, group: 'tropical', scaleX: -1, mass: 1.0, pushResistance: 0.8 },
+        '🐟': { front: 'left', baseSpeed: 0.7, group: 'tropical', scaleX: -1, mass: 0.8, pushResistance: 0.9 },
+        '🐡': { front: 'left', baseSpeed: 0.5, group: 'tropical', scaleX: -1, mass: 1.2, pushResistance: 0.6 },
+        '🦈': { front: 'left', baseSpeed: 0.9, group: 'predator', scaleX: -1, mass: 2.0, pushResistance: 0.4 },
 
         // Crustaceans - different swimming pattern, often backwards/sideways
-        '🦐': { front: 'right', baseSpeed: 0.8, group: 'crustacean', scaleX: 1 },  // Much slower
-        '🦞': { front: 'right', baseSpeed: 0.4, group: 'crustacean', scaleX: 1 },  // Much slower
+        '🦐': { front: 'right', baseSpeed: 0.8, group: 'crustacean', scaleX: 1, mass: 0.6, pushResistance: 1.2 },
+        '🦞': { front: 'right', baseSpeed: 0.4, group: 'crustacean', scaleX: 1, mass: 1.5, pushResistance: 0.5 },
 
         // Cephalopods - no clear front/back, can move in any direction
-        '🐙': { front: 'random', baseSpeed: 0.5, group: 'cephalopod', scaleX: 1 }, // Much slower
-        '🦑': { front: 'random', baseSpeed: 0.6, group: 'cephalopod', scaleX: 1 }  // Much slower
+        '🐙': { front: 'random', baseSpeed: 0.5, group: 'cephalopod', scaleX: 1, mass: 1.3, pushResistance: 0.7 },
+        '🦑': { front: 'random', baseSpeed: 0.6, group: 'cephalopod', scaleX: 1, mass: 1.1, pushResistance: 0.8 }
     };
 
     const FISH_EMOJIS = Object.keys(FISH_DATABASE);
@@ -55,6 +55,21 @@
         hintActive: false,
         initialized: false
     };
+
+    // Mouse position tracking für Physics
+    let mousePos = { x: null, y: null };
+
+    // Track mouse position globally
+    document.addEventListener('mousemove', (e) => {
+        mousePos.x = e.clientX;
+        mousePos.y = e.clientY;
+    });
+
+    // Hide mouse tracking when not on page
+    document.addEventListener('mouseleave', () => {
+        mousePos.x = null;
+        mousePos.y = null;
+    });
 
     // Create dynamic styles
     function createStyles() {
@@ -163,6 +178,16 @@
             y: Math.max(60, Math.min(y || 200, window.innerHeight - 100)),
             baseY: y || 200,
             speed: config.baseSpeed * (0.8 + Math.random() * 0.4),
+
+            // Physics Properties für Stoß-Mechanik
+            vx: 0, // Velocity X
+            vy: 0, // Velocity Y
+            pushForceX: 0,
+            pushForceY: 0,
+            mass: config.mass,
+            pushResistance: config.pushResistance,
+            isBeingPushed: false,
+            pushDecay: 0.95, // Wie schnell der Push-Effekt abnimmt
             scaleX: config.scaleX,
             layer: layer,
             size: finalSize,
@@ -225,10 +250,40 @@
 
     // Update fish animation
     function updateFish(fish, deltaTime) {
-        // Swimming movement
-        fish.x += fish.speed * (deltaTime / 16.67);
-        fish.swimOffset += deltaTime * 0.0008; // Slower for stability
-        fish.y = fish.baseY + Math.sin(fish.swimOffset) * 8; // Less vertical movement
+        // 🐟 PHYSICS-BASED MOVEMENT mit Push-Mechanik
+
+        // Mouse Interaction Detection
+        if (mousePos.x !== null && mousePos.y !== null) {
+            const fishRect = {
+                x: fish.x,
+                y: fish.y,
+                width: 40,
+                height: 30
+            };
+
+            const mouseRect = {
+                x: mousePos.x - 10,
+                y: mousePos.y - 10,
+                width: 20,
+                height: 20
+            };
+
+            // Kollision mit Mauszeiger
+            if (isColliding(fishRect, mouseRect)) {
+                applyPushForce(fish, mousePos.x, mousePos.y);
+            }
+        }
+
+        // Apply physics forces
+        updateFishPhysics(fish, deltaTime);
+
+        // Base swimming movement (wenn nicht gestossen)
+        if (!fish.isBeingPushed) {
+            fish.x += fish.speed * (deltaTime / 16.67);
+            fish.swimOffset += deltaTime * 0.0008;
+            fish.y = fish.baseY + Math.sin(fish.swimOffset) * 8;
+        }
+
         fish.age += deltaTime;
 
         // Fade out near end of life
@@ -246,6 +301,79 @@
 
         // Check if fish should be removed (out of bounds or too old)
         return fish.x > window.innerWidth + 100 || fish.age >= fish.maxAge;
+    }
+
+    // 🐟 PHYSICS HELPER FUNCTIONS
+
+    function isColliding(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    }
+
+    function applyPushForce(fish, mouseX, mouseY) {
+        const centerX = fish.x + 20; // Fish center
+        const centerY = fish.y + 15;
+
+        // Berechne Push-Richtung (von Maus weg)
+        const deltaX = centerX - mouseX;
+        const deltaY = centerY - mouseY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance < 50) { // Nur bei naher Berührung
+            const pushStrength = 3.5; // Subtil aber spürbar
+            const normalizedX = deltaX / distance;
+            const normalizedY = deltaY / distance;
+
+            // Berücksichtige Fisch-Eigenschaften
+            const actualPushStrength = pushStrength * fish.pushResistance;
+
+            fish.pushForceX = normalizedX * actualPushStrength;
+            fish.pushForceY = normalizedY * actualPushStrength;
+            fish.isBeingPushed = true;
+
+            // Visual Feedback
+            fish.element.style.transition = 'transform 0.1s ease';
+            fish.element.style.transform = `scaleX(${fish.scaleX}) scale(1.1)`;
+            setTimeout(() => {
+                fish.element.style.transform = `scaleX(${fish.scaleX}) scale(1)`;
+            }, 150);
+
+            console.log(`🐟 ${fish.emoji} wurde gestossen! Kraft: ${actualPushStrength.toFixed(2)}`);
+        }
+    }
+
+    function updateFishPhysics(fish, deltaTime) {
+        if (!fish.isBeingPushed && Math.abs(fish.pushForceX) < 0.1 && Math.abs(fish.pushForceY) < 0.1) {
+            return;
+        }
+
+        // Apply push forces to position
+        fish.x += fish.pushForceX * (deltaTime / 16.67);
+        fish.y += fish.pushForceY * (deltaTime / 16.67);
+
+        // Decay push forces
+        fish.pushForceX *= fish.pushDecay;
+        fish.pushForceY *= fish.pushDecay;
+
+        // Check if push is nearly finished
+        if (Math.abs(fish.pushForceX) < 0.1 && Math.abs(fish.pushForceY) < 0.1) {
+            fish.isBeingPushed = false;
+            fish.pushForceX = 0;
+            fish.pushForceY = 0;
+
+            // Return to normal swimming - smoothly adjust back to lane
+            const targetY = fish.baseY;
+            const yDiff = targetY - fish.y;
+            if (Math.abs(yDiff) > 5) {
+                fish.baseY = fish.y; // Update base to current position for smooth transition
+            }
+        }
+
+        // Keep fish within screen bounds
+        fish.x = Math.max(10, Math.min(fish.x, window.innerWidth - 50));
+        fish.y = Math.max(10, Math.min(fish.y, window.innerHeight - 50));
     }
 
     // Animation loop

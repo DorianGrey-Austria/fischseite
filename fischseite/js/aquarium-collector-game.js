@@ -183,11 +183,38 @@ class SupabaseHighscoreManager {
 
 class AquariumCollectorGame {
     constructor(containerEl, gameNumber = 1) {
+        if (!containerEl) {
+            throw new Error('Container element is required');
+        }
+
         this.container = containerEl;
         this.gameNumber = gameNumber;
+
+        console.log(`🎮 Initialisiere AquariumCollectorGame ${gameNumber}...`);
+
+        // Canvas mit Error-Handling erstellen
         this.canvas = document.createElement('canvas');
         this.canvas.className = 'aquarium-game-canvas';
-        this.ctx = this.canvas.getContext('2d');
+        this.canvas.style.cssText = `
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            cursor: crosshair;
+            background: transparent;
+        `;
+
+        try {
+            this.ctx = this.canvas.getContext('2d');
+            if (!this.ctx) {
+                throw new Error('Canvas context not available');
+            }
+            console.log('✅ Canvas Context erfolgreich erstellt');
+        } catch (error) {
+            console.error('❌ Canvas-Fehler:', error);
+            throw error;
+        }
+
         this.container.appendChild(this.canvas);
 
         // Schwierigkeitsbasierte Game State
@@ -255,10 +282,144 @@ class AquariumCollectorGame {
             </svg>
         `);
 
+        // Game-Styles hinzufügen
+        this.addGameStyles();
+
         this.setup();
         this.initControls();
         this.spawnInitialItems();
         this.createUI();
+
+        console.log(`🎉 AquariumCollectorGame ${gameNumber} vollständig initialisiert!`);
+    }
+
+    addGameStyles() {
+        // Einmalig Game-Styles zum Document hinzufügen
+        if (document.getElementById('aquarium-game-styles')) return;
+
+        const styles = document.createElement('style');
+        styles.id = 'aquarium-game-styles';
+        styles.textContent = `
+            .aquarium-game-canvas {
+                border: 3px solid rgba(78, 205, 196, 0.5);
+                box-shadow:
+                    0 0 20px rgba(78, 205, 196, 0.3),
+                    inset 0 0 20px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .aquarium-game-canvas:hover {
+                border-color: rgba(78, 205, 196, 0.8);
+                box-shadow:
+                    0 0 30px rgba(78, 205, 196, 0.5),
+                    inset 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .game-start-btn {
+                background: linear-gradient(135deg, #4ECDC4, #44A08D);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 100;
+                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+                transition: all 0.3s ease;
+                animation: pulse-glow 2s ease-in-out infinite;
+            }
+
+            .game-start-btn:hover {
+                transform: translate(-50%, -50%) scale(1.05);
+                box-shadow: 0 6px 25px rgba(78, 205, 196, 0.6);
+            }
+
+            @keyframes pulse-glow {
+                0%, 100% { box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4); }
+                50% { box-shadow: 0 8px 30px rgba(78, 205, 196, 0.8); }
+            }
+
+            .game-exit-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(255, 107, 107, 0.9);
+                color: white;
+                border: none;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 101;
+                transition: all 0.3s ease;
+            }
+
+            .game-exit-btn:hover {
+                background: rgba(255, 107, 107, 1);
+                transform: scale(1.1);
+            }
+
+            .game-ui {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                font-family: 'Arial', sans-serif;
+                font-weight: bold;
+                z-index: 100;
+                min-width: 200px;
+                backdrop-filter: blur(5px);
+                border: 1px solid rgba(78, 205, 196, 0.3);
+            }
+
+            .game-ui div {
+                margin: 5px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .score-display {
+                color: #4ECDC4;
+                font-size: 16px;
+            }
+
+            .items-display {
+                color: #FFD700;
+                font-size: 14px;
+            }
+
+            .timer-display {
+                color: #FF6B6B;
+                font-size: 14px;
+            }
+
+            .test-game-container {
+                animation: game-container-glow 3s ease-in-out infinite;
+            }
+
+            @keyframes game-container-glow {
+                0%, 100% {
+                    border-color: rgba(78, 205, 196, 0.3);
+                    box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
+                }
+                50% {
+                    border-color: rgba(78, 205, 196, 0.6);
+                    box-shadow: 0 0 40px rgba(78, 205, 196, 0.4);
+                }
+            }
+        `;
+        document.head.appendChild(styles);
     }
 
     calculateDifficulty(gameNumber) {
@@ -905,13 +1066,83 @@ const AquariumGameManager = {
     instances: [],
 
     init() {
+        console.log('🎮 Aquarium Game Manager initialisiert...');
+
+        // Suche nach underwater-divider Elementen und prüfe ob sie für Games geeignet sind
         const containers = document.querySelectorAll('.underwater-divider');
+        console.log(`🎮 Gefunden: ${containers.length} underwater-divider Elemente`);
+
+        if (containers.length === 0) {
+            console.warn('⚠️ Keine underwater-divider gefunden - erstelle Test-Container');
+            this.createTestGameContainer();
+            return;
+        }
+
         containers.forEach((container, index) => {
+            // Überprüfe ob Container geeignet ist
+            if (container.offsetWidth < 300 || container.offsetHeight < 200) {
+                console.log(`🎮 Container ${index + 1} zu klein - erweitere Größe`);
+                container.style.minHeight = '400px';
+                container.style.minWidth = '600px';
+            }
+
             const gameNumber = index + 1;
-            const game = new AquariumCollectorGame(container, gameNumber);
-            this.instances.push(game);
-            this.addGameControlsOutside(container, game, gameNumber);
+            console.log(`🎮 Initialisiere Spiel ${gameNumber} in Container:`, container);
+
+            try {
+                const game = new AquariumCollectorGame(container, gameNumber);
+                this.instances.push(game);
+                this.addGameControlsOutside(container, game, gameNumber);
+                console.log(`✅ Spiel ${gameNumber} erfolgreich initialisiert`);
+            } catch (error) {
+                console.error(`❌ Fehler bei Spiel ${gameNumber}:`, error);
+            }
         });
+
+        console.log(`🎉 ${this.instances.length} Spiele erfolgreich geladen!`);
+    },
+
+    createTestGameContainer() {
+        // Fallback: Erstelle einen Test-Container für das Spiel
+        const testSection = document.createElement('section');
+        testSection.className = 'game-test-section';
+        testSection.style.cssText = `
+            margin: 40px auto;
+            max-width: 800px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 105, 148, 0.1), rgba(78, 205, 196, 0.1));
+            border-radius: 20px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        `;
+
+        const testContainer = document.createElement('div');
+        testContainer.className = 'underwater-divider test-game-container';
+        testContainer.style.cssText = `
+            min-height: 400px;
+            min-width: 600px;
+            position: relative;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
+            border-radius: 15px;
+            overflow: hidden;
+        `;
+
+        const title = document.createElement('h3');
+        title.textContent = '🎮 Aquarium Sammler-Spiel';
+        title.style.cssText = 'text-align: center; color: #4ECDC4; margin-bottom: 20px;';
+
+        testSection.appendChild(title);
+        testSection.appendChild(testContainer);
+
+        // Füge zum Body hinzu
+        const mainContent = document.querySelector('main') || document.querySelector('.container') || document.body;
+        mainContent.appendChild(testSection);
+
+        // Initialisiere Spiel im Test-Container
+        const game = new AquariumCollectorGame(testContainer, 1);
+        this.instances.push(game);
+        this.addGameControlsOutside(testContainer, game, 1);
+
+        console.log('✅ Test-Game-Container erfolgreich erstellt und initialisiert');
     },
 
     addGameControlsOutside(container, game, gameNumber) {
