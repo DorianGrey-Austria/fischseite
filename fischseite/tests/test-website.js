@@ -9,7 +9,7 @@ async function testWebsite() {
     try {
         // Load the website
         console.log('📱 Loading website...');
-        await page.goto('file://' + __dirname + '/index.html');
+        await page.goto('http://localhost:8001');
         await page.waitForTimeout(2000);
 
         // Test 1: Check if page loads

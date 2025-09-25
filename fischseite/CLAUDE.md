@@ -19,40 +19,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Key Files & Directories
 - **`index.html`** - Main aquarium-themed website
 - **`guestbook.html`** - Supabase-integrated guestbook feature
-- **`bilder/`** - Image gallery (6 JPEG images)
-- **`videos/`** - Video gallery (7 MOV files)
-- **`docs/prd.md`** - Comprehensive Product Requirements Document
-- **Interactive JavaScript Modules:**
+- **`js/`** - Interactive JavaScript modules
   - `smart-fish-system.js` - Current unified fish spawning system
   - `aquarium-collector-game.js` - Main collection game with scoring
   - `video-preloader.js` - Smart video loading with animations
   - `highscore-display.js` - Supabase-connected highscore system
-  - `fish-game.js` - Legacy game module (deprecated)
-- **Testing Scripts:** `test-*.js` - Comprehensive Playwright test suite
+- **`bilder/`** - Image gallery (29 JPEG images)
+- **`videos/`** - Video gallery (9 MOV files)
+- **`assets/`** - Static assets (logos, sound files)
+- **`tests/`** - Core Playwright tests (3 essential test files)
+- **`docs/`** - Project documentation and PRD
+- **`archive-do-not-read/`** - Legacy files, old tests, and deprecated modules
 
 ## Development Commands
 
 ### Testing (Playwright-based)
 ```bash
 # Core website functionality
-node test-website.js
+node tests/test-website.js
 
 # Complete feature testing
-node test-complete-website.js
+node tests/test-complete-website.js
 
-# Final verification tests (recommended)
-node test-final-verification.js
-node test-final-fish.js
+# Smart fish system testing
+node tests/test-smart-fish-system.js
 
-# Specific feature tests
-node test-member-portraits.js
-node test-3d-underwater-effects.js
-node test-game-controls.js
-node test-menu-visibility.js
-
-# Fish system testing
-node test-smart-fish-system.js
-node test-simple-fish.js
+# All legacy and specialized tests are archived in archive-do-not-read/tests/
+# Use the 3 core tests above for main functionality verification
 ```
 
 ### Local Development
@@ -88,17 +81,17 @@ node test-supabase-connection.js
 
 ### Deployment & Verification
 ```bash
+# 🚨 CRITICAL: AUTOMATIC DEPLOYMENT AFTER EVERY MAJOR CHANGE!
 # Auto-deploy to vibecoding.company/fischseite via GitHub Actions
 git add . && git commit -m "description" && git push
 
-# Deployment configuration:
+# ⚡ GitHub Actions automatically deploys to Hostinger within 2-5 minutes
 # - Workflow: .github/workflows/hostinger-deploy.yml
 # - Target: Hostinger FTP (vibecoding.company/fischseite/)
-# - Documentation: GITHUB_DEPLOYMENT_SETUP.md
+# - ALWAYS DEPLOY IMMEDIATELY after code changes!
 
-# Verify deployment
-node deployment-monitor.js          # Monitor deployment status
-node comprehensive-deployment-test.js # Complete verification
+# Verify deployment (in archive-do-not-read/ if needed)
+# Legacy verification tools moved to archive-do-not-read/legacy-js/
 ```
 
 ## Code Architecture
@@ -188,15 +181,17 @@ node comprehensive-deployment-test.js # Complete verification
 fischseite/
 ├── index.html                      # Main website entry point
 ├── guestbook.html                  # Supabase guestbook feature
-├── smart-fish-system.js           # Current unified fish system
-├── aquarium-collector-game.js      # Main collection game
-├── video-preloader.js              # Smart video loading
-├── highscore-display.js           # Highscore system
-├── bilder/                        # Image gallery assets (JPEG + AVIF/PNG logos)
-├── videos/                        # Video gallery assets (7 MOV files)
-├── HIGHSCORE_SETUP.sql           # Database setup script
-├── SUPABASE_SETUP.sql            # Guestbook database setup
-└── docs/prd.md                   # Product requirements
+├── js/                            # JavaScript modules
+│   ├── smart-fish-system.js       # Unified fish system
+│   ├── aquarium-collector-game.js # Collection game
+│   ├── video-preloader.js         # Smart video loading
+│   └── highscore-display.js       # Highscore system
+├── bilder/                        # Image gallery (29 JPEG images)
+├── videos/                        # Video gallery (9 MOV files)
+├── assets/                        # Static assets (logos, sound)
+├── tests/                         # Core functionality tests
+├── docs/                          # Documentation and PRD
+└── archive-do-not-read/           # Legacy files (not for production)
 ```
 
 ### Performance Considerations

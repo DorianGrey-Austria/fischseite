@@ -2787,7 +2787,7 @@
 
                 <div class="feature-card">
                     <div class="feature-icon" style="display:flex; align-items:center; justify-content:center;">
-                        <img src="bilder/logo alt.avif" alt="ATA Logo" style="width:56px; height:auto; object-fit:contain; opacity:0.9;" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
+                        <img src="assets/logo alt.avif" alt="ATA Logo" style="width:56px; height:auto; object-fit:contain; opacity:0.9;" onerror="this.onerror=null; this.src='bilder/logo%20neu%203d.png';">
                     </div>
                     <h3>ATA Magazin</h3>
                     <p>Mitglieder erhalten 10x jährlich das ATA (Aqua Terra Austria) Magazin mit aktuellen Fachartikeln</p>
@@ -3570,7 +3570,7 @@
             audio.setAttribute('playsinline', '');
 
             // URL-encode the filename to handle the space in "river sound.wav"
-            const audioSrc = 'sound/' + encodeURIComponent('river sound.wav');
+            const audioSrc = 'assets/sound/' + encodeURIComponent('river sound.wav');
             const source = document.createElement('source');
             source.src = audioSrc;
             source.type = 'audio/wav';
@@ -3736,9 +3736,9 @@
             }
         });
     </script>
-    <script src="smart-fish-system.js" defer></script>
-    <script src="video-preloader.js" defer></script>
-    <script src="aquarium-collector-game.js" defer></script>
-    <script src="highscore-display.js" defer></script>
+    <script src="js/smart-fish-system.js" defer></script>
+    <script src="js/video-preloader.js" defer></script>
+    <script src="js/aquarium-collector-game.js" defer></script>
+    <script src="js/highscore-display.js" defer></script>
 </body>
 </html>
