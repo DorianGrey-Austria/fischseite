@@ -108,8 +108,11 @@
             document.addEventListener('touchstart', (e) => this.handleTouchStart(e));
             document.addEventListener('touchend', (e) => this.handleTouchEnd(e));
 
-            // Cleanup on unload
-            window.addEventListener('beforeunload', () => this.cleanup());
+            // Only cleanup on actual page unload (not navigation)
+            window.addEventListener('beforeunload', () => {
+                console.log('🐟 Page unloading - cleaning up fish system');
+                this.cleanup();
+            });
         }
 
         handleMouseDown(e) {
@@ -316,6 +319,7 @@
             // Clear animation
             if (this.animationId) {
                 cancelAnimationFrame(this.animationId);
+                this.animationId = null;
             }
 
             // Clear timers
@@ -326,13 +330,23 @@
 
             // Remove all fish
             for (const fish of this.fishes.values()) {
-                if (fish.element) fish.element.remove();
+                if (fish.element && fish.element.parentNode) {
+                    fish.element.remove();
+                }
             }
             this.fishes.clear();
+
+            // Reset counter
+            this.fishCounter = 0;
 
             // Remove styles
             const style = document.getElementById('simple-fish-styles');
             if (style) style.remove();
+
+            // Clear global reference carefully
+            if (window.fishSystem === this) {
+                window.fishSystem = null;
+            }
 
             console.log('🐟 Fish system cleaned up');
         }
@@ -349,7 +363,8 @@
     }
 
     // Clean up any existing fish systems
-    if (window.fishSystem) {
+    if (window.fishSystem && typeof window.fishSystem.cleanup === 'function') {
+        console.log('🐟 Cleaning up existing fish system...');
         window.fishSystem.cleanup();
     }
 

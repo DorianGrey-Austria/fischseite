@@ -1419,73 +1419,7 @@
             color: var(--secondary-teal);
         }
 
-        /* Animated Fish School */
-        .fish-school {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-
-        .fish {
-            position: absolute;
-            font-size: 1.5rem;
-            animation: swimAcross 40s linear infinite;
-            opacity: 0.6;
-        }
-
-        .fish:nth-child(1) {
-            top: 20%;
-            animation-duration: 35s;
-            animation-delay: 0s;
-            font-size: 1.2rem;
-        }
-        .fish:nth-child(2) {
-            top: 40%;
-            animation-duration: 42s;
-            animation-delay: 5s;
-            font-size: 1.8rem;
-        }
-        .fish:nth-child(3) {
-            top: 60%;
-            animation-duration: 38s;
-            animation-delay: 10s;
-            font-size: 1.4rem;
-        }
-        .fish:nth-child(4) {
-            top: 80%;
-            animation-duration: 45s;
-            animation-delay: 15s;
-            font-size: 1.6rem;
-        }
-        .fish:nth-child(5) {
-            top: 30%;
-            animation-duration: 40s;
-            animation-delay: 20s;
-            font-size: 1.3rem;
-        }
-
-        @keyframes swimAcross {
-            0% {
-                left: -50px;
-                transform: translateY(0) scaleX(1);
-            }
-            25% {
-                transform: translateY(-20px) scaleX(1);
-            }
-            50% {
-                transform: translateY(20px) scaleX(1);
-            }
-            75% {
-                transform: translateY(-10px) scaleX(1);
-            }
-            100% {
-                left: calc(100% + 50px);
-                transform: translateY(0) scaleX(1);
-            }
-        }
+        /* Old static fish school removed - Smart Fish System handles all fish dynamically */
 
         /* Underwater Section Dividers */
         .underwater-divider {
@@ -1864,22 +1798,7 @@
                 animation-duration: 20s;
             }
 
-            /* Mobile Fish Optimizations */
-            .fish-school-1::before,
-            .fish-school-2::before {
-                font-size: 0.8rem;
-                animation-duration: 25s;
-            }
-
-            .fish-large::before {
-                font-size: 2rem;
-                animation-duration: 35s;
-            }
-
-            .fish-bottom::before {
-                font-size: 1.2rem;
-                animation-duration: 22s;
-            }
+            /* Mobile Fish Optimizations - Smart Fish System automatically adjusts for mobile */
 
             /* Show Hamburger Menu */
             .hamburger {
@@ -2358,11 +2277,7 @@
         .water-layer-3::before,
         .bubble-particles::before,
         .bubble-particles::after,
-        .caustic-lights,
-        .fish-school-1::before,
-        .fish-school-2::before,
-        .fish-large::before,
-        .fish-bottom::before {
+        .caustic-lights {
             will-change: transform, opacity;
             backface-visibility: hidden;
             -webkit-transform-style: preserve-3d;
@@ -2380,10 +2295,6 @@
                 animation: none !important;
             }
 
-            .fish-school-1::before,
-            .fish-school-2::before,
-            .fish-large::before,
-            .fish-bottom::before,
             .hero::after {
                 animation-duration: 60s !important;
                 animation-timing-function: linear !important;
@@ -3824,7 +3735,7 @@
             }
         });
     </script>
-    <script src="simple-fish-system.js" defer></script>
+    <script src="smart-fish-system.js" defer></script>
     <script src="video-preloader.js" defer></script>
     <script src="aquarium-collector-game.js" defer></script>
     <script src="highscore-display.js" defer></script>
