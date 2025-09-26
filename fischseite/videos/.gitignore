@@ -1,0 +1,8 @@
+# Video Optimization Artifacts
+backup-original-videos/
+videos-compressed/
+*.tmp
+*.log
+.DS_Store
+
+# Only keep optimized MOV files
