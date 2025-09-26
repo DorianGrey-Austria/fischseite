@@ -1,0 +1,38 @@
+name: 🔍 Test FTP Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Get code
+      uses: actions/checkout@v4
+
+    - name: 📝 Create test file
+      run: |
+        echo "TEST: $(date)" > test-connection.txt
+        ls -la test-connection.txt
+
+    - name: 🔌 Test FTP Connection
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: /public_html/fischseite/
+        exclude: |
+          **/.git*
+          **/node_modules/**
+          **/bilder/**
+          **/videos/**
+          **/assets/**
+          **/*.jpeg
+          **/*.jpg
+          **/*.png
+          **/*.MOV
+        dry-run: false
+        log-level: verbose
