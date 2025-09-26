@@ -3,8 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 🚀 VERSION 2.7 - MASTER WORKFLOW FIX - ENDLICH FUNKTIONAL! -->
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Aquaristikfreunde Steiermark - Österreichs führende Community für Aquaristik-Enthusiasten. Treffen, Events, Wissensaustausch und interaktive Spiele.">
+    <meta name="keywords" content="Aquaristik, Steiermark, Aquarium, Fische, Verein, Österreich, Zierfische, Aquascaping">
+    <meta name="author" content="Aquaristikfreunde Steiermark">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Aquaristikfreunde Steiermark">
+    <meta property="og:description" content="Tauche ein in die faszinierende Welt der Aquaristik! Spiele, lerne und vernetze dich mit Gleichgesinnten.">
+    <meta property="og:image" content="https://vibecoding.company/fischseite/assets/logo.png">
+    <meta property="og:url" content="https://vibecoding.company/fischseite/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_AT">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aquaristikfreunde Steiermark">
+    <meta name="twitter:description" content="Österreichs führende Community für Aquaristik-Enthusiasten">
+    <meta name="twitter:image" content="https://vibecoding.company/fischseite/assets/logo.png">
+
+    <!-- 🚀 VERSION 4.1 - SEO & PERFORMANCE UPDATE -->
     <title>Aquaristikfreunde Steiermark - Moderne Vereins-Community</title>
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://gnhsauvbqrxywtgppetm.supabase.co">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -3632,9 +3658,9 @@
             soundContainer.id = 'sound-control-container';
             soundContainer.style.cssText = `
                 position: fixed;
-                top: 16px;
+                top: 80px;
                 right: 16px;
-                z-index: 9999;
+                z-index: 998;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -3916,6 +3942,42 @@
                 setTimeout(() => banner.style.display = 'none', 5000);
             }
         }, 10000);
+    </script>
+
+    <!-- 🛡️ Performance & Error Handling Scripts -->
+    <script src="js/error-handler.js" defer></script>
+    <script src="js/loading-manager.js" defer></script>
+
+    <!-- 📊 Performance Tracking -->
+    <script>
+        // Measure Core Web Vitals
+        if ('PerformanceObserver' in window) {
+            // Largest Contentful Paint
+            new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                const lastEntry = entries[entries.length - 1];
+                console.log('LCP:', lastEntry.startTime);
+            }).observe({entryTypes: ['largest-contentful-paint']});
+
+            // First Input Delay
+            new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                entries.forEach((entry) => {
+                    console.log('FID:', entry.processingStart - entry.startTime);
+                });
+            }).observe({entryTypes: ['first-input']});
+
+            // Cumulative Layout Shift
+            let cls = 0;
+            new PerformanceObserver((list) => {
+                list.getEntries().forEach((entry) => {
+                    if (!entry.hadRecentInput) {
+                        cls += entry.value;
+                        console.log('CLS:', cls);
+                    }
+                });
+            }).observe({entryTypes: ['layout-shift']});
+        }
     </script>
 </body>
 </html>
