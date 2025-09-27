@@ -238,7 +238,8 @@
                     .insert([{
                         name: name,
                         message: message,
-                        avatar_emoji: '🐠'
+                        avatar_emoji: '🐠',
+                        is_approved: false
                     }]);
 
                 if (error) {
@@ -248,7 +249,7 @@
                 }
 
                 console.log('✅ Entry submitted');
-                showMessage('✅ Eintrag erfolgreich gespeichert!', 'success');
+                showMessage('✅ Eintrag erfolgreich gespeichert! Er wird nach Prüfung freigeschaltet.', 'success');
 
                 // Clear form
                 document.getElementById('name').value = '';

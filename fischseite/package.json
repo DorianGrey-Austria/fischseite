@@ -6,13 +6,27 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node tests/test-website.js",
+    "test:all": "node tests/test-complete-website.js",
+    "test:fish": "node tests/test-smart-fish-system.js",
+    "test:guestbook": "node tests/test-guestbook.js",
+    "test:local": "node tests/test-local-version.js",
+    "test:production": "node tests/test-online-version.js",
+    "test:compare": "node tests/compare-versions.js",
+    "test:selftest": "node tests/play-ride-selftest.js",
+    "test:monitor": "node tests/continuous-monitor.js single",
+    "serve": "python3 -m http.server 8000",
+    "serve:node": "npx serve . -p 8000"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@supabase/supabase-js": "^2.58.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
     "playwright": "^1.55.1"
   }
 }

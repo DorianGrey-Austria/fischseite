@@ -24,14 +24,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `aquarium-collector-game.js` - Main collection game with scoring
   - `video-preloader.js` - Smart video loading with animations
   - `highscore-display.js` - Supabase-connected highscore system
+  - `error-handler.js` - Global error handling and logging
+  - `loading-manager.js` - Resource loading coordination
+  - `performance-optimizer.js` - Performance monitoring and optimization
 - **`bilder/`** - Image gallery (29 JPEG images)
 - **`videos/`** - Video gallery (9 MOV files)
 - **`assets/`** - Static assets (logos, sound files)
-- **`tests/`** - Core Playwright tests (3 essential test files)
+- **`tests/`** - Core Playwright tests (9 test files including version comparison)
 - **`docs/`** - Project documentation and PRD
+- **`*.sql`** - Database schema files for Supabase setup
 - **`archive-do-not-read/`** - Legacy files, old tests, and deprecated modules
 
 ## Development Commands
+
+### npm Scripts
+```bash
+# Available npm scripts for convenience:
+npm test               # Basic website functionality test
+npm run test:all       # Complete website feature testing
+npm run test:fish      # Smart fish system testing
+npm run test:guestbook # Guestbook functionality testing
+npm run test:local     # Test local development version
+npm run test:production # Test live production version
+npm run test:compare   # Compare local vs production versions
+npm run test:selftest  # Comprehensive self-analysis
+npm run test:monitor   # Single monitoring test run
+npm run serve          # Start Python HTTP server on port 8000
+npm run serve:node     # Start Node.js serve on port 8000
+```
 
 ### Testing (Playwright-based)
 ```bash
@@ -47,6 +67,14 @@ node tests/test-complete-website.js
 # Smart fish system testing
 node tests/test-smart-fish-system.js
 
+# Guestbook functionality testing
+node tests/test-guestbook.js
+
+# Version comparison testing
+node tests/test-local-version.js      # Test local development version
+node tests/test-online-version.js     # Test live production version
+node tests/compare-versions.js        # Compare local vs production
+
 # 🚀 NEW: Play/Ride Self-Test Framework
 node tests/play-ride-selftest.js      # Comprehensive self-analysis
 node tests/continuous-monitor.js single    # Single test run
@@ -54,7 +82,6 @@ node tests/continuous-monitor.js start 30  # Continuous monitoring (every 30 min
 node tests/continuous-monitor.js report    # Historical analysis
 
 # All legacy and specialized tests are archived in archive-do-not-read/tests/
-# Use the 3 core tests above for main functionality verification
 ```
 
 ### Local Development
@@ -75,17 +102,21 @@ open http://localhost:8000/guestbook.html # Guestbook
 open index.html
 ```
 
-### Database Setup (Optional)
+### Database Setup (Supabase)
 ```bash
-# Supabase SQL setup for highscores and guestbook
-# Execute HIGHSCORE_SETUP.sql in Supabase SQL Editor
-# Execute SUPABASE_SETUP.sql for guestbook functionality
+# SQL files for database setup (execute in Supabase SQL Editor)
+# HIGHSCORE_SETUP.sql          - Highscore table with RLS policies
+# GUESTBOOK_SCHEMA_UPDATE.sql  - Guestbook table structure
+# FIX_RLS_POLICIES.sql         - Row Level Security fixes
+# TEMPORARY_DISABLE_RLS.sql    - For debugging RLS issues
 
-# Quick highscore table creation
-node create-highscore-table.js
+# Quick JavaScript-based setup tools
+node create-highscore-table.js  # Create highscore table
+node test-supabase-connection.js # Test connection
+node check-rls-policies.js      # Check RLS policy status
 
-# Test Supabase connection
-node test-supabase-connection.js
+# Database testing
+node test-guestbook-db.js       # Test guestbook functionality
 ```
 
 ### Deployment & Verification
