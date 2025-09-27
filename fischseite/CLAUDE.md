@@ -35,6 +35,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing (Playwright-based)
 ```bash
+# Install dependencies first
+npm install
+
 # Core website functionality
 node tests/test-website.js
 
@@ -43,6 +46,12 @@ node tests/test-complete-website.js
 
 # Smart fish system testing
 node tests/test-smart-fish-system.js
+
+# 🚀 NEW: Play/Ride Self-Test Framework
+node tests/play-ride-selftest.js      # Comprehensive self-analysis
+node tests/continuous-monitor.js single    # Single test run
+node tests/continuous-monitor.js start 30  # Continuous monitoring (every 30 min)
+node tests/continuous-monitor.js report    # Historical analysis
 
 # All legacy and specialized tests are archived in archive-do-not-read/tests/
 # Use the 3 core tests above for main functionality verification
@@ -204,6 +213,33 @@ fischseite/
 - **Supabase:** Database queries optimized with rate limiting and error handling
 
 ## Key Development Guidelines
+
+### 🚨 FILE SIZE LIMITS & OPTIMIZATION STANDARDS
+**CRITICAL: NEVER EXCEED THESE LIMITS WITHOUT OPTIMIZATION**
+- **Individual Video Files:** MAX 25MB (compress with FFmpeg if larger)
+- **Individual Image Files:** MAX 5MB (optimize with WebP/JPEG compression)
+- **Audio Files:** MAX 10MB (use MP3/AAC with 128k bitrate)
+- **Total Media Folder:** MAX 100MB (aggressive optimization required above)
+- **JavaScript Modules:** MAX 500KB per file (split if larger)
+- **Project Total Size:** TARGET <200MB (optimize aggressively above)
+
+**OPTIMIZATION METHODS:**
+```bash
+# Video: FFmpeg with CRF 30 for web-optimized H.264/AAC
+ffmpeg -i input.mov -c:v libx264 -crf 30 -c:a aac -b:a 96k output.mp4
+
+# Images: WebP conversion with quality 85
+ffmpeg -i input.jpg -c:v libwebp -quality 85 output.webp
+
+# Audio: MP3 compression with 128k bitrate
+ffmpeg -i input.wav -acodec libmp3lame -ab 128k output.mp3
+```
+
+**ENFORCEMENT:**
+- AUTOMATICALLY compress any file >limits during development
+- Document all optimizations in relevant .md files
+- Test performance impact after optimization
+- NEVER commit unoptimized large files
 
 ### CSS Best Practices
 - Use CSS variables for consistent theming

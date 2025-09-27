@@ -280,3 +280,164 @@ Die `highscores` Tabelle wurde **nie erstellt**. Das Guestbook funktioniert, wei
 - Dunkler Hintergrund: `mix-blend-mode: screen; opacity: .8`
 - Feintuning pro Element: Inline `style="--gif-overlay-opacity: 0.45"` bei `.gif-overlay-el`
 
+---
+
+## 🚀 GITHUB ACTIONS FTP 550 ERROR - FINAL FIX! (27.09.2025)
+
+### ❌ **DAS PROBLEM:**
+**FTP Error 550**: `fischseite/archive-do-not-read/tests/test-results/.last-run.json: No such file or directory`
+
+**Symptome:**
+- GitHub Actions Deployment schlug immer fehl mit FTP 550 Errors
+- FTP-Deploy-Action konnte Verzeichnisstruktur nicht erstellen
+- Online-Version wurde nie aktualisiert (blieb bei Version 2.7 statt 5.1)
+- Exclude-Patterns in GitHub Actions halfen nicht
+
+### 🔍 **ROOT CAUSE ANALYSE:**
+**86 Dateien** im `archive-do-not-read/` Ordner waren ins Git-Repository committed, inklusive:
+- `.last-run.json` (Playwright Test-Artefakte)
+- Legacy JavaScript-Dateien (25 Dateien)
+- Alte Screenshots und Setup-Configs (40+ Dateien)
+- Veraltete Dokumentation (15+ MD-Dateien)
+
+**Das technische Problem:**
+- FTP-Deploy-Action processed Git-tracked Dateien BEVOR exclude-Filter greifen
+- Verzeichnisstruktur-Check für `archive-do-not-read/tests/test-results/` scheiterte
+- Server hatte diese verschachtelte Struktur nie → FTP 550 "No such file or directory"
+
+### ✅ **DIE SENIOR DEVELOPER LÖSUNG:**
+
+#### **SCHRITT 1: Archive-Ordner komplett aus Git entfernen**
+```bash
+# 86 Dateien aus Git-Repository entfernen (bleiben lokal verfügbar)
+git rm -r --cached archive-do-not-read/
+
+# Commit der großen Aufräumaktion
+git commit -m "🧹 CLEANUP: Archive-Ordner aus Git-Repository entfernt (86 Dateien)"
+```
+
+#### **SCHRITT 2: .gitignore für die Zukunft erstellen**
+Neue Datei `.gitignore`:
+```gitignore
+# Archive und Test-Dateien (NIEMALS ins Repository!)
+archive-do-not-read/
+*.log
+test-results/
+.last-run.json
+**/test-output.log
+
+# Deployment und Monitoring
+server.log
+deployment-*.log
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Environment variables
+.env
+.env.local
+```
+
+#### **SCHRITT 3: GitHub Actions robuster machen**
+Update `.github/workflows/hostinger-deploy.yml` exclude-Patterns:
+```yaml
+exclude: |
+  **/.git*
+  **/.git*/**
+  **/node_modules/**
+  **/.github/**
+  **/archive-do-not-read/**
+  **/*.log
+  **/tests/**
+  **/.DS_Store
+  **/.vscode/**
+  **/.idea/**
+  **/test-results/**
+  **/*.tmp
+  **/*.temp
+```
+
+#### **SCHRITT 4: Finales Deployment**
+```bash
+git add .gitignore .github/workflows/hostinger-deploy.yml
+git commit -m "🚀 FIX: Deployment endgültig repariert - Senior Developer Lösung"
+git push
+```
+
+### 🎯 **ERGEBNIS:**
+- ✅ **GitHub Actions Status:** SUCCESS (grüner Haken)
+- ✅ **FTP-Deployment:** Keine 550 Errors mehr
+- ✅ **Online-Version:** Version 5.1 mit Banner live
+- ✅ **Deployment-Zeit:** 2-3 Minuten statt kontinuierliche Failures
+- ✅ **Repository:** 86 problematische Dateien entfernt, sauber strukturiert
+
+### 🏆 **WARUM DAS FUNKTIONIERT:**
+
+**Technischer Grund:**
+1. **Git-Repository sauber:** Keine Archive-Dateien mehr tracked
+2. **.gitignore verhindert:** Zukünftige versehentliche Commits von Test-Artefakten
+3. **FTP-Deploy optimiert:** Nur produktionsrelevante Dateien werden synchronisiert
+4. **Bewährte Konfiguration:** Identisch mit tierarztspiel & EndlessRunner (beide funktionieren)
+
+### 📋 **PREVENTION CHECKLIST für zukünftige Projekte:**
+
+**IMMER beachten:**
+- [ ] `.gitignore` VOR erstem Commit erstellen
+- [ ] Archive/Test-Ordner NIEMALS ins Repository committen
+- [ ] Nur produktionsrelevante Dateien tracken
+- [ ] GitHub Actions exclude-Patterns erweitern
+- [ ] Test-Artefakte in separate ignored Verzeichnisse
+
+### 🔧 **TECHNICAL LEARNINGS:**
+
+**Warum exclude-Patterns allein nicht ausreichten:**
+- FTP-Deploy-Action processed alle Git-tracked Dateien zuerst
+- Verzeichnisstruktur-Checks passieren VOR exclude-Filterung
+- Server-seitige Ordner müssen existieren für FTP-Sync
+- **Lösung:** Files aus Git entfernen + .gitignore für Prevention
+
+**Bewährte Master-Konfiguration getestet auf:**
+- ✅ tierarztspiel → vibecoding.company (Root-Domain)
+- ✅ EndlessRunner → ki-revolution.at
+- ✅ fischseite → vibecoding.company/fischseite/
+
+### ⚡ **QUICK REFERENCE für zukünftige Fixes:**
+
+```bash
+# 1. Problematische Ordner aus Git entfernen
+git rm -r --cached problematic-folder/
+
+# 2. .gitignore erstellen (siehe Template oben)
+
+# 3. GitHub Actions exclude-Patterns erweitern
+
+# 4. Commit & Push
+git add .gitignore .github/workflows/deploy.yml
+git commit -m "🚀 FIX: Deployment repariert"
+git push
+
+# 5. Verification: GitHub Actions → Grüner Haken ✅
+```
+
+**🎯 REGEL:** Dieses spezifische FTP 550 Problem ist jetzt definitiv gelöst!
+**📅 Final Fix:** 27.09.2025 - Claude Code Deployment Test erfolgreich
+**✅ Status:** Production Ready - Live auf vibecoding.company/fischseite/
+

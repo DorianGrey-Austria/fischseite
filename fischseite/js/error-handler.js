@@ -46,8 +46,20 @@ class GlobalErrorHandler {
             message: error.message,
             source,
             line,
-            timestamp: new Date()
+            timestamp: new Date(),
+            stack: error.stack || 'No stack trace available'
         });
+
+        // Enhanced error reporting for Play/Ride tests
+        if (window.PlayRideTestActive) {
+            window.PlayRideErrors = window.PlayRideErrors || [];
+            window.PlayRideErrors.push({
+                type: 'error',
+                message: error.message,
+                source,
+                timestamp: Date.now()
+            });
+        }
 
         // Spezifische Fehlerbehandlung
         if (error.message?.includes('Supabase') || error.message?.includes('supabase')) {

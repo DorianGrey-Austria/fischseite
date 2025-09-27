@@ -14,16 +14,30 @@ class LoadingManager {
     }
 
     init() {
-        // Performance Observer
+        // Enhanced Performance Observer for Play/Ride tests
         if ('PerformanceObserver' in window) {
             const perfObserver = new PerformanceObserver((list) => {
                 for (const entry of list.getEntries()) {
                     if (entry.entryType === 'largest-contentful-paint') {
                         this.performanceMetrics.lcp = entry.startTime;
                     }
+                    if (entry.entryType === 'first-input') {
+                        this.performanceMetrics.fid = entry.processingStart - entry.startTime;
+                    }
+                    if (entry.entryType === 'layout-shift') {
+                        this.performanceMetrics.cls = (this.performanceMetrics.cls || 0) + entry.value;
+                    }
+                }
+
+                // Expose metrics for Play/Ride testing
+                if (window.PlayRideTestActive) {
+                    window.PlayRideMetrics = this.performanceMetrics;
                 }
             });
-            perfObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+
+            perfObserver.observe({
+                entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift']
+            });
         }
 
         // Initial Loading Screen
