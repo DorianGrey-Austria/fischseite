@@ -26,11 +26,16 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
-          **/test-*
           **/.github/**
           **/archive-do-not-read/**
           **/*.log
           **/tests/**
+          **/.DS_Store
+          **/.vscode/**
+          **/.idea/**
+          **/test-results/**
+          **/*.tmp
+          **/*.temp
         dry-run: false
         log-level: verbose
         timeout: 60000
