@@ -382,6 +382,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            z-index: 100;
+            pointer-events: auto;
         }
 
         .game-start-btn:hover {
@@ -7117,7 +7120,8 @@
 
                 // Start the game with existing canvas (pass the canvas ID)
                 const game = new window.AquariumCollectorGame('aquarium-game-canvas');
-                game.start();
+                window.aquariumGame = game; // Store globally
+                game.startGame();
 
                 // Clean, simple game start without level system
 
