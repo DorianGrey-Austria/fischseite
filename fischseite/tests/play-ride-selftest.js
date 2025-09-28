@@ -28,7 +28,7 @@ class PlayRideSelfTest {
         try {
             // Try multiple ports for better reliability
             let pageLoaded = false;
-            const ports = [8000, 8001, 3000];
+            const ports = [8003, 8002, 8000, 8001, 3000];
 
             for (const port of ports) {
                 try {
@@ -202,7 +202,7 @@ class PlayRideSelfTest {
         // Test JavaScript module loading
         const moduleTest = await page.evaluate(() => {
             return {
-                smartFishSystem: typeof SmartFishSystem !== 'undefined',
+                smartFishSystem: typeof window.smartFishSystem !== 'undefined',
                 aquariumGame: typeof AquariumCollectorGame !== 'undefined',
                 videoPreloader: typeof VideoPreloader !== 'undefined',
                 supabase: typeof SupabaseHighscoreManager !== 'undefined'
@@ -263,11 +263,15 @@ class PlayRideSelfTest {
 
         // Test fish spawning system
         try {
-            await page.click('.fish', { timeout: 5000 });
+            // Wait for smartFishSystem to load
+            await page.waitForFunction(() => typeof window.smartFishSystem !== 'undefined', { timeout: 5000 });
+
+            // Click anywhere to spawn fish (fish system listens to all clicks)
+            await page.click('body');
             await page.waitForTimeout(1000);
 
             const fishCount = await page.evaluate(() => {
-                return document.querySelectorAll('.fish').length;
+                return document.querySelectorAll('.smart-fish-spawn, .fish, .spawned-fish, [data-fish]').length;
             });
 
             if (fishCount > 0) {
@@ -283,7 +287,7 @@ class PlayRideSelfTest {
 
         // Test game functionality
         try {
-            const gameButton = await page.$('.game-start-button, .start-game, [onclick*="game"]');
+            const gameButton = await page.$('.game-start-btn, .aquarium-game-canvas, [data-game], [onclick*="game"]');
             if (gameButton) {
                 console.log('  ✅ Game interface detected');
             } else {

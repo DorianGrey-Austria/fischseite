@@ -17,7 +17,7 @@ async function testSmartFishSystem() {
     try {
         // Load the page
         console.log('📖 Loading page...');
-        await page.goto('http://localhost:8080');
+        await page.goto('http://localhost:8003');
         await page.waitForLoadState('networkidle');
 
         // Wait for Smart Fish System to initialize

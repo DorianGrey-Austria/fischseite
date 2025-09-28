@@ -1,0 +1,81 @@
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Large project folders (to improve Git performance)
+3D/
+3dpferdewelt/
+"Eigene Spiele"/
+EndlessRu/
+EndlessRunner/
+arapp/
+beamermac/
+claude_code_to_mobil/
+endlessrunner2/
+"github slugg runner"/
+livestream/
+livetranslate/
+macdowntopdf/
+masterapp/
+mobiltoclaude2/
+musikprogramm/
+portalvisuals/
+portfolio/
+pushUppanic/
+puzzle/
+roadrunner2/
+rollenspiel/
+screenshots/
+startuptipps/
+superagent/
+tierarztspiel/
+top100/
+zeichenapp/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Archives and backups
+archive/
+backup/
+*.zip
+*.rar
+*.tar.gz
+
+# Documentation files that can be large
+*.docx
+*.pdf
+*.pptx
+
+# MCP and configuration directories (can be regenerated)
+.bmad-core/
+.claude/
+.cursor/

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Pferde Memory</title>
+    <style>
+        :root {
+            --card-size: 120px;
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .level-selector {
+            margin: 20px 0;
+        }
+
+        .level-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .level-btn:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-color);
+        }
+
+        .level-btn.active {
+            background-color: var(--accent-color);
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin: 20px auto;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: var(--card-size);
+            height: var(--card-size);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-front {
+            background: #fff;
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .card-back {
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+        }
+
+        .card img {
+            width: 90%;
+            height: 90%;
+            object-fit: cover;
+        }
+
+        .stats {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --card-size: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🐎 Pferde Memory 🐎</h1>
+        <!-- Audio Elemente hinzufügen -->
+        <audio id="backgroundMusic" loop>
+            <source src="sounds/horse-music.mp3" type="audio/mp3">
+        </audio>
+        <audio id="horseSnort">
+            <source src="sounds/horse-snort.mp3" type="audio/mp3">
+        </audio>
+        
+        <!-- Musik-Steuerung -->
+        <button id="toggleMusic" class="level-btn">🔊 Musik An/Aus</button>
+        <div class="level-selector">
+            <button class="level-btn active" data-level="1">Level 1 (10 Karten)</button>
+            <button class="level-btn" data-level="2">Level 2 (16 Karten)</button>
+            <button class="level-btn" data-level="3">Level 3 (20 Karten)</button>
+        </div>
+        <div class="game-board"></div>
+        <div class="stats">
+            Züge: <span id="moves">0</span> | 
+            Paare gefunden: <span id="pairs">0</span>
+        </div>
+    </div>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                this.cards = [];
+                this.currentLevel = 1;
+                this.moves = 0;
+                this.pairs = 0;
+                this.flippedCards = [];
+                this.isLocked = false;
+
+                // Pferde-Bildmotive (hier mit Platzhalterbildern)
+                this.images = [
+                    'Pferdebilder/pferd1.jpg',
+                    'Pferdebilder/pferd2.jpg',
+                    'Pferdebilder/pferd3.jpg',
+                    'Pferdebilder/pferd4.jpg',
+                    'Pferdebilder/pferd5.jpg',
+                    'Pferdebilder/pferd6.jpg',
+                    'Pferdebilder/pferd7.jpg',
+                    'Pferdebilder/pferd8.jpg',
+                    'Pferdebilder/pferd9.jpg',
+                    'Pferdebilder/pferd10.jpg'
+                ];
+
+                this.initializeGame();
+                this.addEventListeners();
+            }
+
+            initializeGame() {
+                const numCards = this.currentLevel === 1 ? 10 : 
+                               this.currentLevel === 2 ? 16 : 20;
+                
+                const columns = this.currentLevel === 1 ? 5 : 
+                               this.currentLevel === 2 ? 4 : 5;
+                
+                const gameBoard = document.querySelector('.game-board');
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                this.cards = [];
+                this.moves = 0;
+                this.pairs = 0;
+                this.updateStats();
+                
+                // Karten erstellen
+                const selectedImages = this.images.slice(0, numCards/2);
+                const cardPairs = [...selectedImages, ...selectedImages];
+                this.shuffleArray(cardPairs);
+                
+                gameBoard.innerHTML = '';
+                cardPairs.forEach((img, index) => {
+                    const card = this.createCard(img, index);
+                    gameBoard.appendChild(card);
+                    this.cards.push(card);
+                });
+            }
+
+            createCard(imgSrc, index) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = index;
+                
+                card.innerHTML = `
+                    <div class="card-face card-front">
+                        <img src="${imgSrc}" alt="Pferd">
+                    </div>
+                    <div class="card-face card-back">
+                        🐎
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => this.flipCard(card));
+                return card;
+            }
+
+            flipCard(card) {
+                if (this.isLocked || this.flippedCards.includes(card) || card.classList.contains('matched')) {
+                    return;
+                }
+
+                card.classList.add('flipped');
+                this.flippedCards.push(card);
+
+                if (this.flippedCards.length === 2) {
+                    this.isLocked = true;
+                    this.moves++;
+                    this.updateStats();
+                    this.checkMatch();
+                }
+            }
+
+            checkMatch() {
+                const [card1, card2] = this.flippedCards;
+                const match = card1.querySelector('img').src === card2.querySelector('img').src;
+
+                if (match) {
+                    this.handleMatch(card1, card2);
+                } else {
+                    this.handleMismatch(card1, card2);
+                }
+            }
+
+            handleMatch(card1, card2) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                this.pairs++;
+                this.updateStats();
+                this.resetFlippedCards();
+
+                if (this.pairs === this.cards.length / 2) {
+                    setTimeout(() => {
+                        alert(`Glückwunsch! Du hast alle Paare in ${this.moves} Zügen gefunden!`);
+                    }, 500);
+                }
+            }
+
+            handleMismatch(card1, card2) {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    this.resetFlippedCards();
+                }, 1000);
+            }
+
+            resetFlippedCards() {
+                this.flippedCards = [];
+                this.isLocked = false;
+            }
+
+            updateStats() {
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('pairs').textContent = this.pairs;
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            addEventListeners() {
+                document.querySelectorAll('.level-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentLevel = parseInt(btn.dataset.level);
+                        this.initializeGame();
+                    });
+                });
+            }
+        }
+
+        // Spiel starten
+        new MemoryGame();
+    </script>
+</body>
+</html>

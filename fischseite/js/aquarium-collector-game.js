@@ -1,1390 +1,222 @@
-/* 🐠 AQUARIUM FUTTER-SAMMLER SPIEL
-   - 20 verschiedene Futterobjekte sammeln
+/* 🐠 AQUARIUM FUTTER-SAMMLER SPIEL V5.2
+   - Verschiedene Futterobjekte sammeln in 30 Sekunden
    - Realistischer Aquarium-Hintergrund
-   - Score-System mit Feedback
+   - Lokaler Score (OHNE Supabase Aufhänger!)
+   - Pädagogische Aquarium-Tipps
    - Exit-Dialog
-   - 🏆 HIGHSCORE-SYSTEM mit Supabase
-   - Perfect Score Detection (20/20)
-   - Name-Eingabe für Bestleistungen
 */
 
-// 🚀 Supabase Integration für Highscores
-class SupabaseHighscoreManager {
+// 🎮 Einfacher lokaler Score-Manager (kein Aufhängen!)
+class LocalScoreManager {
     constructor() {
-        this.supabaseUrl = 'https://gnhsauvbqrxywtgppetm.supabase.co';
-        this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduaHNhdXZicXJ4eXd0Z3BwZXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2Njc0MjcsImV4cCI6MjA3NDI0MzQyN30.DHPTMZR6NOT7mDvCOI_1fzx87dhX9syBFek_cKkOaSc';
-        this.supabase = null;
-        this.isConnected = false;
-        this.init();
-    }
-
-    async init() {
-        try {
-            // Load Supabase dynamically from CDN
-            if (!window.supabase) {
-                await this.loadSupabaseClient();
-            }
-
-            this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
-
-            // Test connection
-            const { data, error } = await this.supabase.from('highscores').select('count').limit(1);
-
-            if (!error) {
-                this.isConnected = true;
-                console.log('🏆 Supabase Highscore System connected successfully!');
-            } else {
-                console.warn('⚠️ Supabase connection failed, using offline mode:', error);
-            }
-        } catch (err) {
-            console.warn('⚠️ Supabase initialization failed, using offline mode:', err);
-        }
-    }
-
-    async loadSupabaseClient() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        this.isConnected = false; // Immer offline
+        console.log('🎮 Local Score Manager initialized (no hanging!)');
     }
 
     async saveHighscore(playerName, score, collectedItems, gameTime, actualDuration, gameLevel = 1) {
-        if (!this.isConnected || !this.supabase) {
-            console.warn('⚠️ Cannot save highscore - offline mode');
-            return { success: false, error: 'Offline mode', data: null };
-        }
-
-        try {
-            const bonusPoints = this.calculateBonusPoints(collectedItems, gameTime, actualDuration);
-            const finalScore = score + bonusPoints;
-
-            const { data, error } = await this.supabase
-                .from('highscores')
-                .insert({
-                    player_name: playerName.trim(),
-                    score: finalScore,
-                    collected_items: collectedItems,
-                    game_time: gameTime,
-                    game_duration_actual: actualDuration,
-                    bonus_points: bonusPoints
-                })
-                .select();
-
-            if (error) {
-                console.error('Error saving highscore:', error);
-                return { success: false, error: error.message, data: null };
-            }
-
-            console.log('🎉 Highscore saved successfully:', data);
-            return { success: true, error: null, data: data[0] };
-
-        } catch (err) {
-            console.error('Exception saving highscore:', err);
-            return { success: false, error: err.message, data: null };
-        }
+        console.log(`🎯 Final Score: ${score} points (${collectedItems} items collected)`);
+        return true; // Immer erfolgreich, kein Aufhängen
     }
 
     calculateBonusPoints(collectedItems, gameTime, actualDuration) {
-        let bonus = 0;
-
-        // Perfect Score Bonus - dynamisch basierend auf totalItems
-        if (collectedItems >= 20) {  // Ab 20 Fischen gibt es Perfect Score Bonus
-            bonus += 100 + (collectedItems - 20) * 10; // Extra Bonus für mehr Items
-        }
-
-        // Speed Bonus (je schneller, desto mehr Bonus)
-        const timeBonus = Math.max(0, (gameTime - actualDuration) * 2);
-        bonus += Math.floor(timeBonus);
-
-        // Completion Rate Bonus
-        const completionRate = collectedItems / 20;
-        bonus += Math.floor(completionRate * 50);
-
-        return bonus;
+        // Einfache Bonus-Berechnung
+        const timeBonus = Math.max(0, (gameTime - actualDuration) * 1);
+        const targetItems = this.getTargetItems();
+        const collectionBonus = collectedItems >= targetItems ? 20 : 0;
+        return Math.round(timeBonus + collectionBonus);
     }
 
-    async getTopHighscores(limit = 50) {
-        if (!this.isConnected || !this.supabase) {
-            return [];
+    getTargetItems(gameLevel = 1) {
+        // Ziel für 30 Sekunden: mehr Items
+        const targets = { 1: 15, 2: 18, 3: 21, 4: 24, 5: 27, 6: 30 };
+        return targets[gameLevel] || 30;
+    }
+
+    async getTopHighscores(limit = 10, gameLevel = null) {
+        return []; // Keine Online-Highscores mehr
+    }
+}
+
+// 🎓 PÄDAGOGISCHE AQUARIUM-TIPPS (30+ Tipps für 30 Sekunden!)
+const AQUARIUM_EDUCATION_TIPS = [
+    "💡 Der pH-Wert sollte zwischen 6-7 liegen für die meisten Fische!",
+    "🕐 Neue Fische brauchen 2 Wochen Eingewöhnung ins Aquarium!",
+    "🍽️ Täglich füttern, wöchentlich Wasser wechseln!",
+    "📏 Größere Aquarien verzeihen Anfängerfehler besser!",
+    "🌱 Pflanzen produzieren tagsüber Sauerstoff für die Fische!",
+    "⚠️ Nitrit über 0.5 mg/l kann für Fische tödlich sein!",
+    "🌡️ Tropische Fische brauchen 24-26°C Wassertemperatur!",
+    "🦠 Filterbakterien wandeln giftiges Ammoniak in Nitrat um!",
+    "❌ Nie zu viel füttern - das verschlechtert die Wasserqualität!",
+    "🏠 Verstecke und Pflanzen reduzieren Stress bei Fischen!",
+    "🧪 Wassertests helfen, die Gesundheit zu überwachen!",
+    "🔄 Wasserwechsel entfernt schädliche Substanzen!",
+    "💨 Belüftung sorgt für genug Sauerstoff im Wasser!",
+    "🐠 Verschiedene Fischarten haben unterschiedliche Bedürfnisse!",
+    "📈 Langsame Temperaturänderungen sind wichtig!",
+    "🌿 Lebende Pflanzen helfen bei der Wasserreinigung!",
+    "⚡ Zu starke Strömung stresst manche Fische!",
+    "🔍 Beobachte deine Fische täglich auf Krankheitszeichen!",
+    "🌙 Fische brauchen einen Tag-Nacht-Rhythmus!",
+    "💧 Weiches Wasser ist besser für viele tropische Arten!",
+    "🏊 Schwimmraum ist wichtiger als Dekoration!",
+    "🦐 Garnelen sind tolle Putzer für das Aquarium!",
+    "🐌 Schnecken helfen beim Algenabbau!",
+    "⚖️ Ein Gleichgewicht zwischen Fischen und Pflanzen ist ideal!",
+    "🔬 Quarantäne für neue Fische verhindert Krankheiten!",
+    "🌊 Sanfte Filterströmung simuliert natürliche Gewässer!",
+    "🍃 Algen sind normal, aber nicht zu viele!",
+    "💡 LED-Beleuchtung ist energiesparend und pflanzentauglich!",
+    "🎣 Überfütterung ist die häufigste Anfänger-Ursache für Probleme!",
+    "🏔️ Verschiedene Wasserschichten bieten verschiedenen Fischen Lebensraum!",
+    "🔄 Regelmäßigkeit bei der Pflege ist der Schlüssel zum Erfolg!"
+];
+
+// 🎲 Spiel-Tipps während des Spielens anzeigen
+class EducationSystem {
+    constructor() {
+        this.usedTips = new Set();
+        this.tipInterval = null;
+    }
+
+    startTipSystem(duration = 30000) {
+        // Alle 3 Sekunden einen neuen Tipp anzeigen
+        this.tipInterval = setInterval(() => {
+            this.showRandomTip();
+        }, 3000);
+
+        // Nach Spiel-Ende stoppen
+        setTimeout(() => {
+            this.stopTipSystem();
+        }, duration);
+    }
+
+    showRandomTip() {
+        const availableTips = AQUARIUM_EDUCATION_TIPS.filter((_, index) => !this.usedTips.has(index));
+
+        if (availableTips.length === 0) {
+            this.usedTips.clear(); // Reset wenn alle Tipps gezeigt
         }
 
-        try {
-            const { data, error } = await this.supabase
-                .from('highscores')
-                .select('*')
-                .order('score', { ascending: false })
-                .order('created_at', { ascending: true })
-                .limit(limit);
+        const randomIndex = Math.floor(Math.random() * AQUARIUM_EDUCATION_TIPS.length);
 
-            if (error) {
-                console.error('Error fetching highscores:', error);
-                return [];
-            }
-
-            return data || [];
-        } catch (err) {
-            console.error('Exception fetching highscores:', err);
-            return [];
+        if (!this.usedTips.has(randomIndex)) {
+            this.usedTips.add(randomIndex);
+            this.displayTip(AQUARIUM_EDUCATION_TIPS[randomIndex]);
         }
     }
 
-    async getPerfectScores(limit = 20) {
-        if (!this.isConnected || !this.supabase) {
-            return [];
-        }
+    displayTip(tip) {
+        // Tipp-Anzeige mit Animation
+        const tipElement = document.createElement('div');
+        tipElement.className = 'aquarium-tip';
+        tipElement.innerHTML = tip;
 
-        try {
-            const { data, error } = await this.supabase
-                .from('highscores')
-                .select('*')
-                .eq('collected_items', 20)
-                .order('score', { ascending: false })
-                .order('game_time', { ascending: true })
-                .limit(limit);
+        tipElement.style.cssText = `
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 150, 255, 0.95);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            animation: tipSlideIn 0.5s ease-out forwards;
+            max-width: 80%;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        `;
 
-            if (error) {
-                console.error('Error fetching perfect scores:', error);
-                return [];
+        document.body.appendChild(tipElement);
+
+        // Nach 2.5 Sekunden entfernen
+        setTimeout(() => {
+            if (tipElement.parentNode) {
+                tipElement.style.animation = 'tipSlideOut 0.5s ease-in forwards';
+                setTimeout(() => {
+                    if (tipElement.parentNode) {
+                        tipElement.remove();
+                    }
+                }, 500);
             }
-
-            return data || [];
-        } catch (err) {
-            console.error('Exception fetching perfect scores:', err);
-            return [];
-        }
+        }, 2500);
     }
 
-    async getPlayerRank(score) {
-        if (!this.isConnected || !this.supabase) {
-            return 0;
-        }
-
-        try {
-            const { count, error } = await this.supabase
-                .from('highscores')
-                .select('*', { count: 'exact', head: true })
-                .gt('score', score);
-
-            if (error) {
-                console.error('Error getting player rank:', error);
-                return 0;
-            }
-
-            return (count || 0) + 1;
-        } catch (err) {
-            console.error('Exception getting player rank:', err);
-            return 0;
+    stopTipSystem() {
+        if (this.tipInterval) {
+            clearInterval(this.tipInterval);
+            this.tipInterval = null;
         }
     }
 }
 
+// 🎮 AQUARIUM COLLECTOR GAME - VEREINFACHT UND STABIL
 class AquariumCollectorGame {
-    constructor(containerEl, gameNumber = 1) {
-        if (!containerEl) {
-            throw new Error('Container element is required');
-        }
-
-        this.container = containerEl;
+    constructor(containerId, gameNumber = 1) {
+        this.containerId = containerId;
+        this.container = document.getElementById(containerId);
         this.gameNumber = gameNumber;
 
-        console.log(`🎮 Initialisiere AquariumCollectorGame ${gameNumber}...`);
+        // Vereinfachtes System ohne Supabase-Aufhänger
+        this.highscoreManager = new LocalScoreManager();
+        this.educationSystem = new EducationSystem();
 
-        // Canvas mit Error-Handling erstellen
-        this.canvas = document.createElement('canvas');
-        this.canvas.className = 'aquarium-game-canvas';
-        this.canvas.style.cssText = `
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            cursor: crosshair;
-            background: transparent;
-        `;
-
-        try {
-            this.ctx = this.canvas.getContext('2d');
-            if (!this.ctx) {
-                throw new Error('Canvas context not available');
-            }
-            console.log('✅ Canvas Context erfolgreich erstellt');
-        } catch (error) {
-            console.error('❌ Canvas-Fehler:', error);
-            throw error;
-        }
-
-        this.container.appendChild(this.canvas);
-
-        // Schwierigkeitsbasierte Game State
-        this.difficulty = this.calculateDifficulty(gameNumber);
-        this.totalItems = this.difficulty.items;
+        // Game state
+        this.gameActive = false;
+        this.gameStarted = false;
+        this.items = [];
         this.collected = 0;
-        this.missed = 0;
         this.score = 0;
-        this.gameTime = this.difficulty.time;
-        this.timeLeft = this.gameTime;
-        this.gameRunning = false;
-        this.gameEnded = false;
-        this.firstFishClicked = false;
-
-        // 🔥 COMBO SYSTEM
-        this.combo = {
-            streak: 0,
-            multiplier: 1.0,
-            maxMultiplier: 5.0,
-            comboTimer: 3000, // 3 Sekunden für nächsten Combo
-            lastCollectionTime: 0,
-            displayTimer: null
-        };
-
-        // ⚡ POWER-UPS SYSTEM (Erweitert)
-        this.powerUps = [];
-        this.activePowerUps = [];
-        this.powerUpTypes = [
-            {
-                type: 'speed_boost',
-                emoji: '💨',
-                duration: 5000,
-                spawnChance: 0.1,
-                color: '#FFD700',
-                effect: () => {
-                    this.playerFish.speed *= 2;
-                    this.showPowerUpEffect('SPEED BOOST!');
-                }
-            },
-            {
-                type: 'time_freeze',
-                emoji: '❄️',
-                duration: 3000,
-                spawnChance: 0.08,
-                color: '#00FFFF',
-                effect: () => {
-                    this.timeFrozen = true;
-                    this.showPowerUpEffect('TIME FREEZE!');
-                }
-            },
-            {
-                type: 'magnet',
-                emoji: '🧲',
-                duration: 6000,
-                spawnChance: 0.06,
-                color: '#FF1493',
-                effect: () => {
-                    this.magnetActive = true;
-                    this.magnetRadius = 150;
-                    this.showPowerUpEffect('MAGNET!');
-                }
-            },
-            {
-                type: 'double_points',
-                emoji: '💎',
-                duration: 8000,
-                spawnChance: 0.05,
-                color: '#9370DB',
-                effect: () => {
-                    this.pointMultiplier = 2;
-                    this.showPowerUpEffect('DOUBLE POINTS!');
-                }
-            },
-            // 🚀 NEUE POWER-UPS
-            {
-                type: 'ultra_magnet',
-                emoji: '🌟',
-                duration: 8000,
-                spawnChance: 0.04,
-                color: '#FFD700',
-                effect: () => {
-                    this.ultraMagnetActive = true;
-                    this.ultraMagnetRadius = 300;
-                    this.showPowerUpEffect('ULTRA MAGNET!');
-                    this.triggerScreenShake(8, 300);
-                }
-            },
-            {
-                type: 'mega_size',
-                emoji: '🔥',
-                duration: 10000,
-                spawnChance: 0.03,
-                color: '#FF4500',
-                effect: () => {
-                    this.megaSizeActive = true;
-                    this.originalPlayerSize = {
-                        width: this.playerFish.width,
-                        height: this.playerFish.height
-                    };
-                    this.playerFish.width *= 2.5;
-                    this.playerFish.height *= 2.5;
-                    this.showPowerUpEffect('MEGA SIZE!');
-                    this.triggerScreenShake(12, 500);
-                }
-            },
-            {
-                type: 'rainbow_mode',
-                emoji: '🌈',
-                duration: 12000,
-                spawnChance: 0.025,
-                color: '#FF69B4',
-                effect: () => {
-                    this.rainbowModeActive = true;
-                    this.rainbowMultiplier = 3;
-                    this.showPowerUpEffect('RAINBOW MODE!');
-                    this.triggerScreenShake(10, 400);
-                    // Regenbogen-Overlay aktivieren
-                    this.colorOverlay.active = true;
-                    this.colorOverlay.color = 'rgba(255, 105, 180, 0.1)';
-                    this.colorOverlay.duration = 12000;
-                    this.colorOverlay.startTime = Date.now();
-                }
-            },
-            {
-                type: 'auto_collect',
-                emoji: '🤖',
-                duration: 6000,
-                spawnChance: 0.02,
-                color: '#00BFFF',
-                effect: () => {
-                    this.autoCollectActive = true;
-                    this.showPowerUpEffect('AUTO COLLECT!');
-                    this.triggerScreenShake(6, 200);
-                }
-            }
-        ];
-        this.timeFrozen = false;
-        this.magnetActive = false;
-        this.magnetRadius = 0;
-        this.pointMultiplier = 1;
-
-        // 🚀 NEUE POWER-UP STATES
-        this.ultraMagnetActive = false;
-        this.ultraMagnetRadius = 0;
-        this.megaSizeActive = false;
-        this.originalPlayerSize = null;
-        this.rainbowModeActive = false;
-        this.rainbowMultiplier = 1;
-        this.autoCollectActive = false;
-
-        // 🎨 VISUAL EFFECTS (Erweitert)
-        this.screenShake = {
-            active: false,
-            intensity: 0,
-            duration: 0,
-            startTime: 0
-        };
-        this.colorOverlay = {
-            active: false,
-            color: 'rgba(0,0,0,0)',
-            duration: 0,
-            startTime: 0
-        };
-        this.comboEffects = [];
-        this.powerUpEffects = [];
-
-        // 🌈 NEUE VISUELLE EFFEKTE
-        this.rainbowTrails = [];
-        this.confettiParticles = [];
-        this.lightningEffects = [];
-        this.starEffects = [];
-        this.flashEffects = [];
-
-        // 🏆 ACHIEVEMENT SYSTEM
-        this.achievements = [
-            {
-                id: 'speed_demon',
-                name: 'Speed Demon',
-                description: 'Sammle alle Items in weniger als 30 Sekunden',
-                emoji: '⚡',
-                unlocked: false,
-                condition: () => this.isPerfectScore && this.gameEndTime && (this.gameEndTime - this.gameStartTime) < 30000
-            },
-            {
-                id: 'combo_king',
-                name: 'Combo King',
-                description: 'Erreiche einen 15x Combo',
-                emoji: '👑',
-                unlocked: false,
-                condition: () => this.combo.streak >= 15
-            },
-            {
-                id: 'perfect_fisher',
-                name: 'Perfect Fisher',
-                description: 'Sammle alle Items ohne eines zu verpassen',
-                emoji: '🎯',
-                unlocked: false,
-                condition: () => this.isPerfectScore
-            },
-            {
-                id: 'boss_slayer',
-                name: 'Boss Slayer',
-                description: 'Besiege 3 Boss-Fische in einem Spiel',
-                emoji: '🗡️',
-                unlocked: false,
-                condition: () => this.bossesDefeated >= 3
-            },
-            {
-                id: 'rainbow_master',
-                name: 'Rainbow Master',
-                description: 'Aktiviere Rainbow Mode und sammle 10 Items',
-                emoji: '🌈',
-                unlocked: false,
-                condition: () => this.rainbowModeActive && this.collected >= 10
-            },
-            {
-                id: 'mega_collector',
-                name: 'Mega Collector',
-                description: 'Sammle im Mega Size Modus 5 Items',
-                emoji: '🔥',
-                unlocked: false,
-                condition: () => this.megaSizeActive && this.collected >= 5
-            }
-        ];
-        this.bossesDefeated = 0;
-        this.achievementPopups = [];
-        this.unlockedThisGame = [];
-
-        // 🦈 BOSS-FISCH SYSTEM
-        this.bossFish = [];
-        this.bossSpawnTimer = 30000; // 30 Sekunden
-        this.lastBossSpawn = 0;
-        this.bossTypes = [
-            {
-                type: 'shark',
-                emoji: '🦈',
-                points: 150,
-                size: 80,
-                speed: 2,
-                color: '#FF4444',
-                pattern: 'zigzag',
-                health: 3,
-                sound: 1800
-            },
-            {
-                type: 'octopus',
-                emoji: '🐙',
-                points: 200,
-                size: 90,
-                speed: 1.5,
-                color: '#9933FF',
-                pattern: 'circle',
-                health: 4,
-                sound: 1600
-            },
-            {
-                type: 'whale',
-                emoji: '🐋',
-                points: 300,
-                size: 120,
-                speed: 1,
-                color: '#4444FF',
-                pattern: 'straight',
-                health: 5,
-                sound: 2200
-            }
-        ];
-
-        // 🔊 SOUND SYSTEM
-        this.soundEnabled = true;
-        this.sounds = {
-            collect: this.createSound(800, 0.1, 0.1),
-            combo: this.createSound(1200, 0.1, 0.15),
-            powerup: this.createSound(1500, 0.2, 0.2),
-            perfect: this.createSound(2000, 0.3, 0.3),
-            gameOver: this.createSound(300, 0.5, 0.2),
-            boss: this.createSound(1800, 0.3, 0.25),
-            bossHit: this.createSound(1000, 0.2, 0.15)
-        };
-
-        // 🏆 Highscore System
-        this.highscoreManager = new SupabaseHighscoreManager();
         this.gameStartTime = null;
         this.gameEndTime = null;
-        this.isPerfectScore = false;
-        this.finalScore = 0;
-        this.playerRank = 0;
 
-        // Aquarium Setup
-        this.playerFish = {
-            x: 100,
-            y: 200,
-            width: 60,
-            height: 40,
-            speed: 5
-        };
+        // Neue 30-Sekunden Konfiguration
+        this.difficulty = this.getDifficulty(gameNumber);
+        this.gameTime = this.difficulty.time; // Jetzt 30 Sekunden!
+        this.timeLeft = this.gameTime;
 
-        // Futter-Typen mit verschiedenen Punktwerten - Größer für bessere Sichtbarkeit
-        this.foodTypes = [
-            { type: 'flakes', emoji: '🐟', points: 10, color: '#FF6B6B', size: 35 },
-            { type: 'worms', emoji: '🪱', points: 20, color: '#4ECDC4', size: 30 },
-            { type: 'pellets', emoji: '⭕', points: 15, color: '#45B7D1', size: 38 },
-            { type: 'shrimp', emoji: '🦐', points: 25, color: '#FFA07A', size: 40 },
-            { type: 'plant', emoji: '🌱', points: 12, color: '#98D8C8', size: 32 }
-        ];
+        // Canvas und Kontext
+        this.canvas = null;
+        this.ctx = null;
 
-        this.collectibles = [];
-        this.particles = [];
-        this.bubbles = [];
-        this.playerTrails = []; // Spieler-Trails für visuelle Effekte
-
-        // Hintergrund laden
-        this.backgroundImg = new Image();
-        this.backgroundImg.src = 'data:image/svg+xml;base64,' + btoa(`
-            <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="water" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#4682B4;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#191970;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#water)"/>
-                <!-- Aquarium Pflanzen -->
-                <path d="M50 550 Q100 450 120 500 Q140 400 160 480 Q180 350 200 450"
-                      stroke="#2E8B57" stroke-width="8" fill="none"/>
-                <path d="M650 550 Q700 420 720 480 Q740 380 760 440"
-                      stroke="#228B22" stroke-width="6" fill="none"/>
-                <!-- Steine -->
-                <ellipse cx="300" cy="580" rx="80" ry="20" fill="#696969"/>
-                <ellipse cx="500" cy="570" rx="60" ry="25" fill="#778899"/>
-            </svg>
-        `);
-
-        // Game-Styles hinzufügen
-        this.addGameStyles();
+        // Timer
+        this.gameTimer = null;
+        this.itemSpawnTimer = null;
 
         this.setup();
-        this.initControls();
-        this.spawnInitialItems();
-        this.createUI();
-
-        console.log(`🎉 AquariumCollectorGame ${gameNumber} vollständig initialisiert!`);
     }
 
-    addGameStyles() {
-        // Einmalig Game-Styles zum Document hinzufügen
-        if (document.getElementById('aquarium-game-styles')) return;
-
-        const styles = document.createElement('style');
-        styles.id = 'aquarium-game-styles';
-        styles.textContent = `
-            .aquarium-game-canvas {
-                border: 3px solid rgba(78, 205, 196, 0.5);
-                box-shadow:
-                    0 0 20px rgba(78, 205, 196, 0.3),
-                    inset 0 0 20px rgba(0, 0, 0, 0.2);
-                transition: all 0.3s ease;
-            }
-
-            .aquarium-game-canvas:hover {
-                border-color: rgba(78, 205, 196, 0.8);
-                box-shadow:
-                    0 0 30px rgba(78, 205, 196, 0.5),
-                    inset 0 0 20px rgba(0, 0, 0, 0.1);
-            }
-
-            .game-start-btn {
-                background: linear-gradient(135deg, #4ECDC4, #44A08D);
-                color: white;
-                border: none;
-                padding: 15px 30px;
-                border-radius: 25px;
-                font-size: 16px;
-                font-weight: bold;
-                cursor: pointer;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 100;
-                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
-                transition: all 0.3s ease;
-                animation: pulse-glow 2s ease-in-out infinite;
-            }
-
-            .game-start-btn:hover {
-                transform: translate(-50%, -50%) scale(1.05);
-                box-shadow: 0 6px 25px rgba(78, 205, 196, 0.6);
-            }
-
-            @keyframes pulse-glow {
-                0%, 100% { box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4); }
-                50% { box-shadow: 0 8px 30px rgba(78, 205, 196, 0.8); }
-            }
-
-            .game-exit-btn {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(255, 107, 107, 0.9);
-                color: white;
-                border: none;
-                width: 35px;
-                height: 35px;
-                border-radius: 50%;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                z-index: 101;
-                transition: all 0.3s ease;
-            }
-
-            .game-exit-btn:hover {
-                background: rgba(255, 107, 107, 1);
-                transform: scale(1.1);
-            }
-
-            .game-ui {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                padding: 15px;
-                border-radius: 10px;
-                font-family: 'Arial', sans-serif;
-                font-weight: bold;
-                z-index: 100;
-                min-width: 200px;
-                backdrop-filter: blur(5px);
-                border: 1px solid rgba(78, 205, 196, 0.3);
-            }
-
-            .game-ui div {
-                margin: 5px 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .score-display {
-                color: #4ECDC4;
-                font-size: 16px;
-            }
-
-            .items-display {
-                color: #FFD700;
-                font-size: 14px;
-            }
-
-            .timer-display {
-                color: #FF6B6B;
-                font-size: 14px;
-            }
-
-            .test-game-container {
-                animation: game-container-glow 3s ease-in-out infinite;
-            }
-
-            @keyframes game-container-glow {
-                0%, 100% {
-                    border-color: rgba(78, 205, 196, 0.3);
-                    box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
-                }
-                50% {
-                    border-color: rgba(78, 205, 196, 0.6);
-                    box-shadow: 0 0 40px rgba(78, 205, 196, 0.4);
-                }
-            }
-        `;
-        document.head.appendChild(styles);
-    }
-
-    // 🦈 BOSS-FISCH METHODEN
-    spawnBossFish() {
-        const now = Date.now();
-        if (now - this.lastBossSpawn > this.bossSpawnTimer && this.gameRunning) {
-            const bossType = this.bossTypes[Math.floor(Math.random() * this.bossTypes.length)];
-
-            const boss = {
-                ...bossType,
-                id: 'boss_' + now,
-                x: -bossType.size,
-                y: Math.random() * (this.canvas.height - bossType.size - 100) + 50,
-                currentHealth: bossType.health,
-                maxHealth: bossType.health,
-                patternOffset: 0,
-                startY: 0,
-                warning: true,
-                warningTime: now,
-                scale: 1.0,
-                glowIntensity: 1.0
-            };
-
-            boss.startY = boss.y;
-            this.bossFish.push(boss);
-            this.lastBossSpawn = now;
-
-            // Boss-Warnung anzeigen
-            this.showBossWarning(bossType.type);
-            this.playSound('boss');
-
-            console.log(`🦈 Boss spawned: ${bossType.type}`);
-        }
-    }
-
-    showBossWarning(bossType) {
-        this.powerUpEffects.push({
-            text: `⚠️ BOSS INCOMING: ${bossType.toUpperCase()}! ⚠️`,
-            x: this.canvas.width / 2,
-            y: 80,
-            opacity: 1.0,
-            color: '#FF0000',
-            scale: 1.5,
-            duration: 3000,
-            startTime: Date.now()
-        });
-
-        // Screen-Shake für Drama
-        this.triggerScreenShake(15, 1000);
-    }
-
-    drawBossFish() {
-        this.bossFish.forEach(boss => {
-            this.ctx.save();
-
-            // Boss-Glow Effekt
-            this.ctx.shadowBlur = 25;
-            this.ctx.shadowColor = boss.color;
-
-            // Warning-Blink Effekt
-            if (boss.warning && Date.now() - boss.warningTime < 2000) {
-                const blinkIntensity = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
-                this.ctx.globalAlpha = 0.5 + blinkIntensity * 0.5;
-            }
-
-            // Boss skalieren für dramatischen Effekt
-            const breathe = Math.sin(Date.now() * 0.005) * 0.05 + 1;
-            boss.scale = breathe;
-
-            // Boss zeichnen
-            this.ctx.font = `${boss.size * boss.scale}px Arial`;
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(boss.emoji, boss.x + boss.size/2, boss.y + boss.size/2);
-
-            // Health Bar für Boss
-            if (boss.currentHealth < boss.maxHealth) {
-                this.drawBossHealthBar(boss);
-            }
-
-            this.ctx.restore();
-        });
-    }
-
-    drawBossHealthBar(boss) {
-        const barWidth = boss.size;
-        const barHeight = 8;
-        const x = boss.x;
-        const y = boss.y - 20;
-
-        // Hintergrund
-        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-        this.ctx.fillRect(x, y, barWidth, barHeight);
-
-        // Health
-        const healthPercent = boss.currentHealth / boss.maxHealth;
-        this.ctx.fillStyle = healthPercent > 0.5 ? '#00FF00' : healthPercent > 0.25 ? '#FFFF00' : '#FF0000';
-        this.ctx.fillRect(x, y, barWidth * healthPercent, barHeight);
-
-        // Border
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(x, y, barWidth, barHeight);
-    }
-
-    updateBossMovement(boss) {
-        switch(boss.pattern) {
-            case 'zigzag':
-                boss.x += boss.speed;
-                boss.y = boss.startY + Math.sin(boss.patternOffset * 0.05) * 80;
-                boss.patternOffset++;
-                break;
-
-            case 'circle':
-                const radius = 60;
-                const centerX = boss.x + boss.speed;
-                const centerY = boss.startY;
-                boss.x = centerX + Math.cos(boss.patternOffset * 0.08) * radius;
-                boss.y = centerY + Math.sin(boss.patternOffset * 0.08) * radius;
-                boss.patternOffset++;
-                break;
-
-            case 'straight':
-                boss.x += boss.speed;
-                boss.y += Math.sin(boss.patternOffset * 0.02) * 2; // Leichtes Schwanken
-                boss.patternOffset++;
-                break;
-        }
-
-        // Warning ausschalten nach 2 Sekunden
-        if (boss.warning && Date.now() - boss.warningTime > 2000) {
-            boss.warning = false;
-        }
-    }
-
-    // 🌈 NEUE ERWEITERTE VISUELLE EFFEKT METHODEN
-
-    createRainbowTrail(x, y) {
-        this.rainbowTrails.push({
-            x: x,
-            y: y,
-            opacity: 1.0,
-            size: 15,
-            hue: Date.now() * 0.1 % 360,
-            life: 1.0
-        });
-    }
-
-    createConfetti(x, y, count = 20) {
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#FFD700', '#FF69B4'];
-
-        for (let i = 0; i < count; i++) {
-            this.confettiParticles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 12,
-                vy: Math.random() * -8 - 4,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                size: Math.random() * 8 + 3,
-                rotation: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.3,
-                gravity: 0.3,
-                life: 1.0
-            });
-        }
-    }
-
-    createLightning(startX, startY, endX, endY) {
-        const lightning = {
-            segments: [],
-            opacity: 1.0,
-            duration: 300,
-            startTime: Date.now(),
-            color: '#FFFFFF'
-        };
-
-        // Erstelle Zickzack-Blitz
-        const steps = 8;
-        for (let i = 0; i <= steps; i++) {
-            const progress = i / steps;
-            const x = startX + (endX - startX) * progress + (Math.random() - 0.5) * 30;
-            const y = startY + (endY - startY) * progress + (Math.random() - 0.5) * 30;
-            lightning.segments.push({ x, y });
-        }
-
-        this.lightningEffects.push(lightning);
-    }
-
-    createStarBurst(x, y, count = 12) {
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2;
-            const speed = 5 + Math.random() * 3;
-
-            this.starEffects.push({
-                x: x,
-                y: y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                size: 4 + Math.random() * 6,
-                opacity: 1.0,
-                color: '#FFD700',
-                sparkle: 0
-            });
-        }
-    }
-
-    createFlashEffect(color = '#FFFFFF', intensity = 0.5) {
-        this.flashEffects.push({
-            color: color,
-            intensity: intensity,
-            opacity: intensity,
-            duration: 200,
-            startTime: Date.now()
-        });
-    }
-
-    drawRainbowTrails() {
-        this.rainbowTrails.forEach(trail => {
-            this.ctx.save();
-            this.ctx.globalAlpha = trail.opacity;
-            this.ctx.fillStyle = `hsl(${trail.hue}, 100%, 50%)`;
-            this.ctx.shadowBlur = 10;
-            this.ctx.shadowColor = `hsl(${trail.hue}, 100%, 50%)`;
-
-            this.ctx.beginPath();
-            this.ctx.arc(trail.x, trail.y, trail.size, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
-        });
-    }
-
-    drawConfetti() {
-        this.confettiParticles.forEach(confetti => {
-            this.ctx.save();
-            this.ctx.globalAlpha = confetti.life;
-            this.ctx.translate(confetti.x, confetti.y);
-            this.ctx.rotate(confetti.rotation);
-            this.ctx.fillStyle = confetti.color;
-
-            this.ctx.fillRect(-confetti.size/2, -confetti.size/2, confetti.size, confetti.size);
-            this.ctx.restore();
-        });
-    }
-
-    drawLightning() {
-        this.lightningEffects.forEach(lightning => {
-            this.ctx.save();
-            this.ctx.globalAlpha = lightning.opacity;
-            this.ctx.strokeStyle = lightning.color;
-            this.ctx.lineWidth = 3;
-            this.ctx.shadowBlur = 8;
-            this.ctx.shadowColor = lightning.color;
-
-            this.ctx.beginPath();
-            lightning.segments.forEach((segment, index) => {
-                if (index === 0) {
-                    this.ctx.moveTo(segment.x, segment.y);
-                } else {
-                    this.ctx.lineTo(segment.x, segment.y);
-                }
-            });
-            this.ctx.stroke();
-            this.ctx.restore();
-        });
-    }
-
-    drawStarEffects() {
-        this.starEffects.forEach(star => {
-            this.ctx.save();
-            this.ctx.globalAlpha = star.opacity;
-            this.ctx.fillStyle = star.color;
-            this.ctx.shadowBlur = 5;
-            this.ctx.shadowColor = star.color;
-
-            // Funkelnder Stern
-            const sparkleSize = star.size + Math.sin(star.sparkle) * 2;
-            this.ctx.font = `${sparkleSize}px Arial`;
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('⭐', star.x, star.y);
-            this.ctx.restore();
-        });
-    }
-
-    drawFlashEffects() {
-        this.flashEffects.forEach(flash => {
-            this.ctx.save();
-            this.ctx.globalAlpha = flash.opacity;
-            this.ctx.fillStyle = flash.color;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.restore();
-        });
-    }
-
-    // 🎨 BESTEHENDE VISUELLE EFFEKT METHODEN
-    drawPlayerTrails() {
-        this.playerTrails.forEach(trail => {
-            this.ctx.save();
-            this.ctx.globalAlpha = trail.opacity;
-            this.ctx.font = '40px Arial';
-            this.ctx.fillText('🐠', trail.x - 20, trail.y + 15);
-            this.ctx.restore();
-        });
-    }
-
-    drawPowerUps() {
-        this.powerUps.forEach(powerUp => {
-            this.ctx.save();
-            this.ctx.translate(powerUp.x, powerUp.y);
-            this.ctx.rotate(powerUp.rotation);
-
-            // Glow-Effekt
-            this.ctx.shadowBlur = 20;
-            this.ctx.shadowColor = powerUp.color;
-
-            // Power-Up zeichnen
-            this.ctx.font = `${powerUp.size}px Arial`;
-            this.ctx.fillText(powerUp.emoji, -powerUp.size/2, powerUp.size/2);
-
-            this.ctx.restore();
-        });
-    }
-
-    drawComboEffects() {
-        this.comboEffects.forEach(effect => {
-            this.ctx.save();
-            this.ctx.globalAlpha = effect.opacity;
-            this.ctx.font = `bold ${20 * effect.scale}px Arial`;
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.strokeStyle = '#FF6B6B';
-            this.ctx.lineWidth = 2;
-            this.ctx.fillText(effect.text, effect.x, effect.y);
-            this.ctx.strokeText(effect.text, effect.x, effect.y);
-            this.ctx.restore();
-        });
-    }
-
-    drawPowerUpEffects() {
-        this.powerUpEffects.forEach(effect => {
-            this.ctx.save();
-            this.ctx.globalAlpha = effect.opacity;
-            this.ctx.font = 'bold 24px Arial';
-            this.ctx.fillStyle = effect.color || '#FFFFFF';
-            this.ctx.strokeStyle = '#000000';
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeText(effect.text, effect.x, effect.y);
-            this.ctx.fillText(effect.text, effect.x, effect.y);
-            this.ctx.restore();
-        });
-    }
-
-    drawComboMeter() {
-        const x = this.canvas.width - 150;
-        const y = 100;
-
-        this.ctx.save();
-
-        // Combo-Hintergrund
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        this.ctx.fillRect(x, y, 120, 40);
-
-        // Combo-Text
-        this.ctx.font = 'bold 16px Arial';
-        this.ctx.fillStyle = '#FFD700';
-        this.ctx.fillText(`COMBO x${this.combo.streak}`, x + 10, y + 18);
-
-        // Multiplikator
-        this.ctx.font = '14px Arial';
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillText(`${this.combo.multiplier.toFixed(1)}x Points`, x + 10, y + 34);
-
-        this.ctx.restore();
-    }
-
-    drawActivePowerUps() {
-        const x = 10;
-        let y = 200;
-
-        this.activePowerUps.forEach(active => {
-            const remaining = Math.ceil((active.duration - (Date.now() - active.startTime)) / 1000);
-
-            this.ctx.save();
-            this.ctx.font = '16px Arial';
-            this.ctx.fillStyle = active.powerUp.color;
-            this.ctx.fillText(`${active.powerUp.emoji} ${remaining}s`, x, y);
-            this.ctx.restore();
-
-            y += 25;
-        });
-    }
-
-    // 🔥 COMBO UND EFFEKT METHODEN
-    showComboEffect(text) {
-        this.comboEffects.push({
-            text: text,
-            x: this.canvas.width / 2,
-            y: 100,
-            opacity: 1.0,
-            scale: 1.0
-        });
-    }
-
-    showPowerUpEffect(text) {
-        this.powerUpEffects.push({
-            text: text,
-            x: this.canvas.width / 2,
-            y: 150,
-            opacity: 1.0,
-            color: '#FFFF00'
-        });
-
-        // Farb-Overlay aktivieren
-        this.colorOverlay.active = true;
-        this.colorOverlay.color = 'rgba(255, 255, 0, 0.1)';
-        this.colorOverlay.duration = 500;
-        this.colorOverlay.startTime = Date.now();
-    }
-
-    createPointsAnimation(x, y, text, isCombo) {
-        const color = isCombo ? '#FFD700' : '#FFFFFF';
-        this.powerUpEffects.push({
-            text: text,
-            x: x,
-            y: y,
-            opacity: 1.0,
-            color: color
-        });
-    }
-
-    triggerScreenShake(intensity, duration) {
-        this.screenShake.active = true;
-        this.screenShake.intensity = intensity;
-        this.screenShake.duration = duration;
-        this.screenShake.startTime = Date.now();
-    }
-
-    // ⚡ POWER-UP METHODEN
-    spawnPowerUp() {
-        // Zufällig Power-Ups spawnen
-        this.powerUpTypes.forEach(type => {
-            if (Math.random() < type.spawnChance * 0.1) { // Reduzierte Chance pro Update
-                this.powerUps.push({
-                    ...type,
-                    x: Math.random() * (this.canvas.width - 60) + 30,
-                    y: -50,
-                    width: 40,
-                    height: 40,
-                    size: 35,
-                    speed: 1.5,
-                    rotation: 0
-                });
-            }
-        });
-    }
-
-    activatePowerUp(powerUp) {
-        // Aktiviere Power-Up Effekt
-        powerUp.effect();
-
-        // Füge zu aktiven Power-Ups hinzu
-        this.activePowerUps.push({
-            powerUp: powerUp,
-            startTime: Date.now(),
-            duration: powerUp.duration
-        });
-
-        // Screen-Effekte
-        this.triggerScreenShake(10, 300);
-        this.colorOverlay.active = true;
-        this.colorOverlay.color = `${powerUp.color}33`; // 20% opacity
-        this.colorOverlay.duration = 300;
-        this.colorOverlay.startTime = Date.now();
-
-        // Sound abspielen
-        this.playSound('powerup');
-    }
-
-    deactivatePowerUp(active) {
-        // Power-Up Effekte zurücksetzen
-        switch(active.powerUp.type) {
-            case 'speed_boost':
-                this.playerFish.speed = 5;
-                break;
-            case 'time_freeze':
-                this.timeFrozen = false;
-                break;
-            case 'magnet':
-                this.magnetActive = false;
-                this.magnetRadius = 0;
-                break;
-            case 'double_points':
-                this.pointMultiplier = 1;
-                break;
-            // 🚀 NEUE POWER-UPS DEAKTIVIEREN
-            case 'ultra_magnet':
-                this.ultraMagnetActive = false;
-                this.ultraMagnetRadius = 0;
-                break;
-            case 'mega_size':
-                this.megaSizeActive = false;
-                if (this.originalPlayerSize) {
-                    this.playerFish.width = this.originalPlayerSize.width;
-                    this.playerFish.height = this.originalPlayerSize.height;
-                    this.originalPlayerSize = null;
-                }
-                break;
-            case 'rainbow_mode':
-                this.rainbowModeActive = false;
-                this.rainbowMultiplier = 1;
-                break;
-            case 'auto_collect':
-                this.autoCollectActive = false;
-                break;
-        }
-    }
-
-    createCollectionEffect(x, y, color, count = 8) {
-        for (let i = 0; i < count; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                size: Math.random() * 6 + 2,
-                color: color,
-                life: 1
-            });
-        }
-    }
-
-    // 🏆 ACHIEVEMENT SYSTEM METHODEN
-
-    checkAchievements() {
-        this.achievements.forEach(achievement => {
-            if (!achievement.unlocked && !this.unlockedThisGame.includes(achievement.id)) {
-                if (achievement.condition()) {
-                    this.unlockAchievement(achievement);
-                }
-            }
-        });
-    }
-
-    unlockAchievement(achievement) {
-        achievement.unlocked = true;
-        this.unlockedThisGame.push(achievement.id);
-
-        // Achievement Popup erstellen
-        this.createAchievementPopup(achievement);
-
-        // Spezielle Effekte
-        this.createConfetti(this.canvas.width / 2, 100, 25);
-        this.createStarBurst(this.canvas.width / 2, 100, 10);
-        this.createFlashEffect('#FFD700', 0.3);
-        this.triggerScreenShake(8, 400);
-
-        // Sound
-        this.playSound('perfect');
-
-        console.log(`🏆 Achievement unlocked: ${achievement.name}`);
-    }
-
-    createAchievementPopup(achievement) {
-        this.achievementPopups.push({
-            achievement: achievement,
-            x: this.canvas.width / 2,
-            y: 60,
-            opacity: 1.0,
-            scale: 0.1,
-            duration: 4000,
-            startTime: Date.now(),
-            phase: 'enter' // enter, show, exit
-        });
-    }
-
-    drawAchievementPopups() {
-        this.achievementPopups.forEach(popup => {
-            const elapsed = Date.now() - popup.startTime;
-            const progress = elapsed / popup.duration;
-
-            this.ctx.save();
-
-            // Animation phases
-            if (progress < 0.2) { // Enter phase
-                popup.scale = this.easeOutBounce(progress / 0.2);
-                popup.opacity = 1.0;
-            } else if (progress < 0.8) { // Show phase
-                popup.scale = 1.0;
-                popup.opacity = 1.0;
-            } else { // Exit phase
-                popup.scale = 1.0;
-                popup.opacity = 1.0 - ((progress - 0.8) / 0.2);
-            }
-
-            this.ctx.globalAlpha = popup.opacity;
-            this.ctx.translate(popup.x, popup.y);
-            this.ctx.scale(popup.scale, popup.scale);
-
-            // Achievement Box
-            const boxWidth = 300;
-            const boxHeight = 80;
-
-            // Background
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-            this.ctx.fillRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight);
-
-            // Border
-            this.ctx.strokeStyle = '#FFD700';
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight);
-
-            // Achievement Text
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = 'bold 16px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('🏆 ACHIEVEMENT UNLOCKED! 🏆', 0, -20);
-
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.font = 'bold 18px Arial';
-            this.ctx.fillText(`${popup.achievement.emoji} ${popup.achievement.name}`, 0, 5);
-
-            this.ctx.font = '12px Arial';
-            this.ctx.fillText(popup.achievement.description, 0, 25);
-
-            this.ctx.restore();
-        });
-    }
-
-    easeOutBounce(t) {
-        if (t < 1 / 2.75) {
-            return 7.5625 * t * t;
-        } else if (t < 2 / 2.75) {
-            return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
-        } else if (t < 2.5 / 2.75) {
-            return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
-        } else {
-            return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
-        }
-    }
-
-    // 🔊 SOUND METHODEN
-    createSound(frequency, duration, volume) {
-        return {
-            frequency: frequency,
-            duration: duration * 1000, // in ms
-            volume: volume
-        };
-    }
-
-    playSound(type) {
-        if (!this.soundEnabled) return;
-
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const sound = this.sounds[type];
-            if (!sound) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.frequency.value = sound.frequency;
-            gainNode.gain.value = sound.volume;
-
-            oscillator.start(0);
-            oscillator.stop(audioContext.currentTime + sound.duration / 1000);
-
-            // Fade out
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration / 1000);
-        } catch (error) {
-            // Ignoriere Audio-Fehler (Browser-Kompatibilität)
-            console.warn('Audio not available:', error);
-        }
-    }
-
-    calculateDifficulty(gameNumber) {
+    // 🚀 NEUE 30-SEKUNDEN KONFIGURATION MIT MEHR ITEMS
+    getDifficulty(gameNumber) {
         const difficulties = [
-            { level: 1, items: 15, time: 90, speedMultiplier: 1.0, pointsMultiplier: 1.0 },
-            { level: 2, items: 18, time: 85, speedMultiplier: 1.2, pointsMultiplier: 1.5 },
-            { level: 3, items: 20, time: 80, speedMultiplier: 1.4, pointsMultiplier: 2.0 },
-            { level: 4, items: 22, time: 75, speedMultiplier: 1.6, pointsMultiplier: 2.5 },
-            { level: 5, items: 25, time: 70, speedMultiplier: 1.8, pointsMultiplier: 3.0 },
-            { level: 6, items: 25, time: 65, speedMultiplier: 2.0, pointsMultiplier: 4.0 }
+            { level: 1, items: 21, time: 30, speedMultiplier: 0.8, pointsMultiplier: 1.0, badItems: 3, itemLifetime: 5000 },
+            { level: 2, items: 24, time: 30, speedMultiplier: 1.0, pointsMultiplier: 1.5, badItems: 4, itemLifetime: 4500 },
+            { level: 3, items: 27, time: 30, speedMultiplier: 1.2, pointsMultiplier: 2.0, badItems: 5, itemLifetime: 4000 },
+            { level: 4, items: 30, time: 30, speedMultiplier: 1.4, pointsMultiplier: 2.5, badItems: 6, itemLifetime: 3500 },
+            { level: 5, items: 33, time: 30, speedMultiplier: 1.6, pointsMultiplier: 3.0, badItems: 7, itemLifetime: 3000 },
+            { level: 6, items: 36, time: 30, speedMultiplier: 1.8, pointsMultiplier: 4.0, badItems: 8, itemLifetime: 2500 }
         ];
 
-        // Falls mehr als 6 Spiele, verwende das schwerste Level
+        // Schwierigkeit basierend auf Spielnummer
         const index = Math.min(gameNumber - 1, difficulties.length - 1);
         return difficulties[index];
     }
 
     setup() {
+        this.createGameUI();
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Blasen initialisieren
+        // Blasen-Animation für Hintergrund
+        this.bubbles = [];
         for (let i = 0; i < 8; i++) {
             this.bubbles.push({
-                x: Math.random() * this.canvas.width,
-                y: this.canvas.height + Math.random() * 100,
+                x: Math.random() * (this.container.offsetWidth || 400),
+                y: (this.container.offsetHeight || 300) + Math.random() * 100,
                 radius: 3 + Math.random() * 8,
                 speed: 0.5 + Math.random() * 1.5,
                 opacity: 0.3 + Math.random() * 0.4
@@ -1392,1224 +224,893 @@ class AquariumCollectorGame {
         }
     }
 
-    resize() {
-        const rect = this.container.getBoundingClientRect();
-        this.canvas.width = rect.width;
-        this.canvas.height = Math.max(400, rect.height);
-        this.canvas.style.width = rect.width + 'px';
-        this.canvas.style.height = this.canvas.height + 'px';
-    }
-
-    initControls() {
-        // Maus-/Touch-Steuerung
-        const updatePlayerPosition = (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
-            const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
-
-            this.playerFish.x = Math.max(0, Math.min(this.canvas.width - this.playerFish.width, x - this.playerFish.width/2));
-            this.playerFish.y = Math.max(0, Math.min(this.canvas.height - this.playerFish.height, y - this.playerFish.height/2));
-        };
-
-        this.canvas.addEventListener('mousemove', updatePlayerPosition);
-        this.canvas.addEventListener('touchmove', updatePlayerPosition, { passive: true });
-
-        // Keyboard-Steuerung
-        document.addEventListener('keydown', (e) => {
-            if (!this.gameRunning) return;
-
-            switch(e.key) {
-                case 'ArrowLeft':
-                    this.playerFish.x = Math.max(0, this.playerFish.x - this.playerFish.speed);
-                    break;
-                case 'ArrowRight':
-                    this.playerFish.x = Math.min(this.canvas.width - this.playerFish.width, this.playerFish.x + this.playerFish.speed);
-                    break;
-                case 'ArrowUp':
-                    this.playerFish.y = Math.max(0, this.playerFish.y - this.playerFish.speed);
-                    break;
-                case 'ArrowDown':
-                    this.playerFish.y = Math.min(this.canvas.height - this.playerFish.height, this.playerFish.y + this.playerFish.speed);
-                    break;
-            }
-        });
-    }
-
-    spawnInitialItems() {
-        // Alle 20 Items zufällig verteilen
-        for (let i = 0; i < this.totalItems; i++) {
-            this.spawnFood();
-        }
-    }
-
-    spawnFood() {
-        const foodType = this.foodTypes[Math.floor(Math.random() * this.foodTypes.length)];
-        const collectible = {
-            ...foodType,
-            id: Date.now() + Math.random(),
-            x: Math.random() * (this.canvas.width - 50) + 25,
-            y: Math.random() * (this.canvas.height - 100) + 50,
-            targetY: Math.random() * (this.canvas.height - 100) + 50,
-            bobSpeed: 0.02 + Math.random() * 0.03,
-            bobOffset: Math.random() * Math.PI * 2,
-            collected: false,
-            glowIntensity: 0.5 + Math.random() * 0.5
-        };
-
-        this.collectibles.push(collectible);
-    }
-
-    createUI() {
-        // Exit Button
-        const exitBtn = document.createElement('button');
-        exitBtn.innerHTML = '✕';
-        exitBtn.className = 'game-exit-btn';
-        exitBtn.onclick = () => this.showExitDialog();
-        this.container.appendChild(exitBtn);
-
-        // Start Button mit Spielnummer
-        const startBtn = document.createElement('button');
-        startBtn.innerHTML = `🎮 Spiel ${this.gameNumber} starten`;
-        startBtn.className = 'game-start-btn';
-        startBtn.onclick = () => this.startGame();
-        this.container.appendChild(startBtn);
-
-        // UI Container für Score etc.
-        const uiContainer = document.createElement('div');
-        uiContainer.className = 'game-ui';
-        uiContainer.innerHTML = `
-            <div class="score-display">Score: <span id="score">0</span></div>
-            <div class="items-display" id="items-display" style="display: none;">Gesammelt: <span id="collected">0</span>/${this.totalItems}</div>
-            <div class="timer-display">Zeit: <span id="timer">${this.timeLeft}s</span></div>
-        `;
-        this.container.appendChild(uiContainer);
-    }
-
-    startGame() {
-        this.gameRunning = true;
-        this.gameEnded = false;
-        this.timeLeft = this.gameTime;
-        this.collected = 0;
-        this.score = 0;
-        this.missed = 0;
-
-        // Hide interactive fish during game
-        document.body.classList.add('game-active');
-
-        // 🏆 Highscore Tracking
-        this.gameStartTime = Date.now();
-        this.gameEndTime = null;
-        this.isPerfectScore = false;
-        this.finalScore = 0;
-        this.playerRank = 0;
-
-        // Reset collectibles
-        this.collectibles = [];
-        this.spawnInitialItems();
-
-        // Hide start button
-        const startBtn = this.container.querySelector('.game-start-btn');
-        if (startBtn) startBtn.style.display = 'none';
-
-        // Start timer
-        this.gameTimer = setInterval(() => {
-            this.timeLeft--;
-            this.updateUI();
-
-            if (this.timeLeft <= 0 || this.collected >= this.totalItems) {
-                this.endGame();
-            }
-        }, 1000);
-
-        this.gameLoop();
-        console.log('🎮 Game started! Highscore tracking active.');
-    }
-
-    showExitDialog() {
-        const userChoice = confirm(
-            "Möchtest du das Spiel beenden?\\n\\n" +
-            "OK = Spiel beenden\\n" +
-            "Abbrechen = Weiterspielen"
-        );
-
-        if (userChoice) {
-            this.endGame();
-            this.showMainMenu();
-        }
-    }
-
-    gameLoop() {
-        if (!this.gameRunning) return;
-
-        this.update();
-        this.draw();
-        requestAnimationFrame(() => this.gameLoop());
-    }
-
-    update() {
-        // Boss-Fisch spawnen
-        this.spawnBossFish();
-
-        // Boss-Fische bewegen und checken
-        this.bossFish.forEach((boss, index) => {
-            this.updateBossMovement(boss);
-
-            // Kollision mit Spieler
-            if (this.checkBossCollision(this.playerFish, boss)) {
-                boss.currentHealth--;
-                this.playSound('bossHit');
-
-                if (boss.currentHealth <= 0) {
-                    // Boss besiegt!
-                    const bonusPoints = boss.points;
-                    this.score += bonusPoints;
-                    this.createBossDefeatEffect(boss.x, boss.y, boss.color);
-                    this.createPointsAnimation(boss.x, boss.y, `+${bonusPoints} BOSS!`, true);
-                    this.triggerScreenShake(20, 500);
-                    this.playSound('perfect');
-
-                    // 🌈 EPISCHE BOSS-DEFEAT EFFEKTE
-                    this.createConfetti(boss.x, boss.y, 30);
-                    this.createStarBurst(boss.x, boss.y, 15);
-                    this.createFlashEffect(boss.color, 0.4);
-                    this.createLightning(boss.x, boss.y, this.playerFish.x, this.playerFish.y);
-
-                    this.bossFish.splice(index, 1);
-                    this.bossesDefeated++;
-                    console.log(`🏆 Boss defeated! +${bonusPoints} points`);
-                } else {
-                    // Boss hit but not defeated
-                    this.createBossHitEffect(boss.x, boss.y);
-                }
-            }
-
-            // Entfernen wenn außerhalb
-            if (boss.x > this.canvas.width + boss.size) {
-                this.bossFish.splice(index, 1);
-            }
-        });
-
-        // Auto-Collect Modus
-        if (this.autoCollectActive) {
-            this.collectibles.forEach((item, index) => {
-                if (!item.collected) {
-                    const dx = this.playerFish.x - item.x;
-                    const dy = this.playerFish.y - item.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < 200) { // Auto-collect Radius
-                        item.x += dx * 0.1;
-                        item.y += dy * 0.1;
-                    }
-                }
-            });
-        }
-
-        // Erweiterte Magnet-Effekte auf alle Items
-        if (this.magnetActive || this.ultraMagnetActive) {
-            this.collectibles.forEach(item => {
-                if (!item.collected) {
-                    const radius = this.ultraMagnetActive ? this.ultraMagnetRadius : this.magnetRadius;
-                    const strength = this.ultraMagnetActive ? 0.12 : 0.06;
-
-                    const dx = this.playerFish.x - item.x;
-                    const dy = this.playerFish.y - item.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < radius) {
-                        item.x += dx * strength;
-                        item.y += dy * strength;
-                    }
-                }
-            });
-        }
-
-        // Kollisionserkennung
-        this.collectibles.forEach((item, index) => {
-            if (item.collected) return;
-
-            // Floating Animation
-            item.y = item.targetY + Math.sin(Date.now() * item.bobSpeed + item.bobOffset) * 10;
-
-            // Kollision mit Spieler-Fisch
-            if (this.checkCollision(this.playerFish, item)) {
-                item.collected = true;
-                this.collected++;
-
-                // 🔥 COMBO SYSTEM UPDATE
-                const now = Date.now();
-                if (now - this.combo.lastCollectionTime < this.combo.comboTimer) {
-                    this.combo.streak++;
-                    this.combo.multiplier = Math.min(1 + (this.combo.streak * 0.3), this.combo.maxMultiplier);
-                    this.showComboEffect(`${this.combo.streak}x COMBO!`);
-                    this.triggerScreenShake(5, 200);
-
-                    // 🌈 NEUE VISUELLE EFFEKTE BEI COMBOS
-                    if (this.combo.streak >= 15) {
-                        this.createLightning(item.x, item.y, this.playerFish.x, this.playerFish.y);
-                        this.createFlashEffect('#FFD700', 0.3);
-                    } else if (this.combo.streak >= 10) {
-                        this.createStarBurst(item.x, item.y, 8);
-                    } else if (this.combo.streak >= 5) {
-                        this.createConfetti(item.x, item.y, 10);
-                    }
-                } else {
-                    this.combo.streak = 0;
-                    this.combo.multiplier = 1.0;
-                }
-                this.combo.lastCollectionTime = now;
-
-                // Schwierigkeits-Multiplikator + Combo + Power-Up Multiplikator + Rainbow Mode
-                const basePoints = Math.floor(item.points * this.difficulty.pointsMultiplier);
-                const rainbowBonus = this.rainbowModeActive ? this.rainbowMultiplier : 1;
-                const points = Math.floor(basePoints * this.combo.multiplier * this.pointMultiplier * rainbowBonus);
-                this.score += points;
-
-                // Zeige Punkte-Animation
-                this.createPointsAnimation(item.x, item.y, `+${points}`, this.combo.streak > 0);
-
-                // Sound abspielen
-                if (this.combo.streak > 5) {
-                    this.playSound('combo');
-                } else {
-                    this.playSound('collect');
-                }
-
-                // Zeige Fisch-Summe beim ersten gesammelten Fisch
-                if (!this.firstFishClicked) {
-                    this.firstFishClicked = true;
-                    const itemsDisplay = document.getElementById('items-display');
-                    if (itemsDisplay) {
-                        itemsDisplay.style.display = 'block';
-                        console.log('🐠 Fisch-Summe wird nach erstem Klick angezeigt');
-                    }
-                }
-
-                // Partikel-Effekt (verstärkt bei Combo)
-                const particleCount = this.combo.streak > 0 ? 15 : 8;
-                this.createCollectionEffect(item.x, item.y, item.color, particleCount);
-
-                // Item entfernen
-                this.collectibles.splice(index, 1);
-
-                this.updateUI();
-            }
-        });
-
-        // Power-Ups bewegen und checken
-        this.powerUps.forEach((powerUp, index) => {
-            powerUp.y += powerUp.speed;
-            powerUp.rotation += 0.05;
-
-            // Magnet-Effekt auf Power-Ups (erweitert)
-            if (this.magnetActive || this.ultraMagnetActive) {
-                const radius = this.ultraMagnetActive ? this.ultraMagnetRadius : this.magnetRadius;
-                const strength = this.ultraMagnetActive ? 0.15 : 0.08;
-
-                const dx = this.playerFish.x - powerUp.x;
-                const dy = this.playerFish.y - powerUp.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < radius) {
-                    powerUp.x += dx * strength;
-                    powerUp.y += dy * strength;
-                }
-            }
-
-            // Kollision mit Spieler
-            if (this.checkCollision(this.playerFish, powerUp)) {
-                this.activatePowerUp(powerUp);
-                this.powerUps.splice(index, 1);
-            }
-
-            // Entfernen wenn außerhalb
-            if (powerUp.y > this.canvas.height + 50) {
-                this.powerUps.splice(index, 1);
-            }
-        });
-
-        // Aktive Power-Ups verwalten
-        this.activePowerUps = this.activePowerUps.filter(active => {
-            if (Date.now() - active.startTime > active.duration) {
-                this.deactivatePowerUp(active);
-                return false;
-            }
-            return true;
-        });
-
-        // Spieler-Trails bei Speed Boost
-        if (this.playerFish.speed > 5) {
-            this.playerTrails.push({
-                x: this.playerFish.x,
-                y: this.playerFish.y,
-                opacity: 0.5
-            });
-        }
-        this.playerTrails = this.playerTrails.filter(trail => {
-            trail.opacity -= 0.05;
-            return trail.opacity > 0;
-        });
-
-        // Blasen bewegen
-        this.bubbles.forEach(bubble => {
-            bubble.y -= bubble.speed;
-            if (bubble.y < -bubble.radius) {
-                bubble.y = this.canvas.height + bubble.radius;
-                bubble.x = Math.random() * this.canvas.width;
-            }
-        });
-
-        // Partikel-Effekte aktualisieren
-        this.particles = this.particles.filter(particle => {
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-            particle.life -= 0.02;
-            particle.size *= 0.99;
-            return particle.life > 0;
-        });
-
-        // Combo-Effekte aktualisieren
-        this.comboEffects = this.comboEffects.filter(effect => {
-            effect.y -= 2;
-            effect.opacity -= 0.02;
-            effect.scale += 0.02;
-            return effect.opacity > 0;
-        });
-
-        // Power-Up-Effekte aktualisieren
-        this.powerUpEffects = this.powerUpEffects.filter(effect => {
-            effect.y -= 1.5;
-            effect.opacity -= 0.015;
-            return effect.opacity > 0;
-        });
-
-        // 🌈 NEUE VISUELLE EFFEKTE AKTUALISIEREN
-
-        // Regenbogen-Trails aktualisieren
-        if (this.combo.streak >= 10) {
-            this.createRainbowTrail(this.playerFish.x + this.playerFish.width/2, this.playerFish.y + this.playerFish.height/2);
-        }
-
-        this.rainbowTrails = this.rainbowTrails.filter(trail => {
-            trail.opacity -= 0.03;
-            trail.size -= 0.2;
-            trail.hue += 2;
-            return trail.opacity > 0 && trail.size > 0;
-        });
-
-        // Konfetti aktualisieren
-        this.confettiParticles = this.confettiParticles.filter(confetti => {
-            confetti.x += confetti.vx;
-            confetti.y += confetti.vy;
-            confetti.vy += confetti.gravity;
-            confetti.rotation += confetti.rotationSpeed;
-            confetti.life -= 0.015;
-            return confetti.life > 0;
-        });
-
-        // Blitz-Effekte aktualisieren
-        this.lightningEffects = this.lightningEffects.filter(lightning => {
-            const elapsed = Date.now() - lightning.startTime;
-            lightning.opacity = 1 - (elapsed / lightning.duration);
-            return elapsed < lightning.duration;
-        });
-
-        // Stern-Effekte aktualisieren
-        this.starEffects = this.starEffects.filter(star => {
-            star.x += star.vx;
-            star.y += star.vy;
-            star.vx *= 0.98;
-            star.vy *= 0.98;
-            star.opacity -= 0.02;
-            star.sparkle += 0.2;
-            return star.opacity > 0;
-        });
-
-        // Flash-Effekte aktualisieren
-        this.flashEffects = this.flashEffects.filter(flash => {
-            const elapsed = Date.now() - flash.startTime;
-            flash.opacity = flash.intensity * (1 - elapsed / flash.duration);
-            return elapsed < flash.duration;
-        });
-
-        // Achievement Popups aktualisieren
-        this.achievementPopups = this.achievementPopups.filter(popup => {
-            const elapsed = Date.now() - popup.startTime;
-            return elapsed < popup.duration;
-        });
-
-        // 🏆 ACHIEVEMENTS CHECKEN
-        this.checkAchievements();
-    }
-
-    checkCollision(rect1, rect2) {
-        // Größere Hitbox für einfacheres Sammeln
-        const padding = 10;
-        return rect1.x < rect2.x + rect2.size + padding &&
-               rect1.x + rect1.width + padding > rect2.x &&
-               rect1.y < rect2.y + rect2.size + padding &&
-               rect1.y + rect1.height + padding > rect2.y;
-    }
-
-    checkBossCollision(player, boss) {
-        // Boss-Kollision mit größerer Hitbox
-        const padding = 15;
-        return player.x < boss.x + boss.size + padding &&
-               player.x + player.width + padding > boss.x &&
-               player.y < boss.y + boss.size + padding &&
-               player.y + player.height + padding > boss.y;
-    }
-
-    createBossDefeatEffect(x, y, color) {
-        // Große Explosion für Boss-Defeat
-        for (let i = 0; i < 25; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 15,
-                vy: (Math.random() - 0.5) * 15,
-                size: 4 + Math.random() * 8,
-                color: color,
-                life: 1.5
-            });
-        }
-
-        // Zusätzliche goldene Partikel
-        for (let i = 0; i < 15; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.5) * 12,
-                size: 3 + Math.random() * 6,
-                color: '#FFD700',
-                life: 2.0
-            });
-        }
-    }
-
-    createBossHitEffect(x, y) {
-        // Kleinere Explosion für Boss-Hit
-        for (let i = 0; i < 8; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                size: 2 + Math.random() * 4,
-                color: '#FF6666',
-                life: 0.8
-            });
-        }
-    }
-
-    createCollectionEffect(x, y, color) {
-        for (let i = 0; i < 8; i++) {
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 10,
-                vy: (Math.random() - 0.5) * 10,
-                size: 3 + Math.random() * 6,
-                color: color,
-                life: 1
-            });
-        }
-    }
-
-    draw() {
-        this.ctx.save();
-
-        // Screen Shake Effekt
-        if (this.screenShake.active) {
-            const now = Date.now();
-            const elapsed = now - this.screenShake.startTime;
-            if (elapsed < this.screenShake.duration) {
-                const shakeX = (Math.random() - 0.5) * this.screenShake.intensity;
-                const shakeY = (Math.random() - 0.5) * this.screenShake.intensity;
-                this.ctx.translate(shakeX, shakeY);
-            } else {
-                this.screenShake.active = false;
-            }
-        }
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Hintergrund
-        this.drawBackground();
-
-        // Blasen
-        this.drawBubbles();
-
-        // Spieler-Trails
-        this.drawPlayerTrails();
-
-        // Sammelobjekte
-        this.drawCollectibles();
-
-        // Power-Ups
-        this.drawPowerUps();
-
-        // Boss-Fische
-        this.drawBossFish();
-
-        // Spieler-Fisch
-        this.drawPlayerFish();
-
-        // Partikel-Effekte
-        this.drawParticles();
-
-        // 🌈 NEUE VISUELLE EFFEKTE
-        this.drawRainbowTrails();
-        this.drawConfetti();
-        this.drawLightning();
-        this.drawStarEffects();
-
-        // Combo-Effekte
-        this.drawComboEffects();
-
-        // Power-Up Effekte
-        this.drawPowerUpEffects();
-
-        // Flash-Effekte (über allem)
-        this.drawFlashEffects();
-
-        // 🏆 ACHIEVEMENT POPUPS (höchste Priorität)
-        this.drawAchievementPopups();
-
-        // Farb-Overlay für Power-Ups
-        if (this.colorOverlay.active) {
-            const now = Date.now();
-            const elapsed = now - this.colorOverlay.startTime;
-            if (elapsed < this.colorOverlay.duration) {
-                this.ctx.fillStyle = this.colorOverlay.color;
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            } else {
-                this.colorOverlay.active = false;
-            }
-        }
-
-        // Combo-Anzeige
-        if (this.combo.streak > 0) {
-            this.drawComboMeter();
-        }
-
-        // Aktive Power-Ups Anzeige
-        this.drawActivePowerUps();
-
-        this.ctx.restore();
-
-        // Game Over Overlay
-        if (this.gameEnded) {
-            this.drawGameOverScreen();
-        }
-    }
-
-    drawBackground() {
-        // Aquarium-Gradient
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#87CEEB');
-        gradient.addColorStop(0.5, '#4682B4');
-        gradient.addColorStop(1, '#191970');
-
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Aquarium Pflanzen (vereinfacht)
-        this.ctx.strokeStyle = '#2E8B57';
-        this.ctx.lineWidth = 8;
-        this.ctx.beginPath();
-        this.ctx.moveTo(50, this.canvas.height - 50);
-        this.ctx.quadraticCurveTo(100, this.canvas.height - 150, 120, this.canvas.height - 100);
-        this.ctx.stroke();
-
-        // Steine
-        this.ctx.fillStyle = '#696969';
-        this.ctx.beginPath();
-        this.ctx.ellipse(300, this.canvas.height - 20, 80, 20, 0, 0, Math.PI * 2);
-        this.ctx.fill();
-    }
-
-    drawBubbles() {
-        this.bubbles.forEach(bubble => {
-            this.ctx.save();
-            this.ctx.globalAlpha = bubble.opacity;
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.beginPath();
-            this.ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
-        });
-    }
-
-    drawCollectibles() {
-        this.collectibles.forEach(item => {
-            if (item.collected) return;
-
-            this.ctx.save();
-
-            // Glow-Effekt
-            this.ctx.shadowColor = item.color;
-            this.ctx.shadowBlur = 10 * item.glowIntensity;
-
-            // Emoji oder Fallback
-            this.ctx.font = `${item.size}px Arial`;
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(item.emoji, item.x, item.y);
-
-            this.ctx.restore();
-        });
-    }
-
-    drawPlayerFish() {
-        this.ctx.save();
-
-        // Mega-Size Glow-Effekt
-        if (this.megaSizeActive) {
-            this.ctx.shadowBlur = 20;
-            this.ctx.shadowColor = '#FF4500';
-        }
-
-        // Rainbow Mode Effekt
-        if (this.rainbowModeActive) {
-            const rainbow = `hsl(${Date.now() * 0.1 % 360}, 100%, 50%)`;
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowColor = rainbow;
-        }
-
-        // Spieler-Fisch (Emoji mit angepasster Größe)
-        const fontSize = this.megaSizeActive ? 60 : 40;
-        this.ctx.font = `${fontSize}px Arial`;
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('🐠',
-            this.playerFish.x + this.playerFish.width/2,
-            this.playerFish.y + this.playerFish.height/2 + (fontSize/3)
-        );
-
-        this.ctx.restore();
-    }
-
-    drawParticles() {
-        this.particles.forEach(particle => {
-            this.ctx.save();
-            this.ctx.globalAlpha = particle.life;
-            this.ctx.fillStyle = particle.color;
-            this.ctx.beginPath();
-            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
-        });
-    }
-
-    drawGameOverScreen() {
-        // Overlay
-        this.ctx.save();
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Result Text
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = 'bold 32px Arial';
-        this.ctx.textAlign = 'center';
-
-        const percentage = (this.collected / this.totalItems) * 100;
-        let message, emoji;
-
-        if (percentage >= 90) {
-            message = "Großartig! Du bist ein Aquaristik-Profi!";
-            emoji = "🏆";
-        } else if (percentage >= 60) {
-            message = "Gut gemacht! Weiter so!";
-            emoji = "👍";
-        } else {
-            message = "Versuch's nochmal! Übung macht den Meister!";
-            emoji = "💪";
-        }
-
-        this.ctx.fillText(emoji, this.canvas.width/2, this.canvas.height/2 - 60);
-        this.ctx.font = 'bold 24px Arial';
-        this.ctx.fillText(message, this.canvas.width/2, this.canvas.height/2);
-
-        this.ctx.font = '18px Arial';
-        this.ctx.fillText(`Gesammelt: ${this.collected}/${this.totalItems}`, this.canvas.width/2, this.canvas.height/2 + 40);
-        this.ctx.fillText(`Score: ${this.score}`, this.canvas.width/2, this.canvas.height/2 + 70);
-
-        this.ctx.restore();
-    }
-
-    updateUI() {
-        const scoreEl = document.getElementById('score');
-        const collectedEl = document.getElementById('collected');
-        const timerEl = document.getElementById('timer');
-
-        if (scoreEl) scoreEl.textContent = this.score;
-        if (collectedEl) collectedEl.textContent = this.collected;
-        if (timerEl) timerEl.textContent = this.timeLeft + 's';
-    }
-
-    async endGame() {
-        this.gameRunning = false;
-        this.gameEnded = true;
-        this.gameEndTime = Date.now();
-
-        // Show interactive fish again
-        document.body.classList.remove('game-active');
-
-        if (this.gameTimer) {
-            clearInterval(this.gameTimer);
-        }
-
-        // 🏆 Perfect Score Detection
-        this.isPerfectScore = (this.collected === this.totalItems);
-        const actualDuration = Math.floor((this.gameEndTime - this.gameStartTime) / 1000);
-        const bonusPoints = this.highscoreManager.calculateBonusPoints(this.collected, this.gameTime, actualDuration);
-        this.finalScore = this.score + bonusPoints;
-
-        // 🌈 PERFECT SCORE MEGA-EFFEKTE
-        if (this.isPerfectScore) {
-            this.createConfetti(this.canvas.width / 2, this.canvas.height / 2, 50);
-            this.createStarBurst(this.canvas.width / 2, this.canvas.height / 2, 20);
-            this.createFlashEffect('#FFD700', 0.6);
-
-            // Mehrere Blitze für dramatic effect
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    this.createLightning(
-                        Math.random() * this.canvas.width,
-                        0,
-                        Math.random() * this.canvas.width,
-                        this.canvas.height
-                    );
-                }, i * 200);
-            }
-        }
-
-        console.log(`🎯 Game ended! Collected: ${this.collected}/${this.totalItems}, Score: ${this.finalScore}, Perfect: ${this.isPerfectScore}`);
-
-        // Ermittle Rang
-        this.playerRank = await this.highscoreManager.getPlayerRank(this.finalScore);
-
-        // Zeige Highscore-Dialog für gute Leistungen
-        if (this.isPerfectScore || this.collected >= 15 || this.playerRank <= 10) {
-            setTimeout(() => {
-                this.showHighscoreDialog();
-            }, 2000);
-        }
-
-        // Show start button wieder
-        setTimeout(() => {
-            const startBtn = this.container.querySelector('.game-start-btn');
-            if (startBtn) {
-                startBtn.style.display = 'block';
-                startBtn.innerHTML = '🎮 Nochmal spielen';
-            }
-        }, 3000);
-    }
-
-    showHighscoreDialog() {
-        // 🏆 Name-Eingabe Dialog für Highscore
-        const dialogHtml = `
-            <div id="highscore-dialog" class="highscore-dialog">
-                <div class="highscore-dialog-content">
-                    <div class="highscore-header">
-                        ${this.isPerfectScore ? '🏆' : '🎯'} ${this.isPerfectScore ? 'PERFECT SCORE!' : 'GREAT SCORE!'}
+    createGameUI() {
+        this.container.innerHTML = `
+            <div class="aquarium-game-container">
+                <div class="game-header">
+                    <h3>🐠 Aquarium Futter-Sammler</h3>
+                    <p>Sammle in 30 Sekunden so viele Futter-Items wie möglich!</p>
+                </div>
+                <div class="game-stats">
+                    <div class="score-display">Score: <span id="score-${this.containerId}">0</span></div>
+                    <div class="items-display">Items: <span id="items-${this.containerId}">0</span>/${this.difficulty.items}</div>
+                    <div class="timer-display">Zeit: <span id="timer-${this.containerId}">${this.timeLeft}s</span></div>
+                </div>
+                <div class="game-canvas-container">
+                    <canvas id="game-canvas-${this.containerId}" class="aquarium-game-canvas"></canvas>
+                    <div class="game-start-overlay" id="start-overlay-${this.containerId}">
+                        <button class="game-start-btn" onclick="window.aquariumGame${this.gameNumber || ''}.startGame()">
+                            🎮 Spiel Starten
+                        </button>
                     </div>
-
-                    <div class="score-summary">
-                        <div class="score-item">
-                            <span class="label">Gesammelt:</span>
-                            <span class="value">${this.collected}/20 ${this.isPerfectScore ? '🌟' : ''}</span>
-                        </div>
-                        <div class="score-item">
-                            <span class="label">Base Score:</span>
-                            <span class="value">${this.score}</span>
-                        </div>
-                        <div class="score-item">
-                            <span class="label">Bonus:</span>
-                            <span class="value">+${this.finalScore - this.score}</span>
-                        </div>
-                        <div class="score-item total">
-                            <span class="label">Final Score:</span>
-                            <span class="value">${this.finalScore}</span>
-                        </div>
-                        <div class="rank-info">
-                            Rang #${this.playerRank} 🎖️
-                        </div>
-                    </div>
-
-                    <div class="name-input-section">
-                        <label for="player-name">Dein Name für die Highscore-Liste:</label>
-                        <input type="text" id="player-name" placeholder="Aquaristik-Profi" maxlength="30" autocomplete="name">
-                        <div class="name-hint">2-30 Zeichen (A-Z, 0-9, Leerzeichen erlaubt)</div>
-                    </div>
-
-                    <div class="dialog-buttons">
-                        <button id="save-highscore-btn" class="primary-btn">🏆 Highscore speichern</button>
-                        <button id="skip-highscore-btn" class="secondary-btn">⏭️ Überspringen</button>
-                    </div>
-
-                    <div id="save-status" class="save-status"></div>
                 </div>
             </div>
         `;
 
-        // Dialog zum DOM hinzufügen
-        document.body.insertAdjacentHTML('beforeend', dialogHtml);
+        // Canvas Setup
+        this.canvas = document.getElementById(`game-canvas-${this.containerId}`);
+        this.ctx = this.canvas.getContext('2d');
 
-        // Event Listeners
-        const dialog = document.getElementById('highscore-dialog');
-        const nameInput = document.getElementById('player-name');
-        const saveBtn = document.getElementById('save-highscore-btn');
-        const skipBtn = document.getElementById('skip-highscore-btn');
-        const statusDiv = document.getElementById('save-status');
-
-        // Focus auf Name Input
-        nameInput.focus();
-
-        // Enter-Taste für Speichern
-        nameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && nameInput.value.trim().length >= 2) {
-                this.saveHighscoreEntry(nameInput.value.trim(), statusDiv, dialog);
-            }
-        });
-
-        // Save Button
-        saveBtn.addEventListener('click', () => {
-            const playerName = nameInput.value.trim();
-            if (playerName.length < 2) {
-                statusDiv.innerHTML = '⚠️ Name muss mindestens 2 Zeichen lang sein';
-                statusDiv.className = 'save-status error';
-                return;
-            }
-            this.saveHighscoreEntry(playerName, statusDiv, dialog);
-        });
-
-        // Skip Button
-        skipBtn.addEventListener('click', () => {
-            this.closeHighscoreDialog(dialog);
-        });
-
-        // ESC zum Schließen
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.closeHighscoreDialog(dialog);
-            }
-        });
-    }
-
-    async saveHighscoreEntry(playerName, statusDiv, dialog) {
-        statusDiv.innerHTML = '⏳ Speichere Highscore...';
-        statusDiv.className = 'save-status loading';
-
-        const actualDuration = Math.floor((this.gameEndTime - this.gameStartTime) / 1000);
-
-        const result = await this.highscoreManager.saveHighscore(
-            playerName,
-            this.score,
-            this.collected,
-            this.gameTime,
-            actualDuration,
-            this.gameNumber
-        );
-
-        if (result.success) {
-            statusDiv.innerHTML = `🎉 Highscore gespeichert! Du bist Rang #${this.playerRank}`;
-            statusDiv.className = 'save-status success';
-
-            // Dialog nach kurzer Zeit schließen
-            setTimeout(() => {
-                this.closeHighscoreDialog(dialog);
-                this.refreshHighscoreDisplay();
-            }, 2000);
+        // Global Game Referenz für Button
+        if (this.gameNumber) {
+            window[`aquariumGame${this.gameNumber}`] = this;
         } else {
-            statusDiv.innerHTML = `❌ Fehler: ${result.error}`;
-            statusDiv.className = 'save-status error';
+            window.aquariumGame = this;
         }
+
+        // Click Handler für Item-Sammlung
+        this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
     }
 
-    closeHighscoreDialog(dialog) {
-        if (dialog && dialog.parentNode) {
-            dialog.remove();
-        }
+    resize() {
+        if (!this.canvas || !this.container) return;
+
+        const rect = this.container.getBoundingClientRect();
+        const width = Math.max(400, rect.width - 40);
+        const height = Math.max(300, 400);
+
+        this.canvas.width = width;
+        this.canvas.style.width = width + 'px';
+        this.canvas.height = height;
+        this.canvas.style.height = height + 'px';
     }
 
-    async refreshHighscoreDisplay() {
-        // Triggert das Highscore-Display Update und zeigt es an
-        if (window.HighscoreDisplay) {
-            await window.HighscoreDisplay.refresh();
-            window.HighscoreDisplay.showAfterGameEnd();
-        }
-    }
+    startGame() {
+        if (this.gameActive) return;
 
-    resetGame() {
-        // Spiel-State zurücksetzen
-        this.gameRunning = false;
-        this.gameEnded = false;
+        console.log('🎮 Starting Aquarium Game with 30 seconds!');
+
+        // 🎮 GAME BALANCER INTEGRATION - Get adaptive difficulty
+        if (window.gameBalancerAPI) {
+            const adaptiveDifficulty = window.gameBalancerAPI.gameStart('collector');
+            if (adaptiveDifficulty && adaptiveDifficulty.adjustments) {
+                console.log('🎯 Applying adaptive difficulty:', adaptiveDifficulty);
+                // Apply adaptive adjustments to existing difficulty
+                if (adaptiveDifficulty.adjustments.timeLimit) {
+                    this.gameTime = adaptiveDifficulty.adjustments.timeLimit;
+                }
+                if (adaptiveDifficulty.adjustments.itemCount) {
+                    this.difficulty.items = adaptiveDifficulty.adjustments.itemCount;
+                }
+            }
+        }
+
+        // Game State Reset
+        this.gameActive = true;
+        this.gameStarted = true;
         this.collected = 0;
-        this.missed = 0;
         this.score = 0;
-        this.timeLeft = this.difficulty.time;
-        this.gameStartTime = null;
+        this.items = [];
+        this.timeLeft = this.gameTime; // Possibly adjusted by balancer!
+        this.gameStartTime = Date.now();
         this.gameEndTime = null;
-        this.isPerfectScore = false;
-        this.finalScore = 0;
-        this.firstFishClicked = false;
 
-        // Arrays leeren
-        this.collectibles = [];
-        this.particles = [];
-        this.bubbles = [];
+        // UI Hide/Show
+        const overlay = document.getElementById(`start-overlay-${this.containerId}`);
+        if (overlay) overlay.style.display = 'none';
 
-        // Player-Position zurücksetzen
-        this.playerFish.x = 100;
-        this.playerFish.y = 200;
+        // Update Displays
+        this.updateDisplay();
 
-        // UI zurücksetzen - Fisch-Summe wieder verstecken
-        const itemsDisplay = document.getElementById('items-display');
-        if (itemsDisplay) {
-            itemsDisplay.style.display = 'none';
-        }
+        // 🎓 Starte Bildungs-Tipps System
+        this.educationSystem.startTipSystem(this.gameTime * 1000);
 
-        // Highscore-Liste verstecken
-        if (window.HighscoreDisplay) {
-            window.HighscoreDisplay.hideDisplay();
-        }
+        // Timer starten
+        this.gameTimer = setInterval(() => {
+            this.timeLeft--;
+            this.updateDisplay();
 
-        // UI aktualisieren
-        this.updateUI();
+            if (this.timeLeft <= 0) {
+                this.endGame();
+            }
+        }, 1000);
 
-        // Neue Items spawnen
-        this.spawnInitialItems();
+        // Items spawnen
+        this.startItemSpawning();
 
-        console.log('🎮 Spiel wurde zurückgesetzt');
+        // Render-Loop
+        this.render();
     }
 
-    showMainMenu() {
-        // Zurück zum Hauptmenü
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    startItemSpawning() {
+        // Spawn-Rate für 30 Sekunden angepasst
+        const spawnInterval = Math.max(800, 3000 / this.difficulty.speedMultiplier);
+
+        this.itemSpawnTimer = setInterval(() => {
+            if (this.gameActive && this.items.length < 12) {
+                this.spawnItem();
+            }
+        }, spawnInterval);
     }
-}
 
-// Game Manager für alle Instanzen
-const AquariumGameManager = {
-    instances: [],
+    spawnItem() {
+        const item = {
+            id: Math.random().toString(36).substr(2, 9),
+            x: Math.random() * (this.canvas.width - 40) + 20,
+            y: -30,
+            vx: (Math.random() - 0.5) * 2,
+            vy: 1 + Math.random() * 2,
+            type: this.getRandomItemType(),
+            size: 20 + Math.random() * 15,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.1,
+            lifetime: Date.now() + this.difficulty.itemLifetime,
+            collected: false
+        };
 
-    init() {
-        console.log('🎮 Aquarium Game Manager initialisiert...');
+        this.items.push(item);
+    }
 
-        // Suche nach underwater-divider Elementen und prüfe ob sie für Games geeignet sind
-        const containers = document.querySelectorAll('.underwater-divider');
-        console.log(`🎮 Gefunden: ${containers.length} underwater-divider Elemente`);
+    getRandomItemType() {
+        const goodItems = ['🦐', '🐛', '🌱', '🟢', '🔵', '⭐'];
+        const badItems = ['💀', '🗑️', '⚠️'];
 
-        if (containers.length === 0) {
-            console.warn('⚠️ Keine underwater-divider gefunden - erstelle Test-Container');
-            this.createTestGameContainer();
-            return;
+        // Mehr gute Items als schlechte
+        if (Math.random() < 0.8) {
+            return {
+                emoji: goodItems[Math.floor(Math.random() * goodItems.length)],
+                points: 5 + Math.floor(Math.random() * 10),
+                good: true
+            };
+        } else {
+            return {
+                emoji: badItems[Math.floor(Math.random() * badItems.length)],
+                points: -5,
+                good: false
+            };
+        }
+    }
+
+    handleCanvasClick(e) {
+        if (!this.gameActive) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        // Check for item collision
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const item = this.items[i];
+            const distance = Math.sqrt((clickX - item.x)**2 + (clickY - item.y)**2);
+
+            if (distance < item.size && !item.collected) {
+                this.collectItem(item, i);
+                break;
+            }
+        }
+    }
+
+    collectItem(item, index) {
+        item.collected = true;
+        this.items.splice(index, 1);
+
+        this.collected++;
+        this.score += Math.round(item.type.points * this.difficulty.pointsMultiplier);
+
+        // 🔊 VERBESSERUNG #2: Sound-Feedback bei Collect
+        if (window.aquariumSounds) {
+            if (item.type.good) {
+                window.aquariumSounds.playCollect();
+            } else {
+                window.aquariumSounds.playError();
+            }
         }
 
-        containers.forEach((container, index) => {
-            // Überprüfe ob Container geeignet ist
-            if (container.offsetWidth < 300 || container.offsetHeight < 200) {
-                console.log(`🎮 Container ${index + 1} zu klein - erweitere Größe`);
-                container.style.minHeight = '400px';
-                container.style.minWidth = '600px';
+        // 📱 VERBESSERUNG #2: Haptic-Feedback bei Collect
+        if (window.aquariumHaptics) {
+            if (item.type.good) {
+                window.aquariumHaptics.collect();
+            } else {
+                window.aquariumHaptics.error();
+            }
+        }
+
+        // 🎨 AAA VISUAL EFFECTS: Advanced particle explosion on collection
+        if (window.visualEffectsEngine) {
+            const intensity = item.type.good ? 1.5 : 0.8;
+            const canvasRect = this.canvas.getBoundingClientRect();
+            const worldX = canvasRect.left + item.x;
+            const worldY = canvasRect.top + item.y;
+
+            // Create particle explosion at collection point
+            window.visualEffectsEngine.createExplosion(worldX, worldY, intensity);
+
+            // Add glow effect to score display for good items
+            if (item.type.good) {
+                const scoreElement = document.querySelector(`#score-display-${this.containerId}`) ||
+                                   document.querySelector('.score-display');
+                if (scoreElement) {
+                    window.visualEffectsEngine.addGlowEffect(scoreElement, '#4ECDC4');
+                }
             }
 
-            const gameNumber = index + 1;
-            console.log(`🎮 Initialisiere Spiel ${gameNumber} in Container:`, container);
-
-            try {
-                const game = new AquariumCollectorGame(container, gameNumber);
-                this.instances.push(game);
-                this.addGameControlsOutside(container, game, gameNumber);
-                console.log(`✅ Spiel ${gameNumber} erfolgreich initialisiert`);
-            } catch (error) {
-                console.error(`❌ Fehler bei Spiel ${gameNumber}:`, error);
+            // Screen shake for high-value items
+            if (item.type.points >= 20) {
+                window.visualEffectsEngine.startScreenShake(0.5, 200);
             }
+        }
+
+        // Visual Feedback (Enhanced)
+        this.showCollectionEffect(item.x, item.y, item.type.points > 0);
+
+        this.updateDisplay();
+
+        // Perfect Score Check
+        if (this.collected >= this.difficulty.items) {
+            setTimeout(() => this.endGame(), 500);
+        }
+    }
+
+    showCollectionEffect(x, y, isGood) {
+        // Einfacher Partikel-Effekt
+        const effect = {
+            x: x,
+            y: y,
+            particles: [],
+            duration: 500,
+            startTime: Date.now()
+        };
+
+        // Partikel erstellen
+        for (let i = 0; i < 6; i++) {
+            effect.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                life: 1.0,
+                color: isGood ? '#00ff88' : '#ff4444'
+            });
+        }
+
+        // Temporär zu Items hinzufügen für Rendering
+        this.items.push({ isEffect: true, effect: effect });
+    }
+
+    updateDisplay() {
+        const scoreEl = document.getElementById(`score-${this.containerId}`);
+        const itemsEl = document.getElementById(`items-${this.containerId}`);
+        const timerEl = document.getElementById(`timer-${this.containerId}`);
+
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (itemsEl) itemsEl.textContent = `${this.collected}/${this.difficulty.items}`;
+        if (timerEl) timerEl.textContent = this.timeLeft + 's';
+    }
+
+    render() {
+        if (!this.gameActive) return;
+
+        // Clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Aquarium Background
+        this.renderBackground();
+
+        // Render Items
+        this.renderItems();
+
+        // Render Bubbles
+        this.renderBubbles();
+
+        // Continue render loop
+        requestAnimationFrame(() => this.render());
+    }
+
+    renderBackground() {
+        // Aquarium-Hintergrund
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#4da6ff');
+        gradient.addColorStop(0.5, '#0066cc');
+        gradient.addColorStop(1, '#003d7a');
+
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Boden
+        this.ctx.fillStyle = '#8B4513';
+        this.ctx.fillRect(0, this.canvas.height - 30, this.canvas.width, 30);
+    }
+
+    renderItems() {
+        const now = Date.now();
+
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const item = this.items[i];
+
+            // Handle Effect Items
+            if (item.isEffect) {
+                this.renderEffect(item.effect);
+                if (now - item.effect.startTime > item.effect.duration) {
+                    this.items.splice(i, 1);
+                }
+                continue;
+            }
+
+            // Move item
+            item.x += item.vx;
+            item.y += item.vy;
+            item.rotation += item.rotationSpeed;
+
+            // Remove if out of bounds or expired
+            if (item.y > this.canvas.height + 50 || now > item.lifetime) {
+                this.items.splice(i, 1);
+                continue;
+            }
+
+            // Render item
+            this.ctx.save();
+            this.ctx.translate(item.x, item.y);
+            this.ctx.rotate(item.rotation);
+            this.ctx.font = `${item.size}px Arial`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(item.type.emoji, 0, 0);
+            this.ctx.restore();
+        }
+    }
+
+    renderEffect(effect) {
+        const elapsed = Date.now() - effect.startTime;
+        const progress = elapsed / effect.duration;
+
+        for (const particle of effect.particles) {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life = 1.0 - progress;
+
+            this.ctx.save();
+            this.ctx.globalAlpha = particle.life;
+            this.ctx.fillStyle = particle.color;
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+        }
+    }
+
+    renderBubbles() {
+        for (const bubble of this.bubbles) {
+            bubble.y -= bubble.speed;
+
+            if (bubble.y < -bubble.radius) {
+                bubble.y = this.canvas.height + bubble.radius;
+                bubble.x = Math.random() * this.canvas.width;
+            }
+
+            this.ctx.save();
+            this.ctx.globalAlpha = bubble.opacity;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.beginPath();
+            this.ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+        }
+    }
+
+    endGame() {
+        if (!this.gameActive) return;
+
+        this.gameActive = false;
+        this.gameEndTime = Date.now();
+
+        // Stop all timers
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+            this.gameTimer = null;
+        }
+
+        if (this.itemSpawnTimer) {
+            clearInterval(this.itemSpawnTimer);
+            this.itemSpawnTimer = null;
+        }
+
+        // Stop education system
+        this.educationSystem.stopTipSystem();
+
+        // Calculate final results
+        const actualDuration = (this.gameEndTime - this.gameStartTime) / 1000;
+        const bonusPoints = this.highscoreManager.calculateBonusPoints(this.collected, this.gameTime, actualDuration);
+        const finalScore = this.score + bonusPoints;
+        const isPerfectScore = this.collected >= this.difficulty.items;
+
+        // Show results
+        this.showResults({
+            score: finalScore,
+            collected: this.collected,
+            target: this.difficulty.items,
+            duration: actualDuration,
+            bonusPoints: bonusPoints,
+            isPerfect: isPerfectScore
         });
 
-        console.log(`🎉 ${this.instances.length} Spiele erfolgreich geladen!`);
-    },
+        // 🎮 GAME BALANCER INTEGRATION - Report game results
+        if (window.gameBalancerAPI) {
+            const gameResult = {
+                won: isPerfectScore || this.collected >= this.difficulty.items * 0.7, // 70% completion = win
+                score: finalScore,
+                time: actualDuration,
+                accuracy: (this.collected / this.difficulty.items) * 100,
+                perfect: isPerfectScore,
+                collected: this.collected,
+                target: this.difficulty.items
+            };
+            window.gameBalancerAPI.gameEnd('collector', gameResult);
 
-    createTestGameContainer() {
-        // Fallback: Erstelle einen Test-Container für das Spiel
-        const testSection = document.createElement('section');
-        testSection.className = 'game-test-section';
-        testSection.style.cssText = `
-            margin: 40px auto;
-            max-width: 800px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(0, 105, 148, 0.1), rgba(78, 205, 196, 0.1));
-            border-radius: 20px;
-            border: 2px solid rgba(78, 205, 196, 0.3);
+            // Update daily challenges
+            window.gameBalancerAPI.updateChallenge('daily', 'daily_collector', 1);
+        }
+
+        // Local save (no hanging!)
+        this.highscoreManager.saveHighscore('Player', finalScore, this.collected, this.gameTime, actualDuration, this.gameNumber);
+    }
+
+    showResults(results) {
+        // 🔊 VERBESSERUNG #5: Sound für Game-Over
+        if (window.aquariumSounds) {
+            if (results.isPerfect) {
+                window.aquariumSounds.playWin();
+            } else if (results.collected >= results.target * 0.7) {
+                window.aquariumSounds.playSuccess();
+            } else {
+                window.aquariumSounds.playLose();
+            }
+        }
+
+        // 📱 VERBESSERUNG #5: Haptic für Game-Over
+        if (window.aquariumHaptics) {
+            if (results.isPerfect) {
+                window.aquariumHaptics.perfect();
+            } else if (results.collected >= results.target * 0.7) {
+                window.aquariumHaptics.achievement();
+            } else {
+                window.aquariumHaptics.lose();
+            }
+        }
+
+        // VERBESSERUNG #5: Enhanced Results mit Animation und Highscore
+        const gradeEmoji = this.getGradeEmoji(results);
+        const gradeText = this.getGradeText(results);
+        const performanceColor = this.getPerformanceColor(results);
+
+        const resultHTML = `
+            <div class="game-results enhanced-results">
+                <div class="result-header">
+                    <div class="grade-circle" style="border-color: ${performanceColor}; color: ${performanceColor};">
+                        <div class="grade-emoji">${gradeEmoji}</div>
+                        <div class="grade-text">${gradeText}</div>
+                    </div>
+                    <h3 class="result-title">${results.isPerfect ? '🏆 PERFEKTE SAMMLUNG!' : '🎯 Spiel Beendet!'}</h3>
+                </div>
+
+                <div class="result-stats animated-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Final Score:</span>
+                        <span class="stat-value highlight" data-target="${results.score}">0</span>
+                        <span class="stat-unit">Punkte</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Items gesammelt:</span>
+                        <span class="stat-value">${results.collected}/${results.target}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Zeit:</span>
+                        <span class="stat-value">${results.duration.toFixed(1)}s von 30s</span>
+                    </div>
+                    ${results.bonusPoints > 0 ? `
+                    <div class="stat-item bonus">
+                        <span class="stat-label">Zeitbonus:</span>
+                        <span class="stat-value">+${results.bonusPoints}</span>
+                        <span class="stat-unit">Punkte</span>
+                    </div>` : ''}
+                </div>
+
+                ${this.generateHighscoreDisplay(results)}
+
+                <div class="result-actions">
+                    <button onclick="window.aquariumGame${this.gameNumber || ''}.restartGame()" class="replay-btn">
+                        🎮 Nochmal spielen
+                    </button>
+                    <button onclick="this.closest('.game-result-overlay').remove()" class="close-btn">
+                        ❌ Schließen
+                    </button>
+                    ${results.isPerfect ? '<button onclick="this.shareScore()" class="share-btn">📱 Teilen</button>' : ''}
+                </div>
+            </div>
         `;
 
-        const testContainer = document.createElement('div');
-        testContainer.className = 'underwater-divider test-game-container';
-        testContainer.style.cssText = `
-            min-height: 400px;
-            min-width: 600px;
-            position: relative;
-            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #191970 100%);
-            border-radius: 15px;
-            overflow: hidden;
-        `;
-
-        const title = document.createElement('h3');
-        title.textContent = '🎮 Aquarium Sammler-Spiel';
-        title.style.cssText = 'text-align: center; color: #4ECDC4; margin-bottom: 20px;';
-
-        testSection.appendChild(title);
-        testSection.appendChild(testContainer);
-
-        // Füge zum Body hinzu
-        const mainContent = document.querySelector('main') || document.querySelector('.container') || document.body;
-        mainContent.appendChild(testSection);
-
-        // Initialisiere Spiel im Test-Container
-        const game = new AquariumCollectorGame(testContainer, 1);
-        this.instances.push(game);
-        this.addGameControlsOutside(testContainer, game, 1);
-
-        console.log('✅ Test-Game-Container erfolgreich erstellt und initialisiert');
-    },
-
-    addGameControlsOutside(container, game, gameNumber) {
-        // Erstelle Wrapper für das gesamte Spiel + Controls
-        const gameWrapper = document.createElement('div');
-        gameWrapper.className = 'game-wrapper';
-        gameWrapper.style.cssText = `
-            margin: 20px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        `;
-
-        // Verschiebe den Container in den Wrapper
-        const parent = container.parentNode;
-        parent.insertBefore(gameWrapper, container);
-        gameWrapper.appendChild(container);
-
-        // Erstelle Control-Container unterhalb des Spiels
-        const controlsContainer = document.createElement('div');
-        controlsContainer.className = 'game-controls-external';
-        controlsContainer.style.cssText = `
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 15px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        `;
-
-        // Erstelle die drei Buttons
-        const stopGameBtn = this.createControlButton(`⏸️ Spiel ${gameNumber} stoppen`, () => this.stopGame(game));
-        const stopAllBtn = this.createControlButton('⏹️ Alle Spiele stoppen', () => this.stopAllGames());
-        const restartBtn = this.createControlButton(`🔄 Spiel ${gameNumber} neu starten`, () => this.restartGame(game));
-
-        controlsContainer.appendChild(stopGameBtn);
-        controlsContainer.appendChild(stopAllBtn);
-        controlsContainer.appendChild(restartBtn);
-
-        // Füge Controls zum Wrapper hinzu
-        gameWrapper.appendChild(controlsContainer);
-    },
-
-    addGameControls(container, game, index) {
-        // Erstelle Control-Container
-        const controlsContainer = document.createElement('div');
-        controlsContainer.className = 'game-controls';
-        controlsContainer.style.cssText = `
+        // Enhanced result overlay with animation
+        const overlay = document.createElement('div');
+        overlay.className = 'game-result-overlay enhanced-overlay';
+        overlay.innerHTML = resultHTML;
+        overlay.style.cssText = `
             position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 105, 148, 0.9), rgba(78, 205, 196, 0.9));
             display: flex;
-            gap: 10px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            padding: 10px;
-            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            backdrop-filter: blur(10px);
+            animation: resultFadeIn 0.5s ease-out forwards;
         `;
 
-        // Erstelle die drei Buttons
-        const stopGameBtn = this.createControlButton('⏸️ Stoppen', () => this.stopGame(game));
-        const stopAllBtn = this.createControlButton('⏹️ Alle stoppen', () => this.stopAllGames());
-        const restartBtn = this.createControlButton('🔄 Neustart', () => this.restartGame(game));
+        this.container.style.position = 'relative';
+        this.container.appendChild(overlay);
 
-        controlsContainer.appendChild(stopGameBtn);
-        controlsContainer.appendChild(stopAllBtn);
-        controlsContainer.appendChild(restartBtn);
+        // Animate score counting
+        setTimeout(() => this.animateScoreCounting(overlay, results.score), 800);
+    }
 
-        // Füge Controls zum Container hinzu
-        container.style.position = 'relative';
-        container.appendChild(controlsContainer);
-    },
+    getGradeEmoji(results) {
+        const percentage = (results.collected / results.target) * 100;
+        if (percentage >= 100) return '🏆';
+        if (percentage >= 90) return '⭐';
+        if (percentage >= 80) return '🎯';
+        if (percentage >= 70) return '👍';
+        if (percentage >= 50) return '📈';
+        return '🤔';
+    }
 
-    createControlButton(text, onClick) {
-        const button = document.createElement('button');
-        button.textContent = text;
-        button.className = 'game-control-btn';
-        button.style.cssText = `
-            background: linear-gradient(45deg, var(--secondary-teal, #4ECDC4), var(--primary-blue, #006994));
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        `;
+    getGradeText(results) {
+        const percentage = (results.collected / results.target) * 100;
+        if (percentage >= 100) return 'PERFEKT';
+        if (percentage >= 90) return 'SEHR GUT';
+        if (percentage >= 80) return 'GUT';
+        if (percentage >= 70) return 'OKAY';
+        if (percentage >= 50) return 'VERBESSERUNG';
+        return 'VERSUCH\'S NOCHMAL';
+    }
 
-        button.addEventListener('mouseenter', () => {
-            button.style.transform = 'translateY(-2px)';
-            button.style.boxShadow = '0 4px 12px rgba(78, 205, 196, 0.4)';
-        });
+    getPerformanceColor(results) {
+        const percentage = (results.collected / results.target) * 100;
+        if (percentage >= 100) return '#FFD700';
+        if (percentage >= 90) return '#00FF88';
+        if (percentage >= 80) return '#4ECDC4';
+        if (percentage >= 70) return '#FFA500';
+        if (percentage >= 50) return '#FF6B6B';
+        return '#FF4444';
+    }
 
-        button.addEventListener('mouseleave', () => {
-            button.style.transform = 'translateY(0)';
-            button.style.boxShadow = 'none';
-        });
+    generateHighscoreDisplay(results) {
+        const localHighscores = this.getLocalHighscores();
+        const isNewRecord = results.score > (localHighscores[0]?.score || 0);
 
-        button.addEventListener('click', onClick);
-        return button;
-    },
-
-    stopGame(game) {
-        if (game && game.gameRunning) {
-            game.gameRunning = false;
-            console.log('🎮 Spiel gestoppt');
+        if (isNewRecord) {
+            this.saveLocalHighscore(results);
         }
-    },
 
-    stopAllGames() {
-        this.instances.forEach(game => {
-            if (game && game.gameRunning) {
-                game.gameRunning = false;
-            }
+        return `
+            <div class="highscore-section">
+                <h4>🏆 Top Scores (Lokal)</h4>
+                <div class="highscore-list">
+                    ${localHighscores.slice(0, 3).map((score, index) => `
+                        <div class="highscore-item ${score.score === results.score ? 'current-score' : ''}">
+                            <span class="rank">#${index + 1}</span>
+                            <span class="score">${score.score}</span>
+                            <span class="items">${score.items}/${score.target}</span>
+                            ${score.score === results.score ? '<span class="new-badge">NEU!</span>' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    getLocalHighscores() {
+        const key = `aquarium-highscores-${this.gameNumber || 1}`;
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+
+    saveLocalHighscore(results) {
+        const key = `aquarium-highscores-${this.gameNumber || 1}`;
+        const highscores = this.getLocalHighscores();
+
+        highscores.push({
+            score: results.score,
+            items: results.collected,
+            target: results.target,
+            date: new Date().toLocaleDateString('de-DE')
         });
-        console.log('🎮 Alle Spiele gestoppt');
-    },
 
-    restartGame(game) {
-        if (game) {
-            game.resetGame();
-            console.log('🎮 Spiel neu gestartet');
+        highscores.sort((a, b) => b.score - a.score);
+        highscores.splice(10); // Keep only top 10
+
+        localStorage.setItem(key, JSON.stringify(highscores));
+    }
+
+    animateScoreCounting(overlay, targetScore) {
+        const scoreElement = overlay.querySelector('.stat-value.highlight');
+        if (!scoreElement) return;
+
+        let currentScore = 0;
+        const increment = Math.max(1, Math.ceil(targetScore / 50));
+        const timer = setInterval(() => {
+            currentScore += increment;
+            if (currentScore >= targetScore) {
+                currentScore = targetScore;
+                clearInterval(timer);
+
+                // Flash effect on completion
+                scoreElement.style.animation = 'scoreFlash 0.5s ease-out';
+            }
+            scoreElement.textContent = currentScore;
+        }, 20);
+    }
+
+    restartGame() {
+        // Clean up current game
+        const overlay = this.container.querySelector('.game-result-overlay');
+        if (overlay) overlay.remove();
+
+        // Reset game state
+        this.gameActive = false;
+        this.gameStarted = false;
+        this.items = [];
+        this.collected = 0;
+        this.score = 0;
+        this.timeLeft = this.gameTime;
+
+        // Recreate UI and show start overlay
+        this.createGameUI();
+        this.resize();
+    }
+}
+
+// CSS für Tipps-Animation
+const tipStyles = `
+    @keyframes tipSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
     }
-};
 
-// Auto-Init nach DOM Load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => AquariumGameManager.init());
-} else {
-    AquariumGameManager.init();
+    @keyframes tipSlideOut {
+        from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+    }
+
+    .perfect-score {
+        color: #00ff88;
+        font-weight: bold;
+        font-size: 1.2em;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    /* 🎨 VERBESSERUNG #5: Enhanced Game Results Animations */
+    @keyframes resultFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes scoreFlash {
+        0%, 100% { transform: scale(1); color: inherit; }
+        50% { transform: scale(1.2); color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+    }
+
+    @keyframes gradeCirclePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .enhanced-results {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(232, 244, 248, 0.95));
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .result-header {
+        margin-bottom: 30px;
+    }
+
+    .grade-circle {
+        width: 80px;
+        height: 80px;
+        border: 4px solid;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: gradeCirclePulse 2s ease-in-out infinite;
+    }
+
+    .grade-emoji {
+        font-size: 32px;
+        line-height: 1;
+    }
+
+    .grade-text {
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .result-title {
+        margin: 0;
+        font-size: 24px;
+        color: var(--primary-blue);
+    }
+
+    .animated-stats {
+        margin: 30px 0;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(78, 205, 196, 0.1);
+        border-radius: 8px;
+    }
+
+    .stat-item.bonus {
+        background: rgba(255, 215, 0, 0.2);
+        border-left: 4px solid #FFD700;
+    }
+
+    .stat-label {
+        font-weight: bold;
+        color: var(--primary-blue);
+    }
+
+    .stat-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--accent-coral);
+    }
+
+    .stat-value.highlight {
+        color: #FFD700;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+
+    .highscore-section {
+        margin: 30px 0;
+        padding: 20px;
+        background: rgba(0, 105, 148, 0.1);
+        border-radius: 12px;
+    }
+
+    .highscore-section h4 {
+        margin: 0 0 15px 0;
+        color: var(--primary-blue);
+    }
+
+    .highscore-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .highscore-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .highscore-item.current-score {
+        background: rgba(255, 215, 0, 0.3);
+        border: 2px solid #FFD700;
+        animation: scoreFlash 2s ease-in-out infinite;
+    }
+
+    .new-badge {
+        background: #FF6B6B;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: bold;
+    }
+
+    .rank {
+        font-weight: bold;
+        color: var(--primary-blue);
+        min-width: 30px;
+    }
+
+    .game-results {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+    }
+
+    .result-stats p {
+        margin: 10px 0;
+        font-size: 16px;
+    }
+
+    .result-actions {
+        margin-top: 20px;
+    }
+
+    .replay-btn, .close-btn {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .replay-btn {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .close-btn {
+        background: #f44336;
+        color: white;
+    }
+`;
+
+// CSS einbetten
+if (!document.getElementById('aquarium-game-styles')) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'aquarium-game-styles';
+    styleSheet.textContent = tipStyles;
+    document.head.appendChild(styleSheet);
 }
+
+// 🏆 Game als global verfügbar machen
+window.AquariumCollectorGame = AquariumCollectorGame;
+window.LocalScoreManager = LocalScoreManager; // Fallback ohne Supabase
+
+console.log('🎮 Aquarium Collector Game V5.2 loaded - 30 seconds, educational tips, no hanging!');

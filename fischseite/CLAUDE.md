@@ -4,360 +4,318 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Fischseite** is a modern, interactive website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. This is a multi-module application featuring a main HTML page with extensive interactive JavaScript components, including games, animations, and dynamic content management.
+**Fischseite** is an interactive aquarium website for "Aquaristikfreunde Steiermark" - an Austrian aquarium club. Single-page application with modular JavaScript architecture featuring **5 games**, advanced animations, and Supabase integration.
 
-**Current Status:** Version 3.0 - Smart Fish System with deployment verification, deployed to **vibecoding.company/fischseite**
+**Current Status:** Version 5.1+ with expanded game portfolio deployed to **vibecoding.company/fischseite**
 
 ## Architecture
 
-### Hybrid Structure
-- **`index.html`** - Main page with embedded CSS and core JavaScript
-- **Interactive Modules** - External JavaScript files for games and features
-- **No build process** - Direct HTML/JS with runtime module loading
-- **Minimal dependencies** - CDN resources only (Font Awesome, optional Supabase)
+### Core Structure
+- **`index.html`** - Main page with embedded CSS + core JavaScript (4000+ lines)
+- **Modular JS** - 20+ external files for games/features, loaded via script tags
+- **No build process** - Direct HTML/JS deployment to Hostinger FTP
+- **Dependencies** - Font Awesome (CDN) + Supabase (optional) + Playwright (testing)
 
-### Key Files & Directories
-- **`index.html`** - Main aquarium-themed website
-- **`guestbook.html`** - Supabase-integrated guestbook feature
-- **`js/`** - Interactive JavaScript modules
-  - `smart-fish-system.js` - Current unified fish spawning system
-  - `aquarium-collector-game.js` - Main collection game with scoring
-  - `video-preloader.js` - Smart video loading with animations
-  - `highscore-display.js` - Supabase-connected highscore system
-  - `error-handler.js` - Global error handling and logging
-  - `loading-manager.js` - Resource loading coordination
-  - `performance-optimizer.js` - Performance monitoring and optimization
-- **`bilder/`** - Image gallery (29 JPEG images)
-- **`videos/`** - Video gallery (9 MOV files)
-- **`assets/`** - Static assets (logos, sound files)
-- **`tests/`** - Core Playwright tests (9 test files including version comparison)
-- **`docs/`** - Project documentation and PRD
-- **`*.sql`** - Database schema files for Supabase setup
-- **`archive-do-not-read/`** - Legacy files, old tests, and deprecated modules
+### Game Engine Architecture
+- **`optimized-game-engine.js`** - Shared game utilities and performance optimization
+- **`animation-coordinator.js`** - Centralized 60fps animation management
+- **`game-balancer.js`** - AI-driven difficulty and performance balancing
+- **`aaa-visual-effects-engine.js`** - Advanced particle effects and visual enhancements
+
+### Fish System Architecture
+- **`smart-fish-system.js`** - Unified fish spawning (click-to-spawn, max 50 fish)
+- **`stable-fish-spawner.js`** - Alternative spawning implementation
+- **Direction Management** - CSS `scaleX(-1)` transforms for proper fish orientation
+
+### Game Modules (5 Complete Games)
+- **`aquarium-collector-game.js`** - Food collection with physics, scoring, highscores
+- **`aquarium-builder-game.js`** - Drag-and-drop aquarium construction system
+- **`fish-memory-game.js`** - Memory matching game with fish pairs
+- **`fish-racing-game.js`** - Racing simulation with multiple fish
+- **`fish-care-simulation.js`** - Virtual pet care and feeding system
+
+### Core System Modules
+- **`video-preloader.js`** - Smart video loading with Intersection Observer
+- **`highscore-display.js`** - Supabase highscore system with rate limiting
+- **`performance-optimizer.js`** - RequestAnimationFrame monitoring
+- **`progressive-enhancement.js`** - Feature detection and fallbacks
+- **`sound-system.js`** - Audio management for games
+- **`haptic-system.js`** - Touch feedback for mobile devices
+- **`error-handler.js`** - Centralized error management
+- **`loading-manager.js`** - Resource loading coordination
 
 ## Development Commands
 
-### npm Scripts
+### Essential Commands
 ```bash
-# Available npm scripts for convenience:
-npm test               # Basic website functionality test
-npm run test:all       # Complete website feature testing
-npm run test:fish      # Smart fish system testing
-npm run test:guestbook # Guestbook functionality testing
-npm run test:local     # Test local development version
-npm run test:production # Test live production version
-npm run test:compare   # Compare local vs production versions
-npm run test:selftest  # Comprehensive self-analysis
-npm run test:monitor   # Single monitoring test run
-npm run serve          # Start Python HTTP server on port 8000
-npm run serve:node     # Start Node.js serve on port 8000
-```
-
-### Testing (Playwright-based)
-```bash
-# Install dependencies first
+# Install dependencies
 npm install
 
-# Core website functionality
-node tests/test-website.js
+# Local development server (CRITICAL: Use port 8003 for fischseite)
+npm run serve          # Python HTTP server on port 8002 (legacy)
+npm run serve:dev      # Background server with logging
+npm run serve:node     # Node.js alternative on port 8002
+python3 -m http.server 8003 &  # RECOMMENDED for fischseite (matches global config)
 
-# Complete feature testing
-node tests/test-complete-website.js
+# MANDATORY testing workflow (NEVER skip selftest!)
+npm run test:selftest  # Comprehensive self-analysis (MANDATORY before browser)
+npm run test:smoke     # Quick validation tests
+npm run test:comprehensive # Full feature validation
+npm run test:debug     # Debug game startup issues
 
-# Smart fish system testing
-node tests/test-smart-fish-system.js
+# Game-specific testing
+npm run test:fish      # Test fish spawning system
+npm run test:enhanced  # Enhanced game features testing
+node tests/test-game-collector.js    # Individual game tests
+node tests/test-game-memory.js       # Memory game validation
+node tests/test-game-racing.js       # Racing game validation
+node tests/test-game-builder.js      # Builder game validation
+node tests/test-fish-care-simulation.js # Care simulation testing
 
-# Guestbook functionality testing
-node tests/test-guestbook.js
+# Pre/post deployment validation
+npm run test:pre-deploy   # Validate before deployment
+npm run test:post-deploy  # Verify after deployment
+npm run test:ci          # Continuous integration tests
+npm run test:production  # Test live site
 
-# Version comparison testing
-node tests/test-local-version.js      # Test local development version
-node tests/test-online-version.js     # Test live production version
-node tests/compare-versions.js        # Compare local vs production
+# Advanced testing and debugging
+npm run test:all         # Complete feature testing
+node tests/test-all-games-comprehensive.js # All games testing
+node tests/test-gameplay-detailed.js       # Detailed gameplay validation
+node tests/debug-game-startup.js           # Game startup debugging
+node tests/test-progressive-enhancement.js # Progressive enhancement tests
 
-# 🚀 NEW: Play/Ride Self-Test Framework
-node tests/play-ride-selftest.js      # Comprehensive self-analysis
-node tests/continuous-monitor.js single    # Single test run
-node tests/continuous-monitor.js start 30  # Continuous monitoring (every 30 min)
-node tests/continuous-monitor.js report    # Historical analysis
-
-# All legacy and specialized tests are archived in archive-do-not-read/tests/
+# Development utilities
+npm run debug:server     # Check server status and basic connectivity
+node tests/continuous-monitor.js single    # Single monitoring run
 ```
 
-### Local Development
+### Development Workflow (CRITICAL - Follow Exactly)
 ```bash
-# Install dependencies (Playwright for testing)
-npm install
+# 1. FORCE COMPLETE CLEANUP (prevents cache issues)
+osascript -e 'tell application "Google Chrome" to quit'
+lsof -ti:8003 | xargs kill -9
+rm -f server.log
 
-# Local server (required for full functionality - file:// has CORS limitations)
-python3 -m http.server 8000    # Recommended
-# OR
-npx serve . -p 8000            # Node.js alternative
+# 2. FRESH START WITH VERSION UPDATE
+sed -i '' 's/V5\.1.*UTC/V$(date +%Y%m%d) - $(date +%H:%M) UTC/g' index.html
+python3 -m http.server 8003 > server.log 2>&1 &
+sleep 5
 
-# Access locally
-open http://localhost:8000                # Main site
-open http://localhost:8000/guestbook.html # Guestbook
+# 3. MANDATORY SELF-TEST (NEVER skip!)
+npm run test:selftest
 
-# Direct file access (limited - no database features, video preloading issues)
-open index.html
+# 4. VERSION VALIDATION (prevents cache confusion)
+EXPECTED_DATE=$(date +%Y%m%d)
+ACTUAL_VERSION=$(curl -s http://localhost:8003/ | grep -o "V[0-9]\+")
+if [[ "$ACTUAL_VERSION" == *"$EXPECTED_DATE"* ]]; then
+    open "http://localhost:8003/"
+else
+    echo "❌ VERSION MISMATCH - NO BROWSER OPENING"
+    exit 1
+fi
+
+# 5. Deploy after changes (auto-deploys via GitHub Actions)
+git add . && git commit -m "🎮 MEGA-UPDATE: [description]" && git push
+# GitHub Actions auto-deploys to vibecoding.company/fischseite (2-5 min)
+# Excludes: tests/, node_modules/, .git*, archive-do-not-read/
+```
+
+### USER vs SELF Testing Protocol
+```bash
+# SELF-TESTS (Claude internal validation - browser auto-closes)
+npm run test:selftest    # For development/debugging
+
+# USER-TESTS (Browser stays open for user inspection)
+node tests/user-test.js  # When presenting finished work to user
 ```
 
 ### Database Setup (Supabase)
 ```bash
-# SQL files for database setup (execute in Supabase SQL Editor)
-# HIGHSCORE_SETUP.sql          - Highscore table with RLS policies
-# GUESTBOOK_SCHEMA_UPDATE.sql  - Guestbook table structure
-# FIX_RLS_POLICIES.sql         - Row Level Security fixes
-# TEMPORARY_DISABLE_RLS.sql    - For debugging RLS issues
+# SQL files (execute in Supabase SQL Editor):
+# - HIGHSCORE_SETUP.sql - Highscore table with RLS
+# - GUESTBOOK_SCHEMA_UPDATE.sql - Guestbook structure
+# - FIX_RLS_POLICIES.sql - RLS fixes
 
-# Quick JavaScript-based setup tools
-node create-highscore-table.js  # Create highscore table
-node test-supabase-connection.js # Test connection
-node check-rls-policies.js      # Check RLS policy status
-
-# Database testing
-node test-guestbook-db.js       # Test guestbook functionality
+# JS setup tools:
+node test-supabase-connection.js  # Test connection
+node test-guestbook-db.js         # Test guestbook functionality
 ```
 
-### Deployment & Verification
-```bash
-# 🚨 CRITICAL: AUTOMATIC DEPLOYMENT AFTER EVERY MAJOR CHANGE!
-# Auto-deploy to vibecoding.company/fischseite via GitHub Actions
-git add . && git commit -m "description" && git push
+## Architecture Patterns
 
-# ⚡ GitHub Actions automatically deploys to Hostinger within 2-5 minutes
-# - Workflow: .github/workflows/hostinger-deploy.yml
-# - Target: Hostinger FTP (vibecoding.company/fischseite/)
-# - ALWAYS DEPLOY IMMEDIATELY after code changes!
+### JavaScript Architecture
+- **Modular Loading** - External JS files loaded via script tags with `defer`
+- **Event-Driven** - Click handlers, Intersection Observer, RequestAnimationFrame
+- **State Management** - Object-oriented games with proper cleanup
+- **Error Handling** - Graceful degradation when Supabase unavailable
+- **Performance** - Object pooling for animations, RAF for 60fps
 
-# Verify deployment (in archive-do-not-read/ if needed)
-# Legacy verification tools moved to archive-do-not-read/legacy-js/
-```
+### Key Interactive Systems
+- **Smart Fish Spawner** - Click any fish → spawn new fish (max 50, unified system)
+  - CSS `scaleX(-1)` transforms for proper fish direction
+  - Single/double-click detection (300ms timeout)
+  - Game area exclusion and collision avoidance
+  - Professional lifecycle: spawn → grow → shrink → fade → remove
+- **Game Portfolio** - 5 complete games with shared optimized engine:
+  - **Collector Game** - 5 food types, physics engine, scoring, perfect score → Supabase highscore
+  - **Builder Game** - Drag-and-drop aquarium construction with decoration system
+  - **Memory Game** - Fish pair matching with flip animations and scoring
+  - **Racing Game** - Multi-fish racing simulation with AI behavior
+  - **Care Simulation** - Virtual fish care, feeding, and aquarium maintenance
+- **Advanced Visual Systems**:
+  - **AAA Visual Effects Engine** - Particle systems, advanced animations
+  - **Animation Coordinator** - 60fps RequestAnimationFrame management
+  - **Game Balancer** - AI-driven difficulty adjustment and performance optimization
+- **Content Management**:
+  - **Video Preloader** - Intersection Observer triggers smart loading (3 parallel max)
+  - **Gallery System** - Tab switching images/videos, lightbox with touch gestures
+  - **Progressive Enhancement** - Feature detection and graceful fallbacks
+- **Audio & Feedback**:
+  - **Sound System** - Ambient underwater audio with volume controls
+  - **Haptic Feedback** - Touch vibrations for mobile interactions
+- **Backend Integration**:
+  - **Supabase Integration** - Highscores + guestbook with rate limiting (5/hour/IP)
+  - **Error Handling** - Graceful degradation when database unavailable
 
-## Code Architecture
-
-### CSS Structure
-- **CSS Variables** - Extensive use of CSS custom properties for theming
-- **Responsive Design** - Mobile-first approach with breakpoints at 768px and 1400px
-- **Animations** - Complex keyframe animations for underwater/aquatic effects:
-  - Bubble animations
-  - Wave effects
-  - Fish swimming animations
-  - Seaweed swaying
-
-### Interactive JavaScript System
-- **Modular Architecture** - External JS files loaded on demand
-- **Game Engine** - Aquarium collector game with physics and scoring
-- **Fish Spawning System** - Click-to-spawn interactive animations
-- **Smart Video Preloading** - Intersection Observer with animated loading
-- **Gallery Management** - Tab switching between images/videos
-- **Lightbox System** - Full-screen image viewing with touch gestures
-- **Mobile Navigation** - Hamburger menu with glassmorphism effects
-- **Performance Optimizations** - RequestAnimationFrame animations, object pooling
-- **Database Integration** - Supabase for highscores and guestbook functionality
-
-### Design System
-**Color Palette:**
+### CSS Design System
 ```css
 --primary-blue: #006994
 --secondary-teal: #4ECDC4
 --accent-coral: #FF6B6B
---deep-blue: #003A5C
---light-blue: #E8F4F8
 ```
+- **Responsive** - Mobile-first, breakpoints at 768px/1400px
+- **Animations** - Underwater effects (bubbles, waves, fish swimming)
+- **Glassmorphism** - Navigation and UI overlays
 
-**Key Interactive Components:**
-- Hero section with animated underwater background and spawnable fish
-- Floating fish navigation with glassmorphism effects
-- Aquarium collector game with 5 different food types and scoring
-- Image/video galleries with smart preloading and lightbox
-- Interactive fish spawner (click to spawn, max 10 fish)
-- Supabase-powered highscore system with perfect score detection
-- Video preloader with aquarium-themed loading animations
-- Coral dividers and bubble effects
+## File Organization
 
-## Content Management
-
-### Image Standards
-- **Gallery Images:** JPEG format, optimized for web
-- **Member Images:** AVIF format with JPEG fallbacks
-- **Lazy Loading:** Implemented for performance
-- **Alt Text:** Required for accessibility
-
-### Video Standards
-- **Format:** MOV (QuickTime) with HTML5 video elements
-- **Smart Loading:** Dynamic preloading via `video-preloader.js`
-- **Loading Animation:** Custom aquarium-themed progress indicators
-- **Controls:** Native browser controls with custom overlays
-- **Performance:** Intersection Observer triggers, parallel loading (3 videos max)
-
-## Testing Strategy
-
-### Automated Testing (Playwright)
-- **Interactive Game Testing** - Aquarium collector game mechanics and scoring
-- **Fish Spawning** - Dynamic fish generation and click interactions
-- **Video Preloading** - Smart loading system and progress indicators
-- **3D Underwater Effects** - Animation performance and visual effects
-- **Menu Visibility** - Navigation states and glassmorphism effects
-- **Responsive Design** - Multiple viewport sizes and mobile interactions
-- **Gallery Functionality** - Tab switching, lightbox operations, touch gestures
-- **Performance Metrics** - Load time, resource counting, animation frame rates
-- **Media Validation** - All images, videos, and interactive elements load correctly
-
-### Manual Testing Checklist
-1. **Game Functionality** - Play aquarium collector game, verify scoring and perfect score detection
-2. **Interactive Fish** - Click fish to spawn new ones, test maximum limit (10 fish)
-3. **Video Preloading** - Scroll to video sections, verify loading animations appear
-4. **Supabase Integration** - Test highscore submission and guestbook (requires database setup)
-5. **Responsive Design** - Test on multiple devices and orientations
-6. **Animation Performance** - Verify smooth fish swimming, bubble effects, wave animations
-7. **Touch Interactions** - Test mobile touch gestures for games and navigation
-8. **Cross-browser Compatibility** - Test on Chrome, Safari, Firefox, Edge
-
-## Deployment
-
-### File Structure for Hosting
+### Production Structure
 ```
 fischseite/
-├── index.html                      # Main website entry point
-├── guestbook.html                  # Supabase guestbook feature
-├── js/                            # JavaScript modules
-│   ├── smart-fish-system.js       # Unified fish system
-│   ├── aquarium-collector-game.js # Collection game
-│   ├── video-preloader.js         # Smart video loading
-│   └── highscore-display.js       # Highscore system
-├── bilder/                        # Image gallery (29 JPEG images)
-├── videos/                        # Video gallery (9 MOV files)
-├── assets/                        # Static assets (logos, sound)
-├── tests/                         # Core functionality tests
-├── docs/                          # Documentation and PRD
-└── archive-do-not-read/           # Legacy files (not for production)
+├── index.html                 # Main site (4000+ lines, embedded CSS)
+├── guestbook.html            # Supabase guestbook
+├── js/                       # Interactive modules
+├── bilder/                   # Image gallery (29 JPEG files)
+├── videos/                   # Video gallery (9 MOV files)
+├── assets/                   # Static assets
+└── archive-do-not-read/      # Legacy files (excluded from deployment)
 ```
 
-### Performance Considerations
-- **JavaScript Modules:** External JS files loaded on demand for better caching
-- **Animation Optimization:** RequestAnimationFrame for smooth 60fps animations
-- **Video Loading:** Smart preloading prevents unnecessary bandwidth usage
-- **Object Pooling:** Bubble and particle effects use efficient memory management
-- **Image Optimization:** Consider WebP conversion for better compression
-- **CDN:** Static assets (images/videos) should be served from CDN in production
-- **Supabase:** Database queries optimized with rate limiting and error handling
+### Testing Coverage (Comprehensive Playwright Suite)
+- **Game mechanics** - All 5 games with scoring validation and physics testing
+- **Fish spawning** - Click interactions, max 50 fish limit, direction validation
+- **Advanced game features** - Enhanced game mechanics, effects, AI behavior
+- **Video preloader** - Progress indicators, loading management, intersection observer
+- **Gallery system** - Tab switching, lightbox, touch gestures, responsive behavior
+- **Performance optimization** - Animation frame rates, memory usage, game balancer
+- **Progressive enhancement** - Feature detection, fallbacks, accessibility
+- **Responsive design** - Multiple viewport sizes, mobile touch interactions
+- **Integration testing**:
+  - **Self-testing** - Comprehensive automated validation (play-ride-selftest.js)
+  - **Smoke tests** - Quick functionality checks
+  - **Production tests** - Live site validation
+  - **Debug tools** - Game startup and error diagnostics
+  - **Comprehensive tests** - Full feature validation across all games
+  - **Individual game tests** - Isolated testing for each game module
+  - **Real gameplay tests** - Actual user interaction simulation
 
-## Key Development Guidelines
+## Development Guidelines
 
-### 🚨 FILE SIZE LIMITS & OPTIMIZATION STANDARDS
-**CRITICAL: NEVER EXCEED THESE LIMITS WITHOUT OPTIMIZATION**
-- **Individual Video Files:** MAX 25MB (compress with FFmpeg if larger)
-- **Individual Image Files:** MAX 5MB (optimize with WebP/JPEG compression)
-- **Audio Files:** MAX 10MB (use MP3/AAC with 128k bitrate)
-- **Total Media Folder:** MAX 100MB (aggressive optimization required above)
-- **JavaScript Modules:** MAX 500KB per file (split if larger)
-- **Project Total Size:** TARGET <200MB (optimize aggressively above)
+### Performance Limits
+- **Video files:** MAX 25MB (use FFmpeg compression if larger)
+- **Images:** MAX 5MB (optimize with WebP/JPEG)
+- **JS modules:** MAX 500KB per file (split if larger)
+- **Total project:** TARGET <200MB
 
-**OPTIMIZATION METHODS:**
-```bash
-# Video: FFmpeg with CRF 30 for web-optimized H.264/AAC
-ffmpeg -i input.mov -c:v libx264 -crf 30 -c:a aac -b:a 96k output.mp4
-
-# Images: WebP conversion with quality 85
-ffmpeg -i input.jpg -c:v libwebp -quality 85 output.webp
-
-# Audio: MP3 compression with 128k bitrate
-ffmpeg -i input.wav -acodec libmp3lame -ab 128k output.mp3
-```
-
-**ENFORCEMENT:**
-- AUTOMATICALLY compress any file >limits during development
-- Document all optimizations in relevant .md files
-- Test performance impact after optimization
-- NEVER commit unoptimized large files
-
-### CSS Best Practices
-- Use CSS variables for consistent theming
-- Maintain mobile-first responsive approach
-- Keep animations performant (use transform/opacity)
-- Ensure proper contrast ratios for accessibility
-
-### JavaScript Patterns
-- **Modular Architecture** - External files for major features, loaded via script tags
-- **Unified Fish System** - All fish interactions consolidated in `smart-fish-system.js`
-- **Game State Management** - Object-oriented approach for games with proper cleanup
-- **Animation Framework** - RequestAnimationFrame with performance monitoring
-- **Async Loading** - Promise-based operations for Supabase and video preloading
-- **Event Management** - Proper delegation and cleanup for dynamic content
-- **Error Handling** - Graceful degradation when database features unavailable
+### Code Patterns
+- **CSS:** Use CSS variables, mobile-first responsive, performant animations
+- **JavaScript:** Modular loading, RequestAnimationFrame for animations, graceful Supabase degradation
+- **Error Handling:** Always fallback when database features unavailable
 
 ### Content Updates
-- **New Images:** Add to `bilder/` directory and update gallery HTML
-- **New Videos:** Add to `videos/` directory, update gallery HTML, consider preloader integration
-- **Game Content:** Modify `aquarium-collector-game.js` for new food types or scoring
-- **Interactive Features:** Update spawner configurations in `smart-fish-system.js`
-- **Database Content:** Use Supabase dashboard for highscore and guestbook management
+- **Images**: Add to `bilder/`, update gallery HTML, use kebab-case naming
+- **Videos**: Add to `videos/`, consider preloader integration, max 25MB files
+- **Games**:
+  - Collector game: Modify `aquarium-collector-game.js` for scoring/physics changes
+  - Memory game: Update `fish-memory-game.js` for pair matching logic
+  - Racing game: Adjust `fish-racing-game.js` for AI behavior
+  - Builder game: Modify `aquarium-builder-game.js` for drag-and-drop features
+  - Care simulation: Update `fish-care-simulation.js` for pet care mechanics
+- **Fish system**: Update `smart-fish-system.js` for spawner changes, direction fixes
+- **Visual effects**: Modify `aaa-visual-effects-engine.js` for particle systems
+- **Performance**: Adjust `game-balancer.js` for difficulty/performance optimization
 
-## Troubleshooting
+## Common Issues & Solutions
 
-### 🚨 CRITICAL: TROUBLESHOOTING.md POLICY
-**Bei Problemen, die länger als 30 Minuten dauern:**
-1. **SOFORT dokumentieren** in `docs/Troubleshooting.md`
-2. **Problem-Symptome** detailliert beschreiben
-3. **Lösungsversuche** chronologisch festhalten
-4. **Root Cause** und finale Lösung dokumentieren
-5. **Lessons Learned** für zukünftige Projekte
-6. **Automatisierung** erstellen wenn möglich
+### Development Problems & Solutions
+1. **Fish System:** Use `smart-fish-system.js` for all fish interactions (max 50 fish, unified system)
+2. **Game Performance:** Check `game-balancer.js` and `animation-coordinator.js` for 60fps optimization
+3. **Visual Effects:** Use `aaa-visual-effects-engine.js` for particle systems and advanced animations
+4. **Supabase Connection:** Verify credentials and network connectivity, graceful fallback to localStorage
+5. **Video Loading:** Check MOV file accessibility, use `video-preloader.js` for optimization
+6. **Cross-Origin:** Always use HTTP server (not file://) for full functionality
+7. **Cache Problems:** Use version validation workflow, force browser restart, wait 5+ min for deployment
 
-**Ziel:** Nie wieder dasselbe Problem 2x debuggen!
+### Critical Browser Cache Issues
+**FISCHSEITE-SPECIFIC PROBLEM:** Browser may show old V5.1 instead of current version
+- **Solution:** Use complete cleanup workflow in Development section
+- **NEVER** open browser without version validation
+- **ALWAYS** update version string before testing
+- **FORCE** complete browser restart (quit Chrome)
 
-### Common Issues
+### Browser Support & Performance
+- **Modern:** Chrome 90+, Safari 14+, Firefox 88+ (full features, all 5 games)
+- **Legacy:** Core functionality works without interactive features
+- **Mobile:** iOS Safari, Android Chrome optimized with haptic feedback
+- **Performance Target:** 95+ score, 60fps animations, sub-3s load times
 
-### Common Issues
-1. **Fish System:** Use `smart-fish-system.js` - unified system for all fish interactions
-2. **Game Performance:** If animations lag, check RequestAnimationFrame implementation in game modules
-3. **Supabase Connection:** Verify credentials in JavaScript files and check network connectivity
-4. **Video Loading:** If preloader fails, check MOV file accessibility and server MIME types
-5. **Fish Spawning:** Maximum 10 fish limit prevents performance issues - check spawner logic in smart-fish-system.js
-6. **Mobile Touch:** Touch events may conflict with click events - test on actual devices
-7. **Cross-Origin:** Local file:// access limits some features - use HTTP server for full functionality
-8. **Deployment Issues:** Check GitHub Actions logs and use deployment verification scripts
-9. **Cache Problems:** After deployment, old versions may be cached. Use deployment verification banners and wait 5+ minutes for propagation
+### Troubleshooting Policy
+For problems >30 minutes: Document in `docs/Troubleshooting.md` with symptoms, attempts, root cause, and solution. Current major issues documented:
+- GitHub Actions FTP deployment fixes
+- Browser cache problems and solutions
+- Supabase integration setup
+- SELF-TEST vs USER-TEST workflow confusion
 
-### Browser Compatibility
-- **Primary:** Chrome 90+, Safari 14+, Firefox 88+ (full feature support)
-- **JavaScript Games:** Require modern browser with RequestAnimationFrame support
-- **Supabase Features:** Require fetch API and Promise support
-- **Mobile:** iOS Safari, Android Chrome optimized with touch event handling
-- **Fallback:** Core website functionality works in older browsers without interactive features
+## 🚨 CRITICAL: BROWSER-CACHE PROBLEM (28.09.2025)
 
-## Interactive Features Architecture
+### ❌ **WIEDERHOLTES VERSAGEN:**
+- **3x INCIDENTS:** Browser zeigt alte V5.1 (27.09.2025 21:40 UTC) statt aktuelle Version
+- **Problem:** Cache-Busting mit `?cache=` funktioniert NICHT
+- **Root Cause:** Server cached responses + Browser cached resources
+- **Evidence:** Screenshot 02:04 zeigt ?cache=1759017739 aber alte Version
 
-### Game System (`aquarium-collector-game.js`)
-- **Food Types:** 5 different collectibles with varying point values (10-25 points)
-- **Scoring:** Perfect score detection (20/20 items) triggers highscore submission
-- **Physics:** Custom collision detection and item movement
-- **UI:** Real-time score display, timer, and game state management
+### ✅ **CORRECTED FISCHSEITE WORKFLOW:**
+```bash
+# 1. FORCE COMPLETE CLEANUP
+osascript -e 'tell application "Google Chrome" to quit'
+lsof -ti:8003 | xargs kill -9
+rm -f server.log
 
-### Fish Spawner (`smart-fish-system.js`)
-- **Click-to-Spawn:** Click any fish to generate new fish (max 10)
-- **Fish Types:** 7 different species with unique animations
-- **Animations:** Natural swimming patterns with random movement
-- **Reset System:** Counter display with reset functionality
-- **Unified System:** Replaces multiple legacy fish modules
+# 2. FRESH START WITH VERSION UPDATE
+sed -i '' 's/V5\.1.*UTC/V$(date +%Y%m%d) - $(date +%H:%M) UTC/g' index.html
+python3 -m http.server 8003 > server.log 2>&1 &
+sleep 5
 
-### Video System (`video-preloader.js`)
-- **Smart Triggering:** Intersection Observer detects when user approaches video areas
-- **Parallel Loading:** Loads up to 3 videos simultaneously for efficiency
-- **Progress Feedback:** Aquarium-themed loading animations with percentage display
-- **Fallback Handling:** Skip button and timeout protection (30 seconds)
+# 3. HARD REFRESH VALIDATION
+curl -H "Cache-Control: no-cache" "http://localhost:8003/" | grep -i "deployed\|version"
 
-### Database Integration (`highscore-display.js`)
-- **Supabase Connection:** Real-time highscore storage and retrieval
-- **Rate Limiting:** 5 entries per IP per hour to prevent spam
-- **Error Handling:** Graceful degradation when database unavailable
-- **Display System:** Scrolling highscore ticker with golden badges for perfect scores
+# 4. ONLY OPEN BROWSER IF VERSION IS CURRENT
+EXPECTED_DATE=$(date +%Y%m%d)
+ACTUAL_VERSION=$(curl -s http://localhost:8003/ | grep -o "V[0-9]\+")
+if [[ "$ACTUAL_VERSION" == *"$EXPECTED_DATE"* ]]; then
+    open "http://localhost:8003/"
+else
+    echo "❌ VERSION MISMATCH - NO BROWSER OPENING"
+    exit 1
+fi
+```
 
-## BMAD Method Integration
+### 🔥 **FISCHSEITE-SPECIFIC RULES:**
+1. **NEVER open browser without version validation**
+2. **ALWAYS update version string before testing**
+3. **FORCE complete browser restart (quit Chrome)**
+4. **VERIFY current date in version banner**
+5. **CLOSE ALL test tabs immediately after validation**
 
-This project includes BMAD (Breakthrough Method for Agile AI-Driven Development) framework:
-- **`.bmad-core/`** - Core BMAD system with specialized agents
-- **Agents Available:** PO, Architect, Developer, QA, Scrum Master, UX Expert
-- **Task Management:** Structured development workflow with agent-driven planning
-- **Documentation:** Comprehensive PRD and architectural guidelines in `docs/`
+**LESSON:** Cache-busting queries are INSUFFICIENT - need server + content changes!

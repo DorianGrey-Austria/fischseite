@@ -177,14 +177,22 @@ class PerformanceOptimizer {
     }
 
     pauseBackgroundProcesses() {
-        // Pause video preloading
-        if (window.videoPreloader) {
-            window.videoPreloader.pauseLoading();
+        // Pause video preloading (defensive programming)
+        if (window.videoPreloader && typeof window.videoPreloader.pauseLoading === 'function') {
+            try {
+                window.videoPreloader.pauseLoading();
+            } catch (error) {
+                console.warn('⚠️ Could not pause video preloader:', error);
+            }
         }
 
         // Reduce Supabase polling frequency
-        if (window.highscoreDisplay) {
-            window.highscoreDisplay.setUpdateInterval(60000); // 1 minute instead of 30s
+        if (window.highscoreDisplay && typeof window.highscoreDisplay.setUpdateInterval === 'function') {
+            try {
+                window.highscoreDisplay.setUpdateInterval(60000); // 1 minute instead of 30s
+            } catch (error) {
+                console.warn('⚠️ Could not reduce highscore update interval:', error);
+            }
         }
     }
 
