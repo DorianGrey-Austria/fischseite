@@ -6669,6 +6669,195 @@
         /* Advanced Theme Consistency */
         .smart-fish:nth-child(even) { filter: hue-rotate(15deg); }
         .game-container { box-shadow: 0 0 20px rgba(78, 205, 196, 0.2); }
+
+        /* 🎨 ENHANCED GAME BUTTON ANIMATIONS (V2.0) */
+        .game-start-btn, .game-banner-btn {
+            background: linear-gradient(135deg, var(--accent-coral), #FF8E53);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-start-btn::before, .game-banner-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .game-start-btn:hover, .game-banner-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(255, 107, 107, 0.5);
+            background: linear-gradient(135deg, #FF8E53, var(--accent-coral));
+        }
+
+        .game-start-btn:hover::before, .game-banner-btn:hover::before {
+            left: 100%;
+        }
+
+        .game-start-btn:active, .game-banner-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        /* 🌊 ENHANCED MODAL GLASSMORPHISM EFFECTS */
+        .game-modal {
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+        }
+
+        .game-modal-backdrop {
+            background: linear-gradient(145deg,
+                rgba(0, 0, 0, 0.4) 0%,
+                rgba(0, 105, 148, 0.2) 25%,
+                rgba(78, 205, 196, 0.1) 50%,
+                rgba(0, 105, 148, 0.2) 75%,
+                rgba(0, 0, 0, 0.6) 100%);
+            backdrop-filter: blur(20px) brightness(1.1);
+            -webkit-backdrop-filter: blur(20px) brightness(1.1);
+        }
+
+        .game-modal-container {
+            background: linear-gradient(145deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.85) 50%,
+                rgba(78, 205, 196, 0.15) 100%);
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        /* 🎬 SMOOTH LOADING ANIMATIONS */
+        .loading-spinner {
+            position: relative;
+        }
+
+        .loading-spinner::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg,
+                rgba(0, 105, 148, 0.1),
+                rgba(78, 205, 196, 0.1),
+                rgba(255, 107, 107, 0.1));
+            border-radius: 15px;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        /* 🌊 AQUARIUM-THEMED GRADIENTS FOR GAME CONTAINERS */
+        .game-canvas-wrapper, #aquarium-game-canvas {
+            background: linear-gradient(180deg,
+                rgba(135, 206, 235, 0.2) 0%,
+                rgba(70, 130, 180, 0.3) 25%,
+                rgba(25, 25, 112, 0.4) 75%,
+                rgba(0, 0, 50, 0.5) 100%);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, var(--secondary-teal), var(--primary-blue), var(--accent-coral)) 1;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-canvas-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%);
+            pointer-events: none;
+            animation: waterShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes waterShimmer {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        /* 💫 FLOATING PARTICLE EFFECTS */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(78, 205, 196, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 40%, rgba(0, 105, 148, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 80%, rgba(255, 107, 107, 0.1) 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px, 200px 200px;
+            animation: floatingParticles 15s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes floatingParticles {
+            0% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(120deg); }
+            66% { transform: translateY(-5px) rotate(240deg); }
+            100% { transform: translateY(0px) rotate(360deg); }
+        }
+
+        /* 🎨 ADDITIONAL VISUAL ENHANCEMENTS */
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 105, 148, 0.2);
+            background: linear-gradient(145deg,
+                rgba(255, 255, 255, 0.95),
+                rgba(78, 205, 196, 0.05));
+        }
+
+        .game-modal-header {
+            background: linear-gradient(135deg,
+                var(--secondary-teal),
+                var(--primary-blue),
+                rgba(78, 205, 196, 0.8));
+            box-shadow: 0 4px 20px rgba(0, 105, 148, 0.3);
+        }
+
+        /* Responsive enhancements */
+        @media (max-width: 768px) {
+            .game-start-btn, .game-banner-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+
+            .game-canvas-wrapper::before {
+                height: 20%;
+            }
+        }
     </style>
 
     <!-- Alle anderen Scripts werden intelligent im Background geladen -->
@@ -6907,11 +7096,12 @@
                 window.aquariumHaptics.button();
             }
 
-            // Initialize the aquarium collector game in the inline container
-            const gameContainer = document.getElementById('aquarium-game-inline');
+            // Initialize the aquarium collector game with existing canvas
+            const existingCanvas = document.getElementById('aquarium-game-canvas');
+            const gameOverlay = document.getElementById('game-overlay');
 
-            if (!gameContainer) {
-                console.error('❌ Game container not found');
+            if (!existingCanvas) {
+                console.error('❌ Aquarium game canvas not found');
                 return;
             }
 
@@ -6921,61 +7111,48 @@
                     throw new Error('AquariumCollectorGame class not loaded');
                 }
 
-                // Show loading state
-                gameContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <div style="border: 4px solid rgba(0,105,148,0.3); border-top: 4px solid var(--primary-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-                        <p style="color: var(--primary-blue);">Lade Aquarium Sammler...</p>
-                    </div>
-                `;
+                // Hide the overlay (start screen)
+                if (gameOverlay) {
+                    gameOverlay.style.display = 'none';
+                }
 
-                // Initialize after short delay for smooth UX
+                // Start the game with existing canvas (pass the canvas ID)
+                const game = new window.AquariumCollectorGame('aquarium-game-canvas');
+                game.start();
+
+                // 🎮 SHOW Game Balancer when inline game starts (User requirement!)
+                // Add small delay to ensure Game Balancer is fully loaded
                 setTimeout(() => {
-                    // Clear loading and create canvas
-                    gameContainer.innerHTML = '';
+                    if (window.gameBalancerAPI && typeof window.gameBalancerAPI.showGameBalancer === 'function') {
+                        window.gameBalancerAPI.showGameBalancer();
+                    } else {
+                        console.warn('⚠️ Game Balancer API not available yet for inline game');
+                    }
+                }, 100);
 
-                    // Create canvas for the game
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 580;  // Slightly smaller than container for padding
-                    canvas.height = 380;
-                    canvas.id = 'aquarium-canvas-inline';
-                    canvas.style.cssText = `
-                        display: block;
-                        margin: 0 auto;
-                        border: 2px solid var(--primary-blue);
-                        border-radius: 12px;
-                        background: linear-gradient(180deg,
-                            rgba(0, 105, 148, 0.1) 0%,
-                            rgba(78, 205, 196, 0.2) 100%);
-                        box-shadow: 0 8px 32px rgba(0, 105, 148, 0.15);
-                    `;
-                    gameContainer.appendChild(canvas);
+                // Scroll to game
+                existingCanvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                    // Start the game
-                    const game = new window.AquariumCollectorGame(canvas);
-                    game.start();
-
-                    // Scroll to game
-                    gameContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                    console.log('✅ Aquarium Collector Game started successfully');
-
-                }, 500);
+                console.log('✅ Aquarium Collector Game started successfully');
 
             } catch (error) {
                 console.error('❌ Aquarium Collector Game initialization failed:', error);
-                gameContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <h3 style="color: var(--accent-coral); margin-bottom: 20px;">🐠 Spiel nicht verfügbar</h3>
-                        <p style="color: var(--primary-blue); margin-bottom: 20px;">
-                            Das Aquarium Sammler Spiel konnte nicht geladen werden.
-                        </p>
-                        <button onclick="window.location.reload();"
-                                style="padding: 10px 20px; background: var(--secondary-teal); color: white; border: none; border-radius: 8px; cursor: pointer;">
-                            🔄 Seite neu laden
-                        </button>
-                    </div>
-                `;
+                // Show error message in overlay
+                if (gameOverlay) {
+                    gameOverlay.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <h3 style="color: var(--accent-coral); margin-bottom: 20px;">🐠 Spiel nicht verfügbar</h3>
+                            <p style="color: var(--primary-blue); margin-bottom: 20px;">
+                                Das Aquarium Sammler Spiel konnte nicht geladen werden.
+                            </p>
+                            <button onclick="window.location.reload();"
+                                    style="padding: 10px 20px; background: var(--secondary-teal); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                🔄 Seite neu laden
+                            </button>
+                        </div>
+                    `;
+                    gameOverlay.style.display = 'flex';
+                }
             }
         }
 
@@ -6995,22 +7172,11 @@
                         throw new Error('FishMemoryGame class not loaded');
                     }
 
-                    modalBody.innerHTML = `
-                        <div id="fish-memory-game-container" style="text-align: center;">
-                            <div id="fish-memory-score" style="font-size: 18px; margin-bottom: 20px; color: var(--primary-blue);">
-                                Score: <span id="memory-score-value">0</span> | Züge: <span id="memory-moves-value">0</span>
-                            </div>
-                            <div id="fish-memory-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 400px; margin: 0 auto;">
-                                <!-- Memory grid wird hier generiert -->
-                            </div>
-                            <button onclick="restartMemoryGame()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-coral); color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Neues Spiel
-                            </button>
-                        </div>
-                    `;
+                    // Create container for the game to build itself into
+                    modalBody.innerHTML = `<div id="fish-memory-modal-container"></div>`;
 
-                    // Initialize Fish Memory Game with error handling
-                    const memoryGame = new window.FishMemoryGame('fish-memory-grid');
+                    // Initialize Fish Memory Game with modal container
+                    const memoryGame = new window.FishMemoryGame('fish-memory-modal-container');
                     // Start actual gameplay (class exposes startGame)
                     if (typeof memoryGame.startGame === 'function') {
                         memoryGame.startGame();
@@ -7197,6 +7363,11 @@
                 el.style.display = 'none';
             });
 
+            // 🎮 SHOW Game Balancer when modal game starts (User requirement!)
+            if (window.gameBalancerAPI && typeof window.gameBalancerAPI.showGameBalancer === 'function') {
+                window.gameBalancerAPI.showGameBalancer();
+            }
+
             // Focus management
             modal.focus();
         }
@@ -7219,6 +7390,9 @@
                 if (window.currentRacingGame) {
                     window.currentRacingGame = null;
                 }
+                if (window.currentFishCareGame) {
+                    window.currentFishCareGame = null;
+                }
 
                 // Restore body scroll
                 document.body.style.overflow = '';
@@ -7230,6 +7404,11 @@
                         delete el.dataset._prevDisplay;
                     }
                 });
+
+                // 🎮 HIDE Game Balancer when modal game ends (User requirement!)
+                if (window.gameBalancerAPI && typeof window.gameBalancerAPI.hideGameBalancer === 'function') {
+                    window.gameBalancerAPI.hideGameBalancer();
+                }
 
                 // Haptic feedback
                 if (window.aquariumHaptics) {
@@ -7289,6 +7468,54 @@
             if (window.currentRacingGame && typeof window.currentRacingGame.reset === 'function') {
                 window.currentRacingGame.reset();
             }
+        }
+
+        // Game 5: Fish Care Simulation (opens in modal)
+        function startFishCareSimulation() {
+            console.log('🎮 Opening Fish Care Simulation in modal...');
+
+            // Haptic feedback
+            if (window.aquariumHaptics) {
+                window.aquariumHaptics.button();
+            }
+
+            openGameModal('Fish Care Simulation', function(modalBody) {
+                try {
+                    // Check if game class is available
+                    if (typeof window.FishCareSimulation === 'undefined') {
+                        throw new Error('FishCareSimulation class not loaded');
+                    }
+
+                    // Create container for Fish Care Simulation
+                    modalBody.innerHTML = `<div id="fish-care-modal-container"></div>`;
+
+                    // Initialize Fish Care Simulation
+                    const fishCareGame = new window.FishCareSimulation();
+
+                    // Override the container to use modal instead of floating window
+                    fishCareGame.gameContainer = document.getElementById('fish-care-modal-container');
+                    fishCareGame.initializeGame();
+
+                    window.currentFishCareGame = fishCareGame; // Store reference
+
+                    console.log('✅ Fish Care Simulation initialized successfully');
+
+                } catch (error) {
+                    console.error('❌ Fish Care Simulation initialization failed:', error);
+                    modalBody.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <h3 style="color: var(--accent-coral); margin-bottom: 20px;">🐠 Spiel nicht verfügbar</h3>
+                            <p style="color: var(--primary-blue); margin-bottom: 20px;">
+                                Die Fish Care Simulation konnte nicht geladen werden.
+                            </p>
+                            <button onclick="closeGameModal(); window.location.reload();"
+                                    style="padding: 10px 20px; background: var(--secondary-teal); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                🔄 Seite neu laden
+                            </button>
+                        </div>
+                    `;
+                }
+            });
         }
 
         // Initialize modal system when DOM is ready

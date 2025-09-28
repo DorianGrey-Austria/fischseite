@@ -8,6 +8,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Current Status:** Version 5.1+ with expanded game portfolio deployed to **vibecoding.company/fischseite**
 
+## 🚨 CRITICAL UI/UX RULES (MUST-HAVE!)
+
+### Game Balancer Widget Visibility Rules
+**ABSOLUTE REQUIREMENT:** The Game Balancer floating widget must ONLY appear when actively playing a game!
+- **✅ SHOW Game Balancer:** When any game modal is open OR inline game is running
+- **❌ HIDE Game Balancer:** On normal page browsing, before game start, after game close
+- **Implementation:** Game start → show balancer, Game close/modal close → hide balancer
+- **THIS IS NON-NEGOTIABLE:** User explicitly requires clean UI when not gaming
+
 ## Architecture
 
 ### Core Structure

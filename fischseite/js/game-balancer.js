@@ -867,6 +867,7 @@
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
+                display: none;
             `;
 
             const levelData = XP_LEVELS.find(l => l.level === this.playerProfile.level) || XP_LEVELS[0];
@@ -944,13 +945,9 @@
                 }
             });
 
-            // Auto-show panel briefly on first load
-            setTimeout(() => {
-                panel.style.transform = 'translateX(0px)';
-                setTimeout(() => {
-                    panel.style.transform = 'translateX(80%)';
-                }, 3000);
-            }, 1000);
+            // ⚠️ CRITICAL: Panel stays hidden by default (User requirement!)
+            // Only show when games are actively being played
+            // Will be controlled by showGameBalancer() / hideGameBalancer() functions
         }
 
         getRecentAchievementsHTML() {
@@ -1225,6 +1222,30 @@
         // Update challenge progress
         updateChallenge: (type, challengeId, progress = 1) => {
             window.gameBalancer.updateChallengeProgress(type, challengeId, progress);
+        },
+
+        // 🎮 CRITICAL: Visibility Control Functions (User Requirement!)
+        showGameBalancer: () => {
+            const panel = document.getElementById('game-balancer-panel');
+            if (panel) {
+                panel.style.display = 'block';
+                panel.style.transform = 'translateX(0px)';
+                console.log('🎮 Game Balancer shown - game is active');
+            }
+        },
+
+        hideGameBalancer: () => {
+            const panel = document.getElementById('game-balancer-panel');
+            if (panel) {
+                panel.style.transform = 'translateX(100%)';
+                // Hide completely after transition
+                setTimeout(() => {
+                    if (panel.style.transform === 'translateX(100%)') {
+                        panel.style.display = 'none';
+                    }
+                }, 300);
+                console.log('🎮 Game Balancer hidden - no active game');
+            }
         }
     };
 
