@@ -6537,8 +6537,7 @@
     <!-- REMOVED: stable-fish-spawner.js - CONFLICTS with smart-fish-system -->
     <!-- REMOVED: optimized-game-engine.js - REDUNDANT MODULE -->
 
-    <!-- 🎮 GAME BALANCER - Adaptive Difficulty & Achievement System -->
-    <script src="js/game-balancer.js" defer></script>
+    <!-- Game Balancer removed for clean experience -->
 
     <!-- Core Game Systems -->
     <script src="js/smart-fish-system.js" defer></script>
@@ -6546,7 +6545,7 @@
     <script src="js/fish-memory-game.js" defer></script>
     <script src="js/aquarium-builder-game.js" defer></script>
     <script src="js/fish-racing-game.js" defer></script>
-    <script src="js/highscore-display.js" defer></script>
+    <!-- Highscore system disabled for clean game experience -->
     <script src="js/video-preloader.js" defer></script>
 
     <!-- 🚀 ULTRATHINK: INSTANT SUPABASE & PERFORMANCE INTEGRATION -->
@@ -7120,15 +7119,7 @@
                 const game = new window.AquariumCollectorGame('aquarium-game-canvas');
                 game.start();
 
-                // 🎮 SHOW Game Balancer when inline game starts (User requirement!)
-                // Add small delay to ensure Game Balancer is fully loaded
-                setTimeout(() => {
-                    if (window.gameBalancerAPI && typeof window.gameBalancerAPI.showGameBalancer === 'function') {
-                        window.gameBalancerAPI.showGameBalancer();
-                    } else {
-                        console.warn('⚠️ Game Balancer API not available yet for inline game');
-                    }
-                }, 100);
+                // Clean, simple game start without level system
 
                 // Scroll to game
                 existingCanvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -7363,10 +7354,7 @@
                 el.style.display = 'none';
             });
 
-            // 🎮 SHOW Game Balancer when modal game starts (User requirement!)
-            if (window.gameBalancerAPI && typeof window.gameBalancerAPI.showGameBalancer === 'function') {
-                window.gameBalancerAPI.showGameBalancer();
-            }
+            // Clean modal game start without level system
 
             // Focus management
             modal.focus();
@@ -7405,10 +7393,7 @@
                     }
                 });
 
-                // 🎮 HIDE Game Balancer when modal game ends (User requirement!)
-                if (window.gameBalancerAPI && typeof window.gameBalancerAPI.hideGameBalancer === 'function') {
-                    window.gameBalancerAPI.hideGameBalancer();
-                }
+                // Clean modal close without level system
 
                 // Haptic feedback
                 if (window.aquariumHaptics) {
