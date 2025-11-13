@@ -175,6 +175,16 @@ class AquariumCollectorGame {
         this.gameStartTime = null;
         this.gameEndTime = null;
 
+        // 🎮 COMBO SYSTEM - Makes game exciting!
+        this.combo = 0;
+        this.maxCombo = 0;
+        this.lastCollectTime = 0;
+        this.comboTimeWindow = 1500; // 1.5 seconds to maintain combo
+
+        // 🔥 FRENZY MODE - Random excitement bursts!
+        this.frenzyMode = false;
+        this.frenzyEndTime = 0;
+
         // Neue 30-Sekunden Konfiguration
         this.difficulty = this.getDifficulty(gameNumber);
         this.gameTime = this.difficulty.time; // Jetzt 30 Sekunden!
@@ -245,6 +255,8 @@ class AquariumCollectorGame {
                     <div class="score-display">Score: <span id="score-${this.containerId}">0</span></div>
                     <div class="items-display">Items: <span id="items-${this.containerId}">0</span>/${this.difficulty.items}</div>
                     <div class="timer-display">Zeit: <span id="timer-${this.containerId}">${this.timeLeft}s</span></div>
+                    <div class="combo-display" id="combo-${this.containerId}" style="display:none; color:#FFD700; font-weight:bold;">🔥 COMBO x0</div>
+                    <div class="frenzy-display" id="frenzy-${this.containerId}" style="display:none; color:#FF4500; font-weight:bold; animation:pulse 0.5s infinite;">⚡ FRENZY MODE!</div>
                 </div>
                 <div class="game-canvas-container">
                     <canvas id="game-canvas-${this.containerId}" class="aquarium-game-canvas"></canvas>
@@ -270,6 +282,8 @@ class AquariumCollectorGame {
         this.timerElement = document.getElementById(`timer-${this.containerId}`);
         this.overlayElement = document.getElementById(`start-overlay-${this.containerId}`);
         this.pauseButton = document.getElementById(`pause-btn-${this.containerId}`);
+        this.comboElement = document.getElementById(`combo-${this.containerId}`);
+        this.frenzyElement = document.getElementById(`frenzy-${this.containerId}`);
 
         // Global Game Referenz für Button
         if (this.gameNumber) {
@@ -357,12 +371,17 @@ class AquariumCollectorGame {
     }
 
     spawnItem() {
+        // 🚀 PROGRESSIVE DIFFICULTY: Speed increases with score!
+        const scoreMultiplier = 1 + (this.score / 500); // +100% speed at 500 points
+        const baseSpeed = (1 + Math.random() * 2) * this.difficulty.speedMultiplier;
+        const finalSpeed = baseSpeed * Math.min(scoreMultiplier, 2.5); // Max 2.5x speed
+
         const item = {
             id: Math.random().toString(36).substr(2, 9),
             x: Math.random() * (this.canvas.width - 40) + 20,
             y: -30,
-            vx: (Math.random() - 0.5) * 2,
-            vy: 1 + Math.random() * 2,
+            vx: (Math.random() - 0.5) * 2 * Math.min(scoreMultiplier, 1.5),
+            vy: finalSpeed,
             type: this.getRandomItemType(),
             size: 20 + Math.random() * 15,
             rotation: Math.random() * Math.PI * 2,
@@ -377,8 +396,8 @@ class AquariumCollectorGame {
     getRandomItemType() {
         const random = Math.random();
 
-        // 🎮 POWER-UPS (5% chance)
-        if (random < 0.05) {
+        // 🎮 POWER-UPS (15% chance - BOOSTED FOR FUN!)
+        if (random < 0.15) {
             const powerUps = [
                 { emoji: '⚡', type: 'speed_boost', points: 20, duration: 5000, description: 'Speed Boost!' },
                 { emoji: '🧲', type: 'magnet', points: 15, duration: 8000, description: 'Magnet Power!' },
@@ -396,7 +415,7 @@ class AquariumCollectorGame {
         const goodItems = ['🦐', '🐛', '🌱', '🟢', '🔵', '⭐', '🐠', '🐟', '🦀', '🦑'];
         const badItems = ['💀', '🗑️', '⚠️', '☠️'];
 
-        // 80% gute Items, 15% bad items, 5% power-ups (above)
+        // 70% gute Items, 15% bad items, 15% power-ups (above)
         if (random < 0.85) {
             return {
                 emoji: goodItems[Math.floor(Math.random() * goodItems.length)],
@@ -437,14 +456,54 @@ class AquariumCollectorGame {
 
         this.collected++;
 
+        const now = Date.now();
+
+        // 🔥 COMBO SYSTEM - Track consecutive catches!
+        if (now - this.lastCollectTime < this.comboTimeWindow && item.type.good) {
+            this.combo++;
+            if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+        } else if (item.type.good) {
+            this.combo = 1; // Start new combo
+        } else {
+            this.combo = 0; // Break combo on bad item
+        }
+        this.lastCollectTime = now;
+
+        // Update combo display
+        if (this.combo >= 2 && this.comboElement) {
+            this.comboElement.style.display = 'block';
+            this.comboElement.textContent = `🔥 COMBO x${this.combo}`;
+            this.comboElement.style.fontSize = Math.min(24, 16 + this.combo * 2) + 'px';
+        } else if (this.comboElement) {
+            this.comboElement.style.display = 'none';
+        }
+
         // 🎮 POWER-UP ACTIVATION
         if (item.type.isPowerUp) {
             this.activatePowerUp(item.type);
         }
 
-        // Calculate points with double_points multiplier
-        const pointsMultiplier = this.activePowerUps.has('double_points') ? 2 : 1;
-        this.score += Math.round(item.type.points * this.difficulty.pointsMultiplier * pointsMultiplier);
+        // Calculate points with ALL multipliers!
+        let basePoints = item.type.points * this.difficulty.pointsMultiplier;
+
+        // Combo multiplier (max 5x)
+        const comboMultiplier = Math.min(1 + (this.combo - 1) * 0.5, 5);
+
+        // Frenzy multiplier
+        const frenzyMultiplier = this.frenzyMode ? 2 : 1;
+
+        // Power-up multiplier
+        const powerUpMultiplier = this.activePowerUps.has('double_points') ? 2 : 1;
+
+        // Total points with all multipliers
+        const totalPoints = Math.round(basePoints * comboMultiplier * frenzyMultiplier * powerUpMultiplier);
+
+        this.score += totalPoints;
+
+        // Show points gained
+        if (totalPoints > item.type.points && item.type.good) {
+            this.showFloatingPoints(item.x, item.y, totalPoints, comboMultiplier > 1 || frenzyMultiplier > 1);
+        }
 
         // 🔊 VERBESSERUNG #2: Sound-Feedback bei Collect
         if (window.aquariumSounds) {
@@ -614,20 +673,38 @@ class AquariumCollectorGame {
             startTime: Date.now()
         };
 
-        // Partikel erstellen
-        for (let i = 0; i < 6; i++) {
+        // More particles for combos!
+        const particleCount = 6 + (this.combo * 2);
+        for (let i = 0; i < particleCount; i++) {
             effect.particles.push({
                 x: x,
                 y: y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
                 life: 1.0,
-                color: isGood ? '#00ff88' : '#ff4444'
+                color: isGood ? (this.combo >= 3 ? '#FFD700' : '#00ff88') : '#ff4444'
             });
         }
 
         // Temporär zu Items hinzufügen für Rendering
         this.items.push({ isEffect: true, effect: effect });
+    }
+
+    showFloatingPoints(x, y, points, isSpecial) {
+        // Floating points text effect
+        const floatingText = {
+            x: x,
+            y: y,
+            text: `+${points}`,
+            vy: -2,
+            life: 1.0,
+            duration: 1000,
+            startTime: Date.now(),
+            color: isSpecial ? '#FFD700' : '#00ff88',
+            size: isSpecial ? 24 : 18
+        };
+
+        this.items.push({ isEffect: true, floatingText: floatingText });
     }
 
     updateDisplay() {
@@ -690,14 +767,28 @@ class AquariumCollectorGame {
     renderItems() {
         const now = Date.now();
 
+        // 🔥 CHECK FRENZY MODE
+        if (this.frenzyMode && now > this.frenzyEndTime) {
+            this.frenzyMode = false;
+            if (this.frenzyElement) this.frenzyElement.style.display = 'none';
+            console.log('🔥 Frenzy Mode ended!');
+        }
+
         for (let i = this.items.length - 1; i >= 0; i--) {
             const item = this.items[i];
 
             // Handle Effect Items
             if (item.isEffect) {
-                this.renderEffect(item.effect);
-                if (now - item.effect.startTime > item.effect.duration) {
-                    this.items.splice(i, 1);
+                if (item.effect) {
+                    this.renderEffect(item.effect);
+                    if (now - item.effect.startTime > item.effect.duration) {
+                        this.items.splice(i, 1);
+                    }
+                } else if (item.floatingText) {
+                    this.renderFloatingText(item.floatingText);
+                    if (now - item.floatingText.startTime > item.floatingText.duration) {
+                        this.items.splice(i, 1);
+                    }
                 }
                 continue;
             }
@@ -742,6 +833,26 @@ class AquariumCollectorGame {
             this.ctx.fill();
             this.ctx.restore();
         }
+    }
+
+    renderFloatingText(floatingText) {
+        const elapsed = Date.now() - floatingText.startTime;
+        const progress = elapsed / floatingText.duration;
+
+        floatingText.y += floatingText.vy;
+        floatingText.life = 1.0 - progress;
+
+        this.ctx.save();
+        this.ctx.globalAlpha = floatingText.life;
+        this.ctx.fillStyle = floatingText.color;
+        this.ctx.font = `bold ${floatingText.size}px Arial`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.strokeStyle = '#000';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeText(floatingText.text, floatingText.x, floatingText.y);
+        this.ctx.fillText(floatingText.text, floatingText.x, floatingText.y);
+        this.ctx.restore();
     }
 
     renderBubbles() {
@@ -872,6 +983,11 @@ class AquariumCollectorGame {
                         <span class="stat-label">Zeit:</span>
                         <span class="stat-value">${results.duration.toFixed(1)}s von 30s</span>
                     </div>
+                    ${this.maxCombo >= 3 ? `
+                    <div class="stat-item bonus">
+                        <span class="stat-label">Höchste Combo:</span>
+                        <span class="stat-value">🔥 x${this.maxCombo}</span>
+                    </div>` : ''}
                     ${results.bonusPoints > 0 ? `
                     <div class="stat-item bonus">
                         <span class="stat-label">Zeitbonus:</span>
@@ -1087,11 +1203,50 @@ class AquariumCollectorGame {
                 this.timeLeft--;
                 this.updateDisplay();
 
+                // 🔥 FRENZY MODE: Random 10% chance each second
+                if (!this.frenzyMode && Math.random() < 0.10 && this.timeLeft > 5) {
+                    this.activateFrenzyMode();
+                }
+
                 if (this.timeLeft <= 0) {
                     this.endGame();
                 }
             }
         }, 1000);
+    }
+
+    activateFrenzyMode() {
+        this.frenzyMode = true;
+        this.frenzyEndTime = Date.now() + 5000; // 5 seconds frenzy
+
+        if (this.frenzyElement) {
+            this.frenzyElement.style.display = 'block';
+        }
+
+        // Visual feedback
+        const frenzyNotification = document.createElement('div');
+        frenzyNotification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            color: white;
+            padding: 30px 50px;
+            border-radius: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            z-index: 10001;
+            box-shadow: 0 0 40px rgba(255, 69, 0, 0.8);
+            animation: frenzyPulse 0.5s ease-in-out;
+            pointer-events: none;
+        `;
+        frenzyNotification.textContent = '🔥 FRENZY MODE! 🔥';
+        document.body.appendChild(frenzyNotification);
+
+        setTimeout(() => frenzyNotification.remove(), 1000);
+
+        console.log('🔥 FRENZY MODE ACTIVATED!');
     }
 
     restartGame() {
@@ -1136,6 +1291,16 @@ const tipStyles = `
             opacity: 0;
             transform: translateX(-50%) translateY(-20px);
         }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @keyframes frenzyPulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.2); }
     }
 
     .perfect-score {

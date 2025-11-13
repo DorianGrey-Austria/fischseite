@@ -22,6 +22,16 @@ class FishRacingGame {
         this.raceIntervalId = null;
         this.lastRaceUpdateTime = 0;
 
+        // 🎮 TURBO METER SYSTEM - Makes racing interactive!
+        this.turboEnergy = 100;
+        this.maxTurboEnergy = 100;
+        this.turboRechargeRate = 3; // per second
+        this.turboConsumptionPerBoost = 20;
+
+        // 🎁 TRACK POWER-UPS - Random power-ups on track!
+        this.trackPowerUps = [];
+        this.trackObstacles = [];
+
         // 🔥 VERBESSERUNG #3 & #5: Enhanced tracking for particle effects and stats
         this.raceStats = {
             startTime: null,
@@ -134,6 +144,13 @@ class FishRacingGame {
                         <div>⏱️ Zeit: <span id="race-timer">${this.gameTime}</span>s</div>
                         <div>💰 Punkte: <span id="race-score">${this.playerScore}</span></div>
                         <div id="race-status">🎯 Wähle deinen Favoriten!</div>
+                        <div id="turbo-meter-container" style="display:none;">
+                            🚀 Turbo:
+                            <div style="display:inline-block; width:100px; height:16px; background:rgba(255,255,255,0.3); border-radius:8px; vertical-align:middle; position:relative; overflow:hidden;">
+                                <div id="turbo-meter-fill" style="height:100%; background:linear-gradient(90deg, #FFD700, #FF6B35); width:100%; transition:width 0.1s;"></div>
+                            </div>
+                            <span id="turbo-meter-value">100</span>%
+                        </div>
                         <button id="race-pause-btn" class="game-btn" style="display:none;" onclick="window.fishRacingGame.toggleRacePause()">⏸️ Pause</button>
                     </div>
                 </div>
@@ -519,6 +536,24 @@ class FishRacingGame {
                 50% { opacity: 0.8; }
             }
 
+            /* 🎁 POWER-UP ANIMATIONS */
+            @keyframes powerUpFloat {
+                0%, 100% { transform: translateY(0) scale(1); }
+                50% { transform: translateY(-10px) scale(1.1); }
+            }
+
+            @keyframes powerUpCollect {
+                0% { transform: scale(1); opacity: 1; }
+                100% { transform: scale(2) translateY(-50px); opacity: 0; }
+            }
+
+            @keyframes powerUpNotify {
+                0% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+                10% { transform: translateX(-50%) translateY(0); opacity: 1; }
+                90% { transform: translateX(-50%) translateY(0); opacity: 1; }
+                100% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            }
+
             @media (max-width: 768px) {
                 .fish-selection {
                     grid-template-columns: repeat(2, 1fr);
@@ -635,14 +670,25 @@ class FishRacingGame {
         this.playerScore -= betAmount;
         document.getElementById('race-score').textContent = this.playerScore;
 
+        // 🎮 Reset turbo meter
+        this.turboEnergy = this.maxTurboEnergy;
+        this.updateTurboMeter();
+
         // Hide betting section, show race track
         document.getElementById('betting-section').style.display = 'none';
         document.getElementById('race-track').style.display = 'block';
         document.getElementById('reset-race-btn').style.display = 'inline-block';
 
-        // Show pause button
+        // Show turbo meter and pause button
+        const turboContainer = document.getElementById('turbo-meter-container');
+        if (turboContainer) turboContainer.style.display = 'inline-block';
+
         const pauseBtn = document.getElementById('race-pause-btn');
         if (pauseBtn) pauseBtn.style.display = 'inline-block';
+
+        // 🎁 Clear and prepare power-ups/obstacles
+        this.trackPowerUps = [];
+        this.trackObstacles = [];
 
         // 🔥 VERBESSERUNG #4: Initialize crowd atmosphere
         this.initializeCrowdAtmosphere();
@@ -780,6 +826,20 @@ class FishRacingGame {
                 timerElement.textContent = Math.max(0, this.timeRemaining).toFixed(1);
             }
 
+            // 🎮 RECHARGE TURBO ENERGY!
+            if (this.turboEnergy < this.maxTurboEnergy) {
+                this.turboEnergy = Math.min(this.maxTurboEnergy, this.turboEnergy + (this.turboRechargeRate * 0.1));
+                this.updateTurboMeter();
+            }
+
+            // 🎁 SPAWN POWER-UPS randomly (5% chance per interval)
+            if (Math.random() < 0.05 && this.trackPowerUps.length < 3) {
+                this.spawnTrackPowerUp();
+            }
+
+            // 🎁 CHECK POWER-UP COLLECTION
+            this.checkPowerUpCollection();
+
             // Move fish
             let raceFinished = false;
             this.raceFish.forEach(fish => {
@@ -823,8 +883,19 @@ class FishRacingGame {
     boostFish(fishId) {
         if (!this.raceInProgress || fishId !== this.selectedFish) return;
 
+        // 🎮 CHECK TURBO ENERGY!
+        if (this.turboEnergy < this.turboConsumptionPerBoost) {
+            // Show "out of energy" feedback
+            this.showTurboDepletedMessage();
+            return;
+        }
+
         const fish = this.raceFish.find(f => f.id === fishId);
         if (fish) {
+            // Consume turbo energy
+            this.turboEnergy = Math.max(0, this.turboEnergy - this.turboConsumptionPerBoost);
+            this.updateTurboMeter();
+
             fish.boost = Math.min(fish.boost + 2, 5); // Max boost of 5
             const fishElement = document.getElementById(`fish-${fishId}`);
             fishElement.classList.add('boosted');
@@ -849,6 +920,182 @@ class FishRacingGame {
             if (window.aquariumSounds) window.aquariumSounds.playCollect();
             if (window.aquariumHaptics) window.aquariumHaptics.collect();
         }
+    }
+
+    updateTurboMeter() {
+        const percentage = (this.turboEnergy / this.maxTurboEnergy) * 100;
+        const fillElement = document.getElementById('turbo-meter-fill');
+        const valueElement = document.getElementById('turbo-meter-value');
+
+        if (fillElement) {
+            fillElement.style.width = `${percentage}%`;
+
+            // Change color based on energy level
+            if (percentage < 20) {
+                fillElement.style.background = 'linear-gradient(90deg, #FF4444, #CC0000)';
+            } else if (percentage < 50) {
+                fillElement.style.background = 'linear-gradient(90deg, #FFA500, #FF6B35)';
+            } else {
+                fillElement.style.background = 'linear-gradient(90deg, #FFD700, #FF6B35)';
+            }
+        }
+
+        if (valueElement) {
+            valueElement.textContent = Math.round(percentage);
+        }
+    }
+
+    showTurboDepletedMessage() {
+        const message = document.createElement('div');
+        message.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 68, 68, 0.95);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+            pointer-events: none;
+        `;
+        message.textContent = '⚠️ Turbo leer! Warte auf Aufladung...';
+        document.body.appendChild(message);
+
+        setTimeout(() => message.remove(), 1500);
+
+        if (window.aquariumSounds) window.aquariumSounds.playError();
+    }
+
+    spawnTrackPowerUp() {
+        const powerUpTypes = [
+            { emoji: '⚡', type: 'speed', description: '+2 Speed!' },
+            { emoji: '🌟', type: 'mega_boost', description: 'Mega Boost!' },
+            { emoji: '🔋', type: 'turbo_refill', description: 'Turbo Refill!' },
+            { emoji: '🎯', type: 'teleport', description: 'Teleport +50px!' }
+        ];
+
+        const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+        const randomLane = Math.floor(Math.random() * this.raceFish.length) + 1;
+        const randomPosition = 100 + Math.random() * 300; // Spawn ahead
+
+        const powerUp = {
+            id: `powerup-${Date.now()}`,
+            type: randomType.type,
+            emoji: randomType.emoji,
+            description: randomType.description,
+            lane: randomLane,
+            position: randomPosition,
+            collected: false
+        };
+
+        this.trackPowerUps.push(powerUp);
+
+        // Create visual element
+        const lane = document.querySelector(`.race-lane[data-lane="${randomLane}"]`);
+        if (lane) {
+            const powerUpElement = document.createElement('div');
+            powerUpElement.id = powerUp.id;
+            powerUpElement.style.cssText = `
+                position: absolute;
+                left: ${50 + randomPosition}px;
+                font-size: 24px;
+                z-index: 3;
+                animation: powerUpFloat 1s ease-in-out infinite;
+                filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+                pointer-events: none;
+            `;
+            powerUpElement.textContent = randomType.emoji;
+            lane.appendChild(powerUpElement);
+        }
+
+        console.log(`🎁 Power-Up spawned: ${randomType.type} at lane ${randomLane}`);
+    }
+
+    checkPowerUpCollection() {
+        for (let i = this.trackPowerUps.length - 1; i >= 0; i--) {
+            const powerUp = this.trackPowerUps[i];
+            if (powerUp.collected) continue;
+
+            // Check if any fish collected it
+            this.raceFish.forEach(fish => {
+                if (fish.lane === powerUp.lane && Math.abs(fish.position - powerUp.position) < 30) {
+                    this.collectPowerUp(fish, powerUp, i);
+                }
+            });
+        }
+    }
+
+    collectPowerUp(fish, powerUp, index) {
+        powerUp.collected = true;
+
+        // Apply power-up effect
+        switch(powerUp.type) {
+            case 'speed':
+                fish.baseSpeed += 1;
+                break;
+            case 'mega_boost':
+                fish.boost += 5;
+                break;
+            case 'turbo_refill':
+                if (fish.id === this.selectedFish) {
+                    this.turboEnergy = Math.min(this.maxTurboEnergy, this.turboEnergy + 40);
+                    this.updateTurboMeter();
+                }
+                break;
+            case 'teleport':
+                fish.position += 50;
+                break;
+        }
+
+        // Show notification if it's player's fish
+        if (fish.id === this.selectedFish) {
+            this.showPowerUpNotification(powerUp);
+        }
+
+        // Remove visual element
+        const element = document.getElementById(powerUp.id);
+        if (element) {
+            element.style.animation = 'powerUpCollect 0.5s ease-out forwards';
+            setTimeout(() => element.remove(), 500);
+        }
+
+        // Remove from array
+        this.trackPowerUps.splice(index, 1);
+
+        if (fish.id === this.selectedFish) {
+            if (window.aquariumSounds) window.aquariumSounds.playSuccess();
+            if (window.aquariumHaptics) window.aquariumHaptics.achievement();
+        }
+
+        console.log(`🎁 ${fish.name} collected power-up: ${powerUp.type}`);
+    }
+
+    showPowerUpNotification(powerUp) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.5);
+            animation: powerUpNotify 1s ease-out forwards;
+            pointer-events: none;
+        `;
+        notification.textContent = `${powerUp.emoji} ${powerUp.description}`;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.remove(), 1500);
     }
 
     getFurthestFish() {
