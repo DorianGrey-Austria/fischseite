@@ -168,6 +168,7 @@ class AquariumCollectorGame {
         // Game state
         this.gameActive = false;
         this.gameStarted = false;
+        this.gamePaused = false;
         this.items = [];
         this.collected = 0;
         this.score = 0;
@@ -186,6 +187,12 @@ class AquariumCollectorGame {
         // Timer
         this.gameTimer = null;
         this.itemSpawnTimer = null;
+
+        // ⚡ PERFORMANCE: Frame rate control
+        this.lastFrameTime = 0;
+        this.frameRate = 60;
+        this.frameDelay = 1000 / this.frameRate;
+        this.animationFrameId = null;
 
         this.setup();
     }
@@ -242,6 +249,9 @@ class AquariumCollectorGame {
                         <button class="game-start-btn" onclick="window.aquariumGame${this.gameNumber || ''}.startGame()">
                             🎮 Spiel Starten
                         </button>
+                        <button class="game-pause-btn" id="pause-btn-${this.containerId}" onclick="window.aquariumGame${this.gameNumber || ''}.togglePause()" style="display:none;">
+                            ⏸️ Pause
+                        </button>
                     </div>
                 </div>
             </div>
@@ -250,6 +260,13 @@ class AquariumCollectorGame {
         // Canvas Setup
         this.canvas = document.getElementById(`game-canvas-${this.containerId}`);
         this.ctx = this.canvas.getContext('2d');
+
+        // ⚡ PERFORMANCE: Cache DOM references
+        this.scoreElement = document.getElementById(`score-${this.containerId}`);
+        this.itemsElement = document.getElementById(`items-${this.containerId}`);
+        this.timerElement = document.getElementById(`timer-${this.containerId}`);
+        this.overlayElement = document.getElementById(`start-overlay-${this.containerId}`);
+        this.pauseButton = document.getElementById(`pause-btn-${this.containerId}`);
 
         // Global Game Referenz für Button
         if (this.gameNumber) {
@@ -306,8 +323,8 @@ class AquariumCollectorGame {
         this.gameEndTime = null;
 
         // UI Hide/Show
-        const overlay = document.getElementById(`start-overlay-${this.containerId}`);
-        if (overlay) overlay.style.display = 'none';
+        if (this.overlayElement) this.overlayElement.style.display = 'none';
+        if (this.pauseButton) this.pauseButton.style.display = 'inline-block';
 
         // Update Displays
         this.updateDisplay();
@@ -316,14 +333,7 @@ class AquariumCollectorGame {
         this.educationSystem.startTipSystem(this.gameTime * 1000);
 
         // Timer starten
-        this.gameTimer = setInterval(() => {
-            this.timeLeft--;
-            this.updateDisplay();
-
-            if (this.timeLeft <= 0) {
-                this.endGame();
-            }
-        }, 1000);
+        this.startTimer();
 
         // Items spawnen
         this.startItemSpawning();
@@ -488,32 +498,45 @@ class AquariumCollectorGame {
     }
 
     updateDisplay() {
-        const scoreEl = document.getElementById(`score-${this.containerId}`);
-        const itemsEl = document.getElementById(`items-${this.containerId}`);
-        const timerEl = document.getElementById(`timer-${this.containerId}`);
-
-        if (scoreEl) scoreEl.textContent = this.score;
-        if (itemsEl) itemsEl.textContent = `${this.collected}/${this.difficulty.items}`;
-        if (timerEl) timerEl.textContent = this.timeLeft + 's';
+        // ⚡ PERFORMANCE: Use cached DOM references
+        if (this.scoreElement) this.scoreElement.textContent = this.score;
+        if (this.itemsElement) this.itemsElement.textContent = `${this.collected}/${this.difficulty.items}`;
+        if (this.timerElement) this.timerElement.textContent = this.timeLeft + 's';
     }
 
-    render() {
-        if (!this.gameActive) return;
+    render(currentTime = 0) {
+        if (!this.gameActive) {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+            return;
+        }
 
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // ⚡ PERFORMANCE: Frame rate limiting (60 FPS)
+        const deltaTime = currentTime - this.lastFrameTime;
 
-        // Aquarium Background
-        this.renderBackground();
+        if (deltaTime >= this.frameDelay) {
+            this.lastFrameTime = currentTime - (deltaTime % this.frameDelay);
 
-        // Render Items
-        this.renderItems();
+            // Skip rendering if paused, but keep loop alive
+            if (!this.gamePaused) {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Render Bubbles
-        this.renderBubbles();
+                // Aquarium Background
+                this.renderBackground();
+
+                // Render Items
+                this.renderItems();
+
+                // Render Bubbles
+                this.renderBubbles();
+            }
+        }
 
         // Continue render loop
-        requestAnimationFrame(() => this.render());
+        this.animationFrameId = requestAnimationFrame((time) => this.render(time));
     }
 
     renderBackground() {
@@ -861,6 +884,80 @@ class AquariumCollectorGame {
         }, 20);
     }
 
+    togglePause() {
+        if (!this.gameActive || !this.gameStarted) return;
+
+        this.gamePaused = !this.gamePaused;
+
+        if (this.gamePaused) {
+            // Pause timers
+            if (this.gameTimer) {
+                clearInterval(this.gameTimer);
+                this.gameTimer = null;
+            }
+            if (this.itemSpawnTimer) {
+                clearInterval(this.itemSpawnTimer);
+                this.itemSpawnTimer = null;
+            }
+
+            // Update button
+            if (this.pauseButton) {
+                this.pauseButton.textContent = '▶️ Resume';
+            }
+
+            // Show pause overlay
+            const pauseOverlay = document.createElement('div');
+            pauseOverlay.className = 'game-pause-overlay';
+            pauseOverlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                font-size: 48px;
+                color: white;
+                font-weight: bold;
+                backdrop-filter: blur(5px);
+            `;
+            pauseOverlay.textContent = '⏸️ PAUSE';
+            this.container.querySelector('.game-canvas-container').appendChild(pauseOverlay);
+
+            console.log('⏸️ Game paused');
+        } else {
+            // Resume game
+            this.startTimer();
+            this.startItemSpawning();
+
+            // Update button
+            if (this.pauseButton) {
+                this.pauseButton.textContent = '⏸️ Pause';
+            }
+
+            // Remove pause overlay
+            const pauseOverlay = this.container.querySelector('.game-pause-overlay');
+            if (pauseOverlay) pauseOverlay.remove();
+
+            console.log('▶️ Game resumed');
+        }
+    }
+
+    startTimer() {
+        // Timer starten
+        this.gameTimer = setInterval(() => {
+            this.timeLeft--;
+            this.updateDisplay();
+
+            if (this.timeLeft <= 0) {
+                this.endGame();
+            }
+        }, 1000);
+    }
+
     restartGame() {
         // Clean up current game
         const overlay = this.container.querySelector('.game-result-overlay');
@@ -869,6 +966,7 @@ class AquariumCollectorGame {
         // Reset game state
         this.gameActive = false;
         this.gameStarted = false;
+        this.gamePaused = false;
         this.items = [];
         this.collected = 0;
         this.score = 0;

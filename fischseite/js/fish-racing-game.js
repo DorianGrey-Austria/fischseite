@@ -11,11 +11,16 @@ class FishRacingGame {
         this.gameContainer = null;
         this.isGameActive = false;
         this.raceInProgress = false;
+        this.racePaused = false;
         this.gameTime = 30; // 30 seconds race
         this.timeRemaining = this.gameTime;
         this.raceDistance = 800; // pixels
         this.playerScore = 100; // Starting betting points
         this.selectedFish = null;
+
+        // ⚡ PERFORMANCE: Race update control
+        this.raceIntervalId = null;
+        this.lastRaceUpdateTime = 0;
 
         // 🔥 VERBESSERUNG #3 & #5: Enhanced tracking for particle effects and stats
         this.raceStats = {
@@ -89,6 +94,7 @@ class FishRacingGame {
                         <div>⏱️ Zeit: <span id="race-timer">${this.gameTime}</span>s</div>
                         <div>💰 Punkte: <span id="race-score">${this.playerScore}</span></div>
                         <div id="race-status">🎯 Wähle deinen Favoriten!</div>
+                        <button id="race-pause-btn" class="game-btn" style="display:none;" onclick="window.fishRacingGame.toggleRacePause()">⏸️ Pause</button>
                     </div>
                 </div>
 
@@ -720,9 +726,15 @@ class FishRacingGame {
     }
 
     runRace() {
-        const raceInterval = setInterval(() => {
+        this.raceIntervalId = setInterval(() => {
+            // ⚡ PERFORMANCE: Skip update if paused
+            if (this.racePaused) return;
+
             this.timeRemaining -= 0.1;
-            document.getElementById('race-timer').textContent = Math.max(0, this.timeRemaining).toFixed(1);
+            const timerElement = document.getElementById('race-timer');
+            if (timerElement) {
+                timerElement.textContent = Math.max(0, this.timeRemaining).toFixed(1);
+            }
 
             // Move fish
             let raceFinished = false;
@@ -739,8 +751,10 @@ class FishRacingGame {
 
                 // Update visual position
                 const fishElement = document.getElementById(`fish-${fish.id}`);
-                const newLeft = Math.min(50 + fish.position, this.raceDistance - 50);
-                fishElement.style.left = `${newLeft}px`;
+                if (fishElement) {
+                    const newLeft = Math.min(50 + fish.position, this.raceDistance - 50);
+                    fishElement.style.left = `${newLeft}px`;
+                }
 
                 // Check for finish line
                 if (fish.position >= this.raceDistance - 100) {
@@ -756,7 +770,8 @@ class FishRacingGame {
             }
 
             if (raceFinished) {
-                clearInterval(raceInterval);
+                clearInterval(this.raceIntervalId);
+                this.raceIntervalId = null;
             }
         }, 100);
     }
@@ -891,11 +906,59 @@ class FishRacingGame {
         console.log('🏁 Fish Racing Game opened');
     }
 
+    toggleRacePause() {
+        if (!this.raceInProgress) return;
+
+        this.racePaused = !this.racePaused;
+
+        const pauseBtn = document.getElementById('race-pause-btn');
+        if (pauseBtn) {
+            pauseBtn.textContent = this.racePaused ? '▶️ Resume' : '⏸️ Pause';
+        }
+
+        if (this.racePaused) {
+            // Show pause overlay
+            const track = document.getElementById('race-track');
+            if (track) {
+                const pauseOverlay = document.createElement('div');
+                pauseOverlay.id = 'race-pause-overlay';
+                pauseOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    font-size: 48px;
+                    color: white;
+                    font-weight: bold;
+                    backdrop-filter: blur(5px);
+                `;
+                pauseOverlay.textContent = '⏸️ PAUSE';
+                track.appendChild(pauseOverlay);
+            }
+            console.log('⏸️ Race paused');
+        } else {
+            // Remove pause overlay
+            const pauseOverlay = document.getElementById('race-pause-overlay');
+            if (pauseOverlay) pauseOverlay.remove();
+            console.log('▶️ Race resumed');
+        }
+
+        if (window.aquariumSounds) window.aquariumSounds.playButton();
+        if (window.aquariumHaptics) window.aquariumHaptics.button();
+    }
+
     closeGame() {
         if (this.gameContainer) {
             this.gameContainer.style.display = 'none';
             this.isGameActive = false;
             this.raceInProgress = false;
+            this.racePaused = false;
         }
 
         if (window.aquariumSounds) window.aquariumSounds.playButton();
