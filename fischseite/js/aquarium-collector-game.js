@@ -194,6 +194,9 @@ class AquariumCollectorGame {
         this.frameDelay = 1000 / this.frameRate;
         this.animationFrameId = null;
 
+        // 🎮 POWER-UPS State
+        this.activePowerUps = new Map();
+
         this.setup();
     }
 
@@ -372,11 +375,29 @@ class AquariumCollectorGame {
     }
 
     getRandomItemType() {
-        const goodItems = ['🦐', '🐛', '🌱', '🟢', '🔵', '⭐'];
-        const badItems = ['💀', '🗑️', '⚠️'];
+        const random = Math.random();
 
-        // Mehr gute Items als schlechte
-        if (Math.random() < 0.8) {
+        // 🎮 POWER-UPS (5% chance)
+        if (random < 0.05) {
+            const powerUps = [
+                { emoji: '⚡', type: 'speed_boost', points: 20, duration: 5000, description: 'Speed Boost!' },
+                { emoji: '🧲', type: 'magnet', points: 15, duration: 8000, description: 'Magnet Power!' },
+                { emoji: '🌟', type: 'double_points', points: 0, duration: 10000, description: '2x Points!' },
+                { emoji: '⏰', type: 'time_freeze', points: 0, duration: 3000, description: 'Time Freeze!' }
+            ];
+            const powerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+            return {
+                ...powerUp,
+                good: true,
+                isPowerUp: true
+            };
+        }
+
+        const goodItems = ['🦐', '🐛', '🌱', '🟢', '🔵', '⭐', '🐠', '🐟', '🦀', '🦑'];
+        const badItems = ['💀', '🗑️', '⚠️', '☠️'];
+
+        // 80% gute Items, 15% bad items, 5% power-ups (above)
+        if (random < 0.85) {
             return {
                 emoji: goodItems[Math.floor(Math.random() * goodItems.length)],
                 points: 5 + Math.floor(Math.random() * 10),
@@ -415,7 +436,15 @@ class AquariumCollectorGame {
         this.items.splice(index, 1);
 
         this.collected++;
-        this.score += Math.round(item.type.points * this.difficulty.pointsMultiplier);
+
+        // 🎮 POWER-UP ACTIVATION
+        if (item.type.isPowerUp) {
+            this.activatePowerUp(item.type);
+        }
+
+        // Calculate points with double_points multiplier
+        const pointsMultiplier = this.activePowerUps.has('double_points') ? 2 : 1;
+        this.score += Math.round(item.type.points * this.difficulty.pointsMultiplier * pointsMultiplier);
 
         // 🔊 VERBESSERUNG #2: Sound-Feedback bei Collect
         if (window.aquariumSounds) {
@@ -469,6 +498,110 @@ class AquariumCollectorGame {
         if (this.collected >= this.difficulty.items) {
             setTimeout(() => this.endGame(), 500);
         }
+    }
+
+    activatePowerUp(powerUpType) {
+        const { type, duration, description } = powerUpType;
+
+        // Add to active power-ups
+        this.activePowerUps.set(type, {
+            endTime: Date.now() + duration,
+            description
+        });
+
+        // Show power-up notification
+        this.showPowerUpNotification(powerUpType);
+
+        // Apply immediate effects
+        switch(type) {
+            case 'speed_boost':
+                // Items fall faster temporarily
+                this.items.forEach(item => {
+                    if (!item.isEffect) {
+                        item.vy *= 1.5;
+                    }
+                });
+                break;
+
+            case 'magnet':
+                // Auto-collect nearby items
+                this.startMagnetEffect();
+                break;
+
+            case 'time_freeze':
+                // Pause game timer
+                this.timeFreeze = true;
+                setTimeout(() => {
+                    this.timeFreeze = false;
+                }, duration);
+                break;
+
+            case 'double_points':
+                // Points multiplier (handled in collectItem)
+                break;
+        }
+
+        // Auto-remove after duration
+        setTimeout(() => {
+            this.activePowerUps.delete(type);
+            this.hidePowerUpNotification(type);
+        }, duration);
+
+        console.log(`🎮 Power-Up activated: ${type}`);
+    }
+
+    showPowerUpNotification(powerUpType) {
+        const notification = document.createElement('div');
+        notification.className = 'power-up-notification';
+        notification.dataset.powerUpType = powerUpType.type;
+        notification.style.cssText = `
+            position: fixed;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.5);
+            animation: powerUpAppear 0.5s ease-out;
+        `;
+        notification.innerHTML = `${powerUpType.emoji} ${powerUpType.description}`;
+        document.body.appendChild(notification);
+    }
+
+    hidePowerUpNotification(type) {
+        const notification = document.querySelector(`.power-up-notification[data-power-up-type="${type}"]`);
+        if (notification) {
+            notification.style.animation = 'powerUpDisappear 0.5s ease-in forwards';
+            setTimeout(() => notification.remove(), 500);
+        }
+    }
+
+    startMagnetEffect() {
+        const magnetInterval = setInterval(() => {
+            if (!this.activePowerUps.has('magnet')) {
+                clearInterval(magnetInterval);
+                return;
+            }
+
+            // Auto-collect items within range
+            this.items.forEach((item, index) => {
+                if (!item.isEffect && !item.collected) {
+                    const distance = Math.sqrt(
+                        Math.pow(item.x - this.canvas.width / 2, 2) +
+                        Math.pow(item.y - this.canvas.height / 2, 2)
+                    );
+
+                    if (distance < 200) {
+                        this.collectItem(item, index);
+                    }
+                }
+            });
+        }, 100);
     }
 
     showCollectionEffect(x, y, isGood) {
@@ -949,11 +1082,14 @@ class AquariumCollectorGame {
     startTimer() {
         // Timer starten
         this.gameTimer = setInterval(() => {
-            this.timeLeft--;
-            this.updateDisplay();
+            // 🎮 POWER-UP: Time Freeze
+            if (!this.timeFreeze) {
+                this.timeLeft--;
+                this.updateDisplay();
 
-            if (this.timeLeft <= 0) {
-                this.endGame();
+                if (this.timeLeft <= 0) {
+                    this.endGame();
+                }
             }
         }, 1000);
     }

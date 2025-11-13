@@ -78,6 +78,46 @@ class FishRacingGame {
                 lane: 4,
                 boost: 0,
                 color: '#FFD700'
+            },
+            {
+                id: 'marlin',
+                name: 'Marlin',
+                emoji: '🐬',
+                baseSpeed: 3.0,
+                position: 0,
+                lane: 5,
+                boost: 0,
+                color: '#4A90E2'
+            },
+            {
+                id: 'crush',
+                name: 'Crush',
+                emoji: '🐢',
+                baseSpeed: 2.0,
+                position: 0,
+                lane: 6,
+                boost: 0,
+                color: '#7CB342'
+            },
+            {
+                id: 'octopus',
+                name: 'Octavia',
+                emoji: '🐙',
+                baseSpeed: 2.6,
+                position: 0,
+                lane: 7,
+                boost: 0,
+                color: '#9C27B0'
+            },
+            {
+                id: 'squid',
+                name: 'Squidy',
+                emoji: '🦑',
+                baseSpeed: 2.9,
+                position: 0,
+                lane: 8,
+                boost: 0,
+                color: '#E91E63'
             }
         ];
 
@@ -600,6 +640,10 @@ class FishRacingGame {
         document.getElementById('race-track').style.display = 'block';
         document.getElementById('reset-race-btn').style.display = 'inline-block';
 
+        // Show pause button
+        const pauseBtn = document.getElementById('race-pause-btn');
+        if (pauseBtn) pauseBtn.style.display = 'inline-block';
+
         // 🔥 VERBESSERUNG #4: Initialize crowd atmosphere
         this.initializeCrowdAtmosphere();
 
@@ -875,6 +919,13 @@ class FishRacingGame {
         document.getElementById('start-race-btn').disabled = true;
         document.getElementById('race-timer').textContent = this.gameTime;
         document.getElementById('race-status').textContent = '🎯 Wähle deinen Favoriten!';
+
+        // Hide pause button
+        const pauseBtn = document.getElementById('race-pause-btn');
+        if (pauseBtn) {
+            pauseBtn.style.display = 'none';
+            pauseBtn.textContent = '⏸️ Pause';
+        }
 
         // Clear selections
         document.querySelectorAll('.fish-bet-btn').forEach(btn => {
