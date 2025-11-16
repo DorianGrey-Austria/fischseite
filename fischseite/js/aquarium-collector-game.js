@@ -185,6 +185,12 @@ class AquariumCollectorGame {
         this.frenzyMode = false;
         this.frenzyEndTime = 0;
 
+        // 🌊 REALISTIC WATER PHYSICS!
+        this.waterCurrentX = 0; // Horizontal current
+        this.waterCurrentChangeInterval = null;
+        this.gravity = 0.15; // Realistic sink speed
+        this.waterDrag = 0.98; // Water resistance
+
         // Neue 30-Sekunden Konfiguration
         this.difficulty = this.getDifficulty(gameNumber);
         this.gameTime = this.difficulty.time; // Jetzt 30 Sekunden!
@@ -349,6 +355,9 @@ class AquariumCollectorGame {
         // 🎓 Starte Bildungs-Tipps System
         this.educationSystem.startTipSystem(this.gameTime * 1000);
 
+        // 🌊 Start water physics simulation
+        this.startWaterCurrents();
+
         // Timer starten
         this.startTimer();
 
@@ -373,21 +382,28 @@ class AquariumCollectorGame {
     spawnItem() {
         // 🚀 PROGRESSIVE DIFFICULTY: Speed increases with score!
         const scoreMultiplier = 1 + (this.score / 500); // +100% speed at 500 points
-        const baseSpeed = (1 + Math.random() * 2) * this.difficulty.speedMultiplier;
-        const finalSpeed = baseSpeed * Math.min(scoreMultiplier, 2.5); // Max 2.5x speed
+
+        // 🌊 REALISTIC ITEM PROPERTIES
+        const itemType = this.getRandomItemType();
+        const density = itemType.good ? 0.8 + Math.random() * 0.4 : 1.2; // Good items float more
+        const baseSpeed = this.gravity * density;
 
         const item = {
             id: Math.random().toString(36).substr(2, 9),
             x: Math.random() * (this.canvas.width - 40) + 20,
             y: -30,
-            vx: (Math.random() - 0.5) * 2 * Math.min(scoreMultiplier, 1.5),
-            vy: finalSpeed,
-            type: this.getRandomItemType(),
+            vx: (Math.random() - 0.5) * 0.5, // Less horizontal drift
+            vy: baseSpeed * Math.min(scoreMultiplier, 2.0),
+            type: itemType,
             size: 20 + Math.random() * 15,
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.1,
+            rotationSpeed: (Math.random() - 0.5) * 0.05, // Slower rotation
             lifetime: Date.now() + this.difficulty.itemLifetime,
-            collected: false
+            collected: false,
+            // 🌊 WATER PHYSICS PROPERTIES
+            density: density,
+            mass: 1 + Math.random() * 0.5,
+            buoyancy: itemType.good ? 0.02 : -0.01 // Good items have upward force
         };
 
         this.items.push(item);
@@ -793,10 +809,32 @@ class AquariumCollectorGame {
                 continue;
             }
 
+            // 🌊 REALISTIC WATER PHYSICS!
+            // Apply water current
+            item.vx += this.waterCurrentX * 0.02;
+
+            // Apply water drag
+            item.vx *= this.waterDrag;
+            item.vy *= this.waterDrag;
+
+            // Apply buoyancy
+            if (item.buoyancy) {
+                item.vy += item.buoyancy;
+            }
+
+            // Apply gravity
+            item.vy += this.gravity * item.density;
+
             // Move item
             item.x += item.vx;
             item.y += item.vy;
             item.rotation += item.rotationSpeed;
+
+            // Bounce off walls (realistic)
+            if (item.x < 20 || item.x > this.canvas.width - 20) {
+                item.vx *= -0.5; // Energy loss on bounce
+                item.x = Math.max(20, Math.min(this.canvas.width - 20, item.x));
+            }
 
             // Remove if out of bounds or expired
             if (item.y > this.canvas.height + 50 || now > item.lifetime) {
@@ -893,6 +931,9 @@ class AquariumCollectorGame {
 
         // Stop education system
         this.educationSystem.stopTipSystem();
+
+        // 🌊 Stop water currents
+        this.stopWaterCurrents();
 
         // Calculate final results
         const actualDuration = (this.gameEndTime - this.gameStartTime) / 1000;
@@ -1213,6 +1254,24 @@ class AquariumCollectorGame {
                 }
             }
         }, 1000);
+    }
+
+    startWaterCurrents() {
+        // 🌊 Simulate realistic water currents
+        this.waterCurrentChangeInterval = setInterval(() => {
+            if (!this.gameActive || this.gamePaused) return;
+
+            // Gradually change water current (like real aquarium)
+            const targetCurrent = (Math.random() - 0.5) * 3; // -1.5 to +1.5
+            this.waterCurrentX += (targetCurrent - this.waterCurrentX) * 0.1; // Smooth transition
+        }, 2000); // Change every 2 seconds
+    }
+
+    stopWaterCurrents() {
+        if (this.waterCurrentChangeInterval) {
+            clearInterval(this.waterCurrentChangeInterval);
+            this.waterCurrentChangeInterval = null;
+        }
     }
 
     activateFrenzyMode() {

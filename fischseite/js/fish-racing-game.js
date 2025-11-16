@@ -57,7 +57,13 @@ class FishRacingGame {
                 position: 0,
                 lane: 1,
                 boost: 0,
-                color: '#FF6B35'
+                color: '#FF6B35',
+                // 🏊 REALISTIC STAMINA SYSTEM
+                stamina: 100,
+                maxStamina: 100,
+                staminaDrain: 0.5,
+                staminaRecharge: 0.3,
+                exhausted: false
             },
             {
                 id: 'dory',
@@ -711,6 +717,12 @@ class FishRacingGame {
         this.raceFish.forEach(fish => {
             fish.position = 0;
             fish.boost = 0;
+            // 🏊 REALISTIC STAMINA - Initialize for all fish
+            fish.stamina = 100;
+            fish.maxStamina = 100;
+            fish.staminaDrain = 0.3 + Math.random() * 0.4; // 0.3-0.7
+            fish.staminaRecharge = 0.2 + Math.random() * 0.2; // 0.2-0.4
+            fish.exhausted = false;
             const fishElement = document.getElementById(`fish-${fish.id}`);
             fishElement.style.left = '50px';
             fishElement.classList.add('moving');
@@ -843,14 +855,34 @@ class FishRacingGame {
             // Move fish
             let raceFinished = false;
             this.raceFish.forEach(fish => {
-                // Calculate speed with random variation and boost
+                // 🏊 REALISTIC STAMINA SYSTEM!
+                // Drain stamina when moving fast
+                const currentSpeed = fish.baseSpeed + fish.boost;
+                if (currentSpeed > fish.baseSpeed * 1.2) {
+                    fish.stamina = Math.max(0, fish.stamina - fish.staminaDrain);
+                } else {
+                    // Recharge when swimming normally
+                    fish.stamina = Math.min(fish.maxStamina, fish.stamina + fish.staminaRecharge);
+                }
+
+                // Check exhaustion
+                if (fish.stamina <= 10 && !fish.exhausted) {
+                    fish.exhausted = true;
+                    console.log(`${fish.name} is exhausted! 😓`);
+                } else if (fish.stamina > 50) {
+                    fish.exhausted = false;
+                }
+
+                // Calculate speed with stamina penalty
                 const randomFactor = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
-                const speed = fish.baseSpeed * randomFactor + fish.boost;
+                const staminaFactor = fish.exhausted ? 0.5 : (fish.stamina / fish.maxStamina);
+                const speed = (fish.baseSpeed * randomFactor + fish.boost) * (0.7 + staminaFactor * 0.3);
                 fish.position += speed;
 
                 // Apply boost decay
                 if (fish.boost > 0) {
                     fish.boost *= 0.95;
+                    fish.stamina = Math.max(0, fish.stamina - fish.staminaDrain * 2); // Boost drains more
                 }
 
                 // Update visual position
@@ -858,6 +890,15 @@ class FishRacingGame {
                 if (fishElement) {
                     const newLeft = Math.min(50 + fish.position, this.raceDistance - 50);
                     fishElement.style.left = `${newLeft}px`;
+
+                    // 🏊 Visual exhaustion indicator
+                    if (fish.exhausted) {
+                        fishElement.style.opacity = '0.6';
+                        fishElement.style.filter = 'grayscale(0.5)';
+                    } else {
+                        fishElement.style.opacity = '1';
+                        fishElement.style.filter = 'none';
+                    }
                 }
 
                 // Check for finish line
